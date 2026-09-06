@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123535">
+  <title>The Free Game</title>
+  <link rel="icon" href="index.icon.png">
+  <link rel="apple-touch-icon" href="index.apple-touch-icon.png">
+  <link rel="stylesheet" href="@@CSS@@">
+</head>
+<body>
+  <canvas id="canvas" aria-label="The Free Game, cenário da vila" tabindex="0">Seu navegador não consegue exibir o jogo. Tente abrir o link em um navegador atualizado.</canvas>
+  <main id="status" aria-labelledby="game-title">
+    <div class="entry">
+      <div class="entry-copy">
+        <p class="eyebrow">THE FREE GAME <span>VERSÃO DE TESTES</span></p>
+        <h1 id="game-title">The Free<br>Game</h1>
+        <p class="intro">Você planeja a vila.<br>Seus moradores dão vida a ela.</p>
+        <div class="loading" id="loading-state">
+          <div class="progress-heading"><p id="status-label" role="status">Preparando o jogo…</p><span id="status-percent" aria-hidden="true"></span></div>
+          <progress id="status-progress" aria-label="Download do jogo"></progress>
+          <p id="status-detail">O primeiro carregamento pode levar um pouco mais de tempo.</p>
+        </div>
+        <section id="failure-state" aria-labelledby="failure-title" hidden>
+          <h2 id="failure-title" tabindex="-1">Não foi possível abrir a vila</h2>
+          <p id="failure-message">Confira sua conexão e tente novamente.</p>
+          <details id="technical-details"><summary>Detalhes do erro</summary><pre id="failure-detail"></pre></details>
+        </section>
+        <button id="retry" class="primary" type="button" hidden>Tentar novamente</button>
+        <p id="loading-tip" class="tip">Seu primeiro caminho: ligue a praça à escola com uma estrada.</p>
+      </div>
+      <figure class="village-art" aria-label="Modelos 3D usados no jogo">
+        <img class="hall" src="@@HALL@@" width="384" height="320" alt="Prédio principal de pedra e madeira, com telhados de barro e uma torre de relógio">
+        <img class="servant" src="@@SERVANT@@" width="256" height="320" alt="" aria-hidden="true">
+      </figure>
+    </div>
+    <footer><span>Lucas Marques, from Shiva</span><a href="https://github.com/LucasMarquesShiva/the-free-game" target="_blank" rel="noopener noreferrer">Código e artes · construa sua versão ↗</a></footer>
+  </main>
+  <aside id="screen-hint" aria-label="Tamanho da janela" hidden>
+    <p>Amplie a janela para ver todos os controles.</p>
+    <button id="fullscreen" type="button">Tela cheia</button>
+    <button id="dismiss-hint" type="button" aria-label="Fechar aviso">×</button>
+    <p id="screen-status" role="status"></p>
+  </aside>
+  <noscript><section class="noscript"><h1>Ative o JavaScript para jogar</h1><p>O The Free Game precisa dele para abrir a vila. Ative-o neste site e recarregue a página.</p></section></noscript>
+  <script>
+const GODOT_CONFIG = @@CONFIG@@;
+const GODOT_THREADS_ENABLED = @@THREADS@@;
+function showShellLoadError() {
+  document.getElementById('loading-state').hidden = true;
+  document.getElementById('failure-state').hidden = false;
+  document.getElementById('technical-details').hidden = true;
+  document.getElementById('loading-tip').hidden = true;
+  document.getElementById('failure-message').textContent = 'Não conseguimos baixar a tela de entrada. Confira sua conexão e tente novamente.';
+  const retry = document.getElementById('retry');
+  retry.hidden = false;
+  retry.onclick = () => window.location.reload();
+  document.getElementById('failure-title').focus({preventScroll:true});
+}
+  </script>
+  <script src="@@JS@@" onerror="showShellLoadError()"></script>
+</body>
+</html>

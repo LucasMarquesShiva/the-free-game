@@ -1,0 +1,454 @@
+[
+  {
+    "base_triangles": 14707,
+    "file_bytes": 786117,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.554929971694946,
+        "triangles": 5577
+      },
+      {
+        "screen_error": 0.832394957542419,
+        "triangles": 1946
+      },
+      {
+        "screen_error": 1.24859237670898,
+        "triangles": 775
+      },
+      {
+        "screen_error": 1.87288868427277,
+        "triangles": 334
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/pine-0.res",
+    "shadow_mesh": true,
+    "variant": 0
+  },
+  {
+    "base_triangles": 14707,
+    "file_bytes": 778773,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.481124222278595,
+        "triangles": 4631
+      },
+      {
+        "screen_error": 0.721686363220215,
+        "triangles": 2153
+      },
+      {
+        "screen_error": 1.08252942562103,
+        "triangles": 799
+      },
+      {
+        "screen_error": 1.6237940788269,
+        "triangles": 308
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/pine-1.res",
+    "shadow_mesh": true,
+    "variant": 1
+  },
+  {
+    "base_triangles": 14707,
+    "file_bytes": 764257,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.536999523639679,
+        "triangles": 4274
+      },
+      {
+        "screen_error": 0.805499255657196,
+        "triangles": 1421
+      },
+      {
+        "screen_error": 1.20824885368347,
+        "triangles": 542
+      },
+      {
+        "screen_error": 1.8123733997345,
+        "triangles": 269
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/pine-2.res",
+    "shadow_mesh": true,
+    "variant": 2
+  },
+  {
+    "base_triangles": 14707,
+    "file_bytes": 778414,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.602318048477173,
+        "triangles": 5602
+      },
+      {
+        "screen_error": 0.903477072715759,
+        "triangles": 1706
+      },
+      {
+        "screen_error": 1.35521554946899,
+        "triangles": 503
+      },
+      {
+        "screen_error": 2.03282332420349,
+        "triangles": 217
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/pine-3.res",
+    "shadow_mesh": true,
+    "variant": 3
+  },
+  {
+    "base_triangles": 14707,
+    "file_bytes": 760502,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.490046828985214,
+        "triangles": 4297
+      },
+      {
+        "screen_error": 0.73507022857666,
+        "triangles": 1206
+      },
+      {
+        "screen_error": 1.10260534286499,
+        "triangles": 529
+      },
+      {
+        "screen_error": 1.65390801429749,
+        "triangles": 217
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/pine-4.res",
+    "shadow_mesh": true,
+    "variant": 4
+  },
+  {
+    "base_triangles": 14707,
+    "file_bytes": 768479,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.538504540920258,
+        "triangles": 4285
+      },
+      {
+        "screen_error": 0.807756781578064,
+        "triangles": 1926
+      },
+      {
+        "screen_error": 1.21163523197174,
+        "triangles": 464
+      },
+      {
+        "screen_error": 1.81745290756226,
+        "triangles": 217
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/pine-5.res",
+    "shadow_mesh": true,
+    "variant": 5
+  },
+  {
+    "base_triangles": 17051,
+    "file_bytes": 671638,
+    "kind": "oak",
+    "lods": [
+      {
+        "screen_error": 0.209666103124619,
+        "triangles": 5507
+      },
+      {
+        "screen_error": 0.314499169588089,
+        "triangles": 1347
+      },
+      {
+        "screen_error": 0.471748739480972,
+        "triangles": 637
+      },
+      {
+        "screen_error": 0.843106150627136,
+        "triangles": 126
+      },
+      {
+        "screen_error": 1.47119140625,
+        "triangles": 31
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/oak-0.res",
+    "shadow_mesh": true,
+    "variant": 0
+  },
+  {
+    "base_triangles": 17051,
+    "file_bytes": 666295,
+    "kind": "oak",
+    "lods": [
+      {
+        "screen_error": 0.210144385695457,
+        "triangles": 5347
+      },
+      {
+        "screen_error": 0.315216600894928,
+        "triangles": 1267
+      },
+      {
+        "screen_error": 0.61781907081604,
+        "triangles": 402
+      },
+      {
+        "screen_error": 0.92672860622406,
+        "triangles": 126
+      },
+      {
+        "screen_error": 1.39009284973145,
+        "triangles": 56
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/oak-1.res",
+    "shadow_mesh": true,
+    "variant": 1
+  },
+  {
+    "base_triangles": 17051,
+    "file_bytes": 672042,
+    "kind": "oak",
+    "lods": [
+      {
+        "screen_error": 0.209754288196564,
+        "triangles": 5657
+      },
+      {
+        "screen_error": 0.314631432294846,
+        "triangles": 1317
+      },
+      {
+        "screen_error": 0.47194716334343,
+        "triangles": 637
+      },
+      {
+        "screen_error": 0.913491547107697,
+        "triangles": 126
+      },
+      {
+        "screen_error": 1.37023735046387,
+        "triangles": 56
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/oak-2.res",
+    "shadow_mesh": true,
+    "variant": 2
+  },
+  {
+    "base_triangles": 2479,
+    "file_bytes": 150936,
+    "kind": "rock",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 1807
+      },
+      {
+        "screen_error": 0.645394086837769,
+        "triangles": 201
+      },
+      {
+        "screen_error": 0.968091130256653,
+        "triangles": 80
+      },
+      {
+        "screen_error": 1.45213663578033,
+        "triangles": 40
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/rock-0.res",
+    "shadow_mesh": true,
+    "variant": 0
+  },
+  {
+    "base_triangles": 2650,
+    "file_bytes": 159156,
+    "kind": "rock",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 1978
+      },
+      {
+        "screen_error": 0.826979875564575,
+        "triangles": 160
+      },
+      {
+        "screen_error": 1.24046981334686,
+        "triangles": 40
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/rock-1.res",
+    "shadow_mesh": true,
+    "variant": 1
+  },
+  {
+    "base_triangles": 2524,
+    "file_bytes": 153288,
+    "kind": "rock",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 1852
+      },
+      {
+        "screen_error": 0.666032016277313,
+        "triangles": 200
+      },
+      {
+        "screen_error": 0.999047935009003,
+        "triangles": 40
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/rock-2.res",
+    "shadow_mesh": true,
+    "variant": 2
+  },
+  {
+    "base_triangles": 2533,
+    "file_bytes": 153783,
+    "kind": "rock",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 1861
+      },
+      {
+        "screen_error": 0.817116260528564,
+        "triangles": 160
+      },
+      {
+        "screen_error": 1.22567439079285,
+        "triangles": 40
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/rock-3.res",
+    "shadow_mesh": true,
+    "variant": 3
+  },
+  {
+    "base_triangles": 2524,
+    "file_bytes": 151783,
+    "kind": "rock",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 1852
+      },
+      {
+        "screen_error": 0.88417387008667,
+        "triangles": 40
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/rock-4.res",
+    "shadow_mesh": true,
+    "variant": 4
+  },
+  {
+    "base_triangles": 2632,
+    "file_bytes": 158617,
+    "kind": "rock",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 1960
+      },
+      {
+        "screen_error": 0.648811280727386,
+        "triangles": 164
+      },
+      {
+        "screen_error": 0.973216950893402,
+        "triangles": 41
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/rock-5.res",
+    "shadow_mesh": true,
+    "variant": 5
+  },
+  {
+    "base_triangles": 631,
+    "file_bytes": 21590,
+    "kind": "stump",
+    "lods": [
+      {
+        "screen_error": 0.372817426919937,
+        "triangles": 206
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/stump-0.res",
+    "shadow_mesh": true,
+    "variant": 0
+  },
+  {
+    "base_triangles": 631,
+    "file_bytes": 23408,
+    "kind": "stump",
+    "lods": [
+      {
+        "screen_error": 0.344718456268311,
+        "triangles": 310
+      },
+      {
+        "screen_error": 0.519609212875366,
+        "triangles": 142
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/stump-1.res",
+    "shadow_mesh": true,
+    "variant": 1
+  },
+  {
+    "base_triangles": 631,
+    "file_bytes": 22895,
+    "kind": "stump",
+    "lods": [
+      {
+        "screen_error": 0.3470379114151,
+        "triangles": 310
+      },
+      {
+        "screen_error": 0.594764173030853,
+        "triangles": 78
+      }
+    ],
+    "path": "res://assets/approved/environment-lod/stump-2.res",
+    "shadow_mesh": true,
+    "variant": 2
+  }
+]

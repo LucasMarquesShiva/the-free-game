@@ -1,0 +1,175 @@
+{
+  "version": "0.2",
+  "tool": "built-in image_gen",
+  "purpose": "playable peaceful isometric prototype based on approved concept images",
+  "assets": [
+    {
+      "id": "decor",
+      "file": "jogo/assets/illustrated/decor.png",
+      "prompt": "jogo/assets/illustrated/decor.prompt.txt",
+      "reference": "kits/01-terreno_e_vegetacao.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": true,
+      "sha256": "8cbcec72e98ab6fbf49d1d07a8e9c618faef78ee59d9d031c34447991c6ac8fb",
+      "runtime": "native alpha atlas"
+    },
+    {
+      "id": "farm",
+      "file": "jogo/assets/illustrated/farm.png",
+      "prompt": "jogo/assets/illustrated/farm.prompt.txt",
+      "reference": "construcoes/12-horta.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "82474547fd48d8388f7dab1efd9b37064a8ffed46089bf4ca222c5a9624092b6",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "grass",
+      "file": "jogo/assets/illustrated/grass.png",
+      "prompt": "jogo/assets/illustrated/grass.prompt.txt",
+      "reference": [
+        "../conceitos-v1/01-vila.png",
+        "kits/01-terreno_e_vegetacao.png"
+      ],
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "4bc35ff5930079ae88235411783d6957f92ba1656ffbd6b3021e3ecbcd5ccbdd",
+      "runtime": "ground texture"
+    },
+    {
+      "id": "grass_v2",
+      "file": "jogo/assets/illustrated/grass_v2.png",
+      "prompt": "jogo/assets/illustrated/grass_v2.prompt.txt",
+      "reference": "jogo/assets/illustrated/grass.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "82dbe1b5dbd5f3ead80f54fcaf55ebdd2672e4634a9129e18308d186f397ace7",
+      "runtime": "ground texture"
+    },
+    {
+      "id": "hall",
+      "file": "jogo/assets/illustrated/hall.png",
+      "prompt": "jogo/assets/illustrated/hall.prompt.txt",
+      "reference": "construcoes/01-centro_da_vila.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "e518dbd49fc41edeb07f489b6283b213ab9be90b16096dd74897d4a529dbe2ba",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "house",
+      "file": "jogo/assets/illustrated/house.png",
+      "prompt": "jogo/assets/illustrated/house.prompt.txt",
+      "reference": "construcoes/02-casas.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "bbc0980f55b0130b5fe9903a547d5085a289eccce60e681ca33e8b88f4c929ee",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "lumber",
+      "file": "jogo/assets/illustrated/lumber.png",
+      "prompt": "jogo/assets/illustrated/lumber.prompt.txt",
+      "reference": "construcoes/06-cabana_do_lenhador.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "8b5717e84798f8b6c3796efe0731163bf23de12504809655337072b91c191e17",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "quarry",
+      "file": "jogo/assets/illustrated/quarry.png",
+      "prompt": "jogo/assets/illustrated/quarry.prompt.txt",
+      "reference": "construcoes/08-pedreira.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "17a6d32635df03d845b6bd9a68b9efc2530052b3a54c231080d67144c80148bc",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "road",
+      "file": "jogo/assets/illustrated/road.png",
+      "prompt": "jogo/assets/illustrated/road.prompt.txt",
+      "reference": "kits/01-terreno_e_vegetacao.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "6d8f9a58b0ef30eddd0f069ec5ee670cdf90777fbaff7253a3c950693cdee9d5",
+      "runtime": "ground texture"
+    },
+    {
+      "id": "store",
+      "file": "jogo/assets/illustrated/store.png",
+      "prompt": "jogo/assets/illustrated/store.prompt.txt",
+      "reference": "construcoes/03-armazem.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "14102a98082d3756d33f9135635e558bbb50f796b3ba42a14ac68aca083d509a",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "training",
+      "file": "jogo/assets/illustrated/training.png",
+      "prompt": "jogo/assets/illustrated/training.prompt.txt",
+      "reference": "construcoes/04-centro_de_treinamento.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "a3ad8d1b55061aa50e3934766bda0c0a31c086bc464fced11f63e78b06dfdaae",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "vineyard",
+      "file": "jogo/assets/illustrated/vineyard.png",
+      "prompt": "jogo/assets/illustrated/vineyard.prompt.txt",
+      "reference": "kits/03-lavouras_e_vinhedos.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "96c5d5e325eeae1e3e93be0f8a057c2ebfb5cd9f2050f7ea547d1d33aa38bce5",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "winery",
+      "file": "jogo/assets/illustrated/winery.png",
+      "prompt": "jogo/assets/illustrated/winery.prompt.txt",
+      "reference": "construcoes/20-vinicola.png",
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "89d7b7ce6fb1a050e47d361e033b231d575d4d0dab422b19555327c2723130c4",
+      "runtime": "neutral background keyed by canvas shader"
+    },
+    {
+      "id": "workers",
+      "file": "jogo/assets/illustrated/workers.png",
+      "prompt": "jogo/assets/illustrated/workers.prompt.txt",
+      "reference": [
+        "civis/01-morador.png",
+        "civis/02-servente.png",
+        "civis/04-construtor.png",
+        "civis/11-horticultor.png"
+      ],
+      "width": 1254,
+      "height": 1254,
+      "native_alpha": false,
+      "sha256": "2feec56fb2dabb9c92ae8f33111a5d5bd3391562caf92c2bc202a8e9bfce19ff",
+      "runtime": "neutral background keyed by canvas shader"
+    }
+  ],
+  "limitations": [
+    "Static isometric building views; no camera rotation.",
+    "Four civilian poses are shared across eight roles.",
+    "Most cutouts are RGB: neutral preview background is removed by shader at render time.",
+    "Original concept sheets are preserved unchanged."
+  ]
+}

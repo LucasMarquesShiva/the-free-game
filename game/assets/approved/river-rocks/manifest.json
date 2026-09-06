@@ -1,0 +1,140 @@
+[
+  {
+    "bytes": 165872,
+    "lods": [
+      {
+        "threshold": 0.025000000372529,
+        "triangles": 1807
+      },
+      {
+        "threshold": 0.645394086837769,
+        "triangles": 201
+      },
+      {
+        "threshold": 0.968091130256653,
+        "triangles": 80
+      },
+      {
+        "threshold": 1.45213663578033,
+        "triangles": 40
+      }
+    ],
+    "max_normal_turn_degrees": 27.6930646017118,
+    "path": "res://assets/approved/river-rocks/stone-0.res",
+    "smoothed_vertices": 1919,
+    "triangles": 2479,
+    "variant": 0,
+    "vertices": 7437
+  },
+  {
+    "bytes": 174384,
+    "lods": [
+      {
+        "threshold": 0.025000000372529,
+        "triangles": 1978
+      },
+      {
+        "threshold": 0.826979875564575,
+        "triangles": 160
+      },
+      {
+        "threshold": 1.24046981334686,
+        "triangles": 40
+      }
+    ],
+    "max_normal_turn_degrees": 26.4349077581314,
+    "path": "res://assets/approved/river-rocks/stone-1.res",
+    "smoothed_vertices": 1920,
+    "triangles": 2650,
+    "variant": 1,
+    "vertices": 7950
+  },
+  {
+    "bytes": 167952,
+    "lods": [
+      {
+        "threshold": 0.025000000372529,
+        "triangles": 1852
+      },
+      {
+        "threshold": 0.666032016277313,
+        "triangles": 200
+      },
+      {
+        "threshold": 0.999047935009003,
+        "triangles": 40
+      }
+    ],
+    "max_normal_turn_degrees": 25.9622755649862,
+    "path": "res://assets/approved/river-rocks/stone-2.res",
+    "smoothed_vertices": 1920,
+    "triangles": 2524,
+    "variant": 2,
+    "vertices": 7572
+  },
+  {
+    "bytes": 168432,
+    "lods": [
+      {
+        "threshold": 0.025000000372529,
+        "triangles": 1861
+      },
+      {
+        "threshold": 0.817116260528564,
+        "triangles": 160
+      },
+      {
+        "threshold": 1.22567439079285,
+        "triangles": 40
+      }
+    ],
+    "max_normal_turn_degrees": 25.0846698918692,
+    "path": "res://assets/approved/river-rocks/stone-3.res",
+    "smoothed_vertices": 1920,
+    "triangles": 2533,
+    "variant": 3,
+    "vertices": 7599
+  },
+  {
+    "bytes": 166753,
+    "lods": [
+      {
+        "threshold": 0.025000000372529,
+        "triangles": 1852
+      },
+      {
+        "threshold": 0.88417387008667,
+        "triangles": 40
+      }
+    ],
+    "max_normal_turn_degrees": 24.1584962413038,
+    "path": "res://assets/approved/river-rocks/stone-4.res",
+    "smoothed_vertices": 1919,
+    "triangles": 2524,
+    "variant": 4,
+    "vertices": 7572
+  },
+  {
+    "bytes": 173907,
+    "lods": [
+      {
+        "threshold": 0.025000000372529,
+        "triangles": 1960
+      },
+      {
+        "threshold": 0.648811280727386,
+        "triangles": 164
+      },
+      {
+        "threshold": 0.973216950893402,
+        "triangles": 41
+      }
+    ],
+    "max_normal_turn_degrees": 25.7347372475054,
+    "path": "res://assets/approved/river-rocks/stone-5.res",
+    "smoothed_vertices": 1919,
+    "triangles": 2632,
+    "variant": 5,
+    "vertices": 7896
+  }
+]

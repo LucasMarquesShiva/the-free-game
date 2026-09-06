@@ -1,0 +1,682 @@
+{
+ "arrival_ticks": 0,
+ "battle": null,
+ "buildings": [
+  {
+   "builder": -1,
+   "cell": {
+    "__cell": [
+     7,
+     10
+    ]
+   },
+   "delivered": {
+    "food": 0,
+    "grapes": 0,
+    "stone": 0,
+    "wine": 0,
+    "wood": 0
+   },
+   "entrance": {
+    "__cell": [
+     8,
+     13
+    ]
+   },
+   "id": 1,
+   "initial": true,
+   "input": {
+    "food": 0,
+    "grapes": 0,
+    "stone": 0,
+    "wine": 0,
+    "wood": 0
+   },
+   "kind": "hall",
+   "output": {
+    "food": 0,
+    "grapes": 0,
+    "stone": 0,
+    "wine": 0,
+    "wood": 0
+   },
+   "production": 0.0,
+   "progress": 1.0,
+   "reason": "",
+   "stage": "complete",
+   "worker": -1
+  },
+  {
+   "builder": -1,
+   "cell": {
+    "__cell": [
+     12,
+     10
+    ]
+   },
+   "delivered": {
+    "food": 0,
+    "grapes": 0,
+    "stone": 0,
+    "wine": 0,
+    "wood": 0
+   },
+   "entrance": {
+    "__cell": [
+     13,
+     13
+    ]
+   },
+   "id": 2,
+   "initial": true,
+   "input": {
+    "food": 0,
+    "grapes": 0,
+    "stone": 0,
+    "wine": 0,
+    "wood": 0
+   },
+   "kind": "training",
+   "output": {
+    "food": 0,
+    "grapes": 0,
+    "stone": 0,
+    "wine": 0,
+    "wood": 0
+   },
+   "production": 0.0,
+   "progress": 1.0,
+   "reason": "",
+   "stage": "complete",
+   "worker": 11
+  }
+ ],
+ "consumed": {
+  "food": 0,
+  "grapes": 0,
+  "stone": 0,
+  "wine": 0,
+  "wood": 0
+ },
+ "events": [
+  {
+   "text": "Comece ligando a entrada do edifício principal ao centro de treinamento por uma estrada. Os construtores farão o trabalho.",
+   "tick": 0
+  }
+ ],
+ "food_shortage": 0,
+ "initial": {
+  "food": 280,
+  "grapes": 0,
+  "stone": 160,
+  "wine": 0,
+  "wood": 140
+ },
+ "lost": false,
+ "mode": "approved",
+ "next_id": 20,
+ "paused": false,
+ "produced": {
+  "food": 0,
+  "grapes": 0,
+  "stone": 0,
+  "wine": 0,
+  "wood": 0
+ },
+ "reserved": {
+  "food": 0,
+  "grapes": 0,
+  "stone": 0,
+  "wine": 0,
+  "wood": 0
+ },
+ "roads": [],
+ "stats": {
+  "food_produced": 0,
+  "houses_built": 0,
+  "wine_delivered": 0
+ },
+ "stock": {
+  "food": 280,
+  "grapes": 0,
+  "stone": 160,
+  "wine": 0,
+  "wood": 140
+ },
+ "tick": 0,
+ "training": [],
+ "version": 1,
+ "won": false,
+ "workers": [
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     3,
+     14
+    ]
+   },
+   "goal": {
+    "__cell": [
+     3,
+     14
+    ]
+   },
+   "id": 3,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     3,
+     14
+    ]
+   },
+   "role": "builder",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     4,
+     14
+    ]
+   },
+   "goal": {
+    "__cell": [
+     4,
+     14
+    ]
+   },
+   "id": 4,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     4,
+     14
+    ]
+   },
+   "role": "builder",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     5,
+     14
+    ]
+   },
+   "goal": {
+    "__cell": [
+     5,
+     14
+    ]
+   },
+   "id": 5,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     5,
+     14
+    ]
+   },
+   "role": "builder",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     6,
+     14
+    ]
+   },
+   "goal": {
+    "__cell": [
+     6,
+     14
+    ]
+   },
+   "id": 6,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     6,
+     14
+    ]
+   },
+   "role": "servant",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     7,
+     14
+    ]
+   },
+   "goal": {
+    "__cell": [
+     7,
+     14
+    ]
+   },
+   "id": 7,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     7,
+     14
+    ]
+   },
+   "role": "servant",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     3,
+     15
+    ]
+   },
+   "goal": {
+    "__cell": [
+     3,
+     15
+    ]
+   },
+   "id": 8,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     3,
+     15
+    ]
+   },
+   "role": "servant",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     4,
+     15
+    ]
+   },
+   "goal": {
+    "__cell": [
+     4,
+     15
+    ]
+   },
+   "id": 9,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     4,
+     15
+    ]
+   },
+   "role": "servant",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     5,
+     15
+    ]
+   },
+   "goal": {
+    "__cell": [
+     5,
+     15
+    ]
+   },
+   "id": 10,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     5,
+     15
+    ]
+   },
+   "role": "servant",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     11,
+     11
+    ]
+   },
+   "goal": {
+    "__cell": [
+     11,
+     11
+    ]
+   },
+   "id": 11,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     11,
+     11
+    ]
+   },
+   "role": "instructor",
+   "route": [],
+   "state": "Ensinando no centro",
+   "task": {
+    "building": 2,
+    "type": "produce"
+   },
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     10,
+     15
+    ]
+   },
+   "goal": {
+    "__cell": [
+     10,
+     15
+    ]
+   },
+   "id": 12,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     10,
+     15
+    ]
+   },
+   "role": "resident",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     11,
+     15
+    ]
+   },
+   "goal": {
+    "__cell": [
+     11,
+     15
+    ]
+   },
+   "id": 13,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     11,
+     15
+    ]
+   },
+   "role": "resident",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     12,
+     15
+    ]
+   },
+   "goal": {
+    "__cell": [
+     12,
+     15
+    ]
+   },
+   "id": 14,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     12,
+     15
+    ]
+   },
+   "role": "resident",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     13,
+     15
+    ]
+   },
+   "goal": {
+    "__cell": [
+     13,
+     15
+    ]
+   },
+   "id": 15,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     13,
+     15
+    ]
+   },
+   "role": "resident",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     10,
+     16
+    ]
+   },
+   "goal": {
+    "__cell": [
+     10,
+     16
+    ]
+   },
+   "id": 16,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     10,
+     16
+    ]
+   },
+   "role": "resident",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     11,
+     16
+    ]
+   },
+   "goal": {
+    "__cell": [
+     11,
+     16
+    ]
+   },
+   "id": 17,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     11,
+     16
+    ]
+   },
+   "role": "resident",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     12,
+     16
+    ]
+   },
+   "goal": {
+    "__cell": [
+     12,
+     16
+    ]
+   },
+   "id": 18,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     12,
+     16
+    ]
+   },
+   "role": "resident",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  },
+  {
+   "cargo": {},
+   "cell": {
+    "__cell": [
+     13,
+     16
+    ]
+   },
+   "goal": {
+    "__cell": [
+     13,
+     16
+    ]
+   },
+   "id": 19,
+   "jobs": 0,
+   "meal": 0,
+   "previous": {
+    "__cell": [
+     13,
+     16
+    ]
+   },
+   "role": "resident",
+   "route": [],
+   "state": "Disponível",
+   "task": {},
+   "wait": 0,
+   "work": 0.0,
+   "yield_until": 0
+  }
+ ]
+}

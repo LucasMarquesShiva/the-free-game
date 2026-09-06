@@ -1,0 +1,11 @@
+.DS_Store
+.godot/
+.local-data/
+__pycache__/
+*.pyc
+builds/
+dist/
+.env
+.env.*
+*.log
+.openai/

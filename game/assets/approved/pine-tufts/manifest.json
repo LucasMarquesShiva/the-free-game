@@ -1,0 +1,158 @@
+[
+  {
+    "base_triangles": 8635,
+    "file_bytes": 522622,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.335845500230789,
+        "triangles": 1788
+      },
+      {
+        "screen_error": 0.519667148590088,
+        "triangles": 633
+      },
+      {
+        "screen_error": 0.995771050453186,
+        "triangles": 243
+      }
+    ],
+    "path": "res://assets/approved/pine-tufts/pine-0.res",
+    "shadow_mesh": true,
+    "variant": 0
+  },
+  {
+    "base_triangles": 8635,
+    "file_bytes": 517468,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.375128746032715,
+        "triangles": 1490
+      },
+      {
+        "screen_error": 0.569134891033173,
+        "triangles": 503
+      },
+      {
+        "screen_error": 0.963344395160675,
+        "triangles": 217
+      }
+    ],
+    "path": "res://assets/approved/pine-tufts/pine-1.res",
+    "shadow_mesh": true,
+    "variant": 1
+  },
+  {
+    "base_triangles": 8635,
+    "file_bytes": 521787,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.3373022377491,
+        "triangles": 1830
+      },
+      {
+        "screen_error": 0.626020193099976,
+        "triangles": 529
+      },
+      {
+        "screen_error": 0.983930587768555,
+        "triangles": 243
+      }
+    ],
+    "path": "res://assets/approved/pine-tufts/pine-2.res",
+    "shadow_mesh": true,
+    "variant": 2
+  },
+  {
+    "base_triangles": 8635,
+    "file_bytes": 524024,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.33349472284317,
+        "triangles": 1843
+      },
+      {
+        "screen_error": 0.510690152645111,
+        "triangles": 919
+      },
+      {
+        "screen_error": 0.809106290340424,
+        "triangles": 334
+      }
+    ],
+    "path": "res://assets/approved/pine-tufts/pine-3.res",
+    "shadow_mesh": true,
+    "variant": 3
+  },
+  {
+    "base_triangles": 8635,
+    "file_bytes": 521242,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.335052669048309,
+        "triangles": 1843
+      },
+      {
+        "screen_error": 0.636380016803741,
+        "triangles": 529
+      },
+      {
+        "screen_error": 1.18043947219849,
+        "triangles": 217
+      }
+    ],
+    "path": "res://assets/approved/pine-tufts/pine-4.res",
+    "shadow_mesh": true,
+    "variant": 4
+  },
+  {
+    "base_triangles": 8635,
+    "file_bytes": 520842,
+    "kind": "pine",
+    "lods": [
+      {
+        "screen_error": 0.025,
+        "triangles": 8299
+      },
+      {
+        "screen_error": 0.327654451131821,
+        "triangles": 1830
+      },
+      {
+        "screen_error": 0.641519725322723,
+        "triangles": 503
+      },
+      {
+        "screen_error": 0.962279677391052,
+        "triangles": 217
+      }
+    ],
+    "path": "res://assets/approved/pine-tufts/pine-5.res",
+    "shadow_mesh": true,
+    "variant": 5
+  }
+]

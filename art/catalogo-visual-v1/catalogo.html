@@ -1,0 +1,410 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Free Game · Catálogo visual</title><style>
+    :root{--paper:#f7f3e9;--ink:#193b37;--muted:#69756b;--line:#d8d4c6;--gold:#957643;--white:#fffdf7}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:inherit;text-underline-offset:4px}button,input{font:inherit}button,a,input{touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #a77625;outline-offset:4px}header{padding:26px 5vw 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{font-size:12px;font-weight:650;letter-spacing:.18em;text-transform:uppercase}.edition{color:var(--muted);font-size:12px;letter-spacing:.1em}main{max-width:1680px;margin:auto;padding:0 5vw}.intro{display:grid;grid-template-columns:1.2fr .8fr;gap:56px;padding:58px 0 44px;align-items:end}h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(40px,5vw,72px);line-height:1.04;font-weight:400;letter-spacing:-.04em;margin:12px 0 22px}.eyebrow{font-size:10px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}.lede{max-width:610px;font-size:16px;line-height:1.7;color:#50635b}.intro-note{font-size:14px;line-height:1.75;max-width:410px}.intro-note p{margin:0 0 16px}.stat-line{display:flex;gap:25px;border-top:1px solid var(--line);padding-top:20px}.stat-line strong{font-family:Georgia,serif;font-size:32px;font-weight:400;display:block}.stat-line small{font-size:11px;color:var(--muted)}.toolbar{position:sticky;top:0;z-index:2;background:rgba(247,243,233,.97);border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;align-items:center;padding:15px 0;backdrop-filter:blur(8px)}.filters{display:flex;gap:6px;flex-wrap:wrap}.filter{border:0;color:#53675e;background:transparent;padding:11px 13px;cursor:pointer;font-size:12px;border-radius:3px;white-space:nowrap}.filter span{opacity:.6;margin-left:5px;font-size:10px}.filter.active{background:var(--ink);color:var(--white)}.search{position:relative;min-width:210px}.search input{width:100%;background:transparent;border:1px solid #bfc7bd;padding:11px 14px;border-radius:3px;color:var(--ink);font-size:13px}.result-line{display:flex;justify-content:space-between;gap:16px;margin:22px 0;color:var(--muted);font-size:12px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px 24px;padding-bottom:60px}.card{min-width:0}.card[hidden]{display:none}.preview{display:block;width:100%;padding:0;border:1px solid #e3dccb;background:#fff9ee;cursor:zoom-in;position:relative;aspect-ratio:3/2;overflow:hidden}.preview img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .25s}.preview:hover img{transform:scale(1.025)}.expand{position:absolute;right:10px;bottom:9px;background:var(--white);border:1px solid var(--line);padding:2px 7px;font-size:17px;opacity:0;transition:opacity .2s}.preview:hover .expand,.preview:focus-visible .expand{opacity:1}.card-copy{padding-top:15px}.card h3{font-family:Georgia,serif;font-size:23px;line-height:1.15;font-weight:400;margin:7px 0 14px}.card-links{display:flex;gap:17px;font-size:11px;color:#627265}.card-links a:first-child{color:var(--ink)}.pending{display:grid;place-items:center;height:100%;color:var(--muted)}.empty{padding:80px 0;text-align:center;font-size:17px;color:var(--muted)}footer{padding:26px 5vw;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:24px;font-size:12px;line-height:1.7;color:var(--muted)}footer nav{display:flex;gap:20px;flex-wrap:wrap}dialog{padding:0;border:0;background:var(--paper);color:var(--ink);width:min(1450px,96vw);max-height:96vh;box-shadow:0 24px 120px #0006}dialog::backdrop{background:#10211fed;backdrop-filter:blur(5px)}.modal-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);gap:18px}.modal-bar h2{font-family:Georgia,serif;font-size:25px;font-weight:400;margin:0}.modal-controls{display:flex;align-items:center;gap:12px}.modal-controls button{background:transparent;border:1px solid #c3cbbf;border-radius:3px;color:var(--ink);width:40px;height:36px;cursor:pointer}.modal-controls a{font-size:12px;white-space:nowrap}.modal-image{display:block;max-width:100%;max-height:calc(96vh - 68px);height:auto;width:auto;margin:auto;object-fit:contain}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(min-width:1700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:1000px){.toolbar{align-items:stretch;flex-direction:column;gap:10px}.search{max-width:none}.intro{gap:28px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){header{padding-top:20px;padding-bottom:20px}.edition{display:none}.intro{grid-template-columns:1fr;padding:35px 0 25px;gap:12px}.intro-note{max-width:none}.stat-line{gap:28px}h1{font-size:46px}.lede{font-size:14px}.grid{grid-template-columns:1fr;gap:30px}.filter{padding:9px 8px;font-size:11px}.toolbar{position:static}.card h3{font-size:25px}.modal-bar{align-items:flex-start;padding:12px}.modal-bar h2{font-size:19px}.modal-controls{gap:5px}.modal-controls a{display:none}footer{flex-direction:column}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}@media print{header,.toolbar,.intro-note,footer,.card-links,.result-line{display:none}.intro{display:block;padding:0}h1{font-size:30px}.grid{grid-template-columns:repeat(2,1fr);gap:20px}.card{break-inside:avoid}.preview{border:0}.card h3{font-size:16px}.card-copy{padding-top:4px}body{background:white}main{padding:0}}
+    </style></head><body><header><div class="brand">Vila medieval · Arquivo visual</div><div class="edition">VOLUME 01 / CONCEITOS</div></header><main><section class="intro"><div><span class="eyebrow">Construções, habitantes e um mundo em movimento</span><h1>The Free Game</h1><p>Lucas Marques, from Shiva</p><p class="lede">O catálogo visual do jogo: casas que crescem, ofícios que dão vida às ruas e um exército que se organiza por objetivos.</p></div><div class="intro-note"><p>Cada prancha reúne referências para a futura modelagem: vistas, poses, etapas de construção ou componentes separados.</p><p>São desenhos conceituais. Modelos 3D, animações e integração ao jogo serão produzidos a partir destas referências.</p><div class="stat-line"><div><strong>32</strong><small>construções</small></div><div><strong>41</strong><small>personagens</small></div><div><strong>8</strong><small>kits de mundo</small></div></div></div></section><section class="toolbar" aria-label="Filtrar catálogo"><div class="filters"><button type="button" class="filter active" data-filter="all" aria-pressed="true">Tudo <span>81</span></button><button type="button" class="filter" data-filter="construcoes" aria-pressed="false">Construções <span>32</span></button><button type="button" class="filter" data-filter="civis" aria-pressed="false">Vida na vila <span>29</span></button><button type="button" class="filter" data-filter="militares" aria-pressed="false">Exército <span>12</span></button><button type="button" class="filter" data-filter="kits" aria-pressed="false">Mundo e objetos <span>8</span></button></div><label class="search"><span class="sr-only">Buscar pelo nome</span><input id="search" type="search" placeholder="Buscar vinícola, servente…" autocomplete="off"></label></section><div class="result-line"><span id="results" aria-live="polite">81 pranchas</span><span>Toque em uma imagem para ampliar</span></div><section id="grid" class="grid" aria-label="Pranchas conceituais"><article class="card" data-category="construcoes" data-name="Centro da vila" data-id="bld_01_centro_da_vila">
+          <button class="preview" type="button" data-image="construcoes/01-centro_da_vila.png" data-title="Centro da vila" aria-label="Ampliar Centro da vila" ><img src="construcoes/01-centro_da_vila.png" alt="Ficha visual de Centro da vila" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 01</span><h3>Centro da vila</h3>
+          <div class="card-links"><a href="construcoes/01-centro_da_vila.png" download>PNG ↓</a><a href="fichas/bld_01_centro_da_vila.md">Ficha</a><a href="prompts/bld_01_centro_da_vila.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Casas" data-id="bld_02_casas">
+          <button class="preview" type="button" data-image="construcoes/02-casas.png" data-title="Casas" aria-label="Ampliar Casas" ><img src="construcoes/02-casas.png" alt="Ficha visual de Casas" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 02</span><h3>Casas</h3>
+          <div class="card-links"><a href="construcoes/02-casas.png" download>PNG ↓</a><a href="fichas/bld_02_casas.md">Ficha</a><a href="prompts/bld_02_casas.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Armazém" data-id="bld_03_armazem">
+          <button class="preview" type="button" data-image="construcoes/03-armazem.png" data-title="Armazém" aria-label="Ampliar Armazém" ><img src="construcoes/03-armazem.png" alt="Ficha visual de Armazém" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 03</span><h3>Armazém</h3>
+          <div class="card-links"><a href="construcoes/03-armazem.png" download>PNG ↓</a><a href="fichas/bld_03_armazem.md">Ficha</a><a href="prompts/bld_03_armazem.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Centro de treinamento" data-id="bld_04_centro_de_treinamento">
+          <button class="preview" type="button" data-image="construcoes/04-centro_de_treinamento.png" data-title="Centro de treinamento" aria-label="Ampliar Centro de treinamento" ><img src="construcoes/04-centro_de_treinamento.png" alt="Ficha visual de Centro de treinamento" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 04</span><h3>Centro de treinamento</h3>
+          <div class="card-links"><a href="construcoes/04-centro_de_treinamento.png" download>PNG ↓</a><a href="fichas/bld_04_centro_de_treinamento.md">Ficha</a><a href="prompts/bld_04_centro_de_treinamento.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Mercado" data-id="bld_05_mercado">
+          <button class="preview" type="button" data-image="construcoes/05-mercado.png" data-title="Mercado" aria-label="Ampliar Mercado" ><img src="construcoes/05-mercado.png" alt="Ficha visual de Mercado" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 05</span><h3>Mercado</h3>
+          <div class="card-links"><a href="construcoes/05-mercado.png" download>PNG ↓</a><a href="fichas/bld_05_mercado.md">Ficha</a><a href="prompts/bld_05_mercado.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Cabana do lenhador" data-id="bld_06_cabana_do_lenhador">
+          <button class="preview" type="button" data-image="construcoes/06-cabana_do_lenhador.png" data-title="Cabana do lenhador" aria-label="Ampliar Cabana do lenhador" ><img src="construcoes/06-cabana_do_lenhador.png" alt="Ficha visual de Cabana do lenhador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 06</span><h3>Cabana do lenhador</h3>
+          <div class="card-links"><a href="construcoes/06-cabana_do_lenhador.png" download>PNG ↓</a><a href="fichas/bld_06_cabana_do_lenhador.md">Ficha</a><a href="prompts/bld_06_cabana_do_lenhador.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Serraria" data-id="bld_07_serraria">
+          <button class="preview" type="button" data-image="construcoes/07-serraria.png" data-title="Serraria" aria-label="Ampliar Serraria" ><img src="construcoes/07-serraria.png" alt="Ficha visual de Serraria" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 07</span><h3>Serraria</h3>
+          <div class="card-links"><a href="construcoes/07-serraria.png" download>PNG ↓</a><a href="fichas/bld_07_serraria.md">Ficha</a><a href="prompts/bld_07_serraria.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Pedreira" data-id="bld_08_pedreira">
+          <button class="preview" type="button" data-image="construcoes/08-pedreira.png" data-title="Pedreira" aria-label="Ampliar Pedreira" ><img src="construcoes/08-pedreira.png" alt="Ficha visual de Pedreira" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 08</span><h3>Pedreira</h3>
+          <div class="card-links"><a href="construcoes/08-pedreira.png" download>PNG ↓</a><a href="fichas/bld_08_pedreira.md">Ficha</a><a href="prompts/bld_08_pedreira.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Carvoaria" data-id="bld_09_carvoaria">
+          <button class="preview" type="button" data-image="construcoes/09-carvoaria.png" data-title="Carvoaria" aria-label="Ampliar Carvoaria" ><img src="construcoes/09-carvoaria.png" alt="Ficha visual de Carvoaria" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 09</span><h3>Carvoaria</h3>
+          <div class="card-links"><a href="construcoes/09-carvoaria.png" download>PNG ↓</a><a href="fichas/bld_09_carvoaria.md">Ficha</a><a href="prompts/bld_09_carvoaria.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Mina de ferro" data-id="bld_10_mina_de_ferro">
+          <button class="preview" type="button" data-image="construcoes/10-mina_de_ferro.png" data-title="Mina de ferro" aria-label="Ampliar Mina de ferro" ><img src="construcoes/10-mina_de_ferro.png" alt="Ficha visual de Mina de ferro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 10</span><h3>Mina de ferro</h3>
+          <div class="card-links"><a href="construcoes/10-mina_de_ferro.png" download>PNG ↓</a><a href="fichas/bld_10_mina_de_ferro.md">Ficha</a><a href="prompts/bld_10_mina_de_ferro.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Fundição" data-id="bld_11_fundicao">
+          <button class="preview" type="button" data-image="construcoes/11-fundicao.png" data-title="Fundição" aria-label="Ampliar Fundição" ><img src="construcoes/11-fundicao.png" alt="Ficha visual de Fundição" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 11</span><h3>Fundição</h3>
+          <div class="card-links"><a href="construcoes/11-fundicao.png" download>PNG ↓</a><a href="fichas/bld_11_fundicao.md">Ficha</a><a href="prompts/bld_11_fundicao.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Horta" data-id="bld_12_horta">
+          <button class="preview" type="button" data-image="construcoes/12-horta.png" data-title="Horta" aria-label="Ampliar Horta" ><img src="construcoes/12-horta.png" alt="Ficha visual de Horta" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 12</span><h3>Horta</h3>
+          <div class="card-links"><a href="construcoes/12-horta.png" download>PNG ↓</a><a href="fichas/bld_12_horta.md">Ficha</a><a href="prompts/bld_12_horta.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Fazenda de cereais" data-id="bld_13_fazenda_de_cereais">
+          <button class="preview" type="button" data-image="construcoes/13-fazenda_de_cereais.png" data-title="Fazenda de cereais" aria-label="Ampliar Fazenda de cereais" ><img src="construcoes/13-fazenda_de_cereais.png" alt="Ficha visual de Fazenda de cereais" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 13</span><h3>Fazenda de cereais</h3>
+          <div class="card-links"><a href="construcoes/13-fazenda_de_cereais.png" download>PNG ↓</a><a href="fichas/bld_13_fazenda_de_cereais.md">Ficha</a><a href="prompts/bld_13_fazenda_de_cereais-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Moinho" data-id="bld_14_moinho">
+          <button class="preview" type="button" data-image="construcoes/14-moinho.png" data-title="Moinho" aria-label="Ampliar Moinho" ><img src="construcoes/14-moinho.png" alt="Ficha visual de Moinho" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 14</span><h3>Moinho</h3>
+          <div class="card-links"><a href="construcoes/14-moinho.png" download>PNG ↓</a><a href="fichas/bld_14_moinho.md">Ficha</a><a href="prompts/bld_14_moinho.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Padaria" data-id="bld_15_padaria">
+          <button class="preview" type="button" data-image="construcoes/15-padaria.png" data-title="Padaria" aria-label="Ampliar Padaria" ><img src="construcoes/15-padaria.png" alt="Ficha visual de Padaria" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 15</span><h3>Padaria</h3>
+          <div class="card-links"><a href="construcoes/15-padaria.png" download>PNG ↓</a><a href="fichas/bld_15_padaria.md">Ficha</a><a href="prompts/bld_15_padaria.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Cabana do pescador" data-id="bld_16_cabana_do_pescador">
+          <button class="preview" type="button" data-image="construcoes/16-cabana_do_pescador.png" data-title="Cabana do pescador" aria-label="Ampliar Cabana do pescador" ><img src="construcoes/16-cabana_do_pescador.png" alt="Ficha visual de Cabana do pescador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 16</span><h3>Cabana do pescador</h3>
+          <div class="card-links"><a href="construcoes/16-cabana_do_pescador.png" download>PNG ↓</a><a href="fichas/bld_16_cabana_do_pescador.md">Ficha</a><a href="prompts/bld_16_cabana_do_pescador.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Criação de porcos" data-id="bld_17_criacao_de_porcos">
+          <button class="preview" type="button" data-image="construcoes/17-criacao_de_porcos-v2.png" data-title="Criação de porcos" aria-label="Ampliar Criação de porcos" ><img src="construcoes/17-criacao_de_porcos-v2.png" alt="Ficha visual de Criação de porcos" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 17</span><h3>Criação de porcos</h3>
+          <div class="card-links"><a href="construcoes/17-criacao_de_porcos-v2.png" download>PNG ↓</a><a href="fichas/bld_17_criacao_de_porcos.md">Ficha</a><a href="prompts/bld_17_criacao_de_porcos-edit-v2.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Açougue" data-id="bld_18_acougue">
+          <button class="preview" type="button" data-image="construcoes/18-acougue.png" data-title="Açougue" aria-label="Ampliar Açougue" ><img src="construcoes/18-acougue.png" alt="Ficha visual de Açougue" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 18</span><h3>Açougue</h3>
+          <div class="card-links"><a href="construcoes/18-acougue.png" download>PNG ↓</a><a href="fichas/bld_18_acougue.md">Ficha</a><a href="prompts/bld_18_acougue.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Taverna" data-id="bld_19_taverna">
+          <button class="preview" type="button" data-image="construcoes/19-taverna.png" data-title="Taverna" aria-label="Ampliar Taverna" ><img src="construcoes/19-taverna.png" alt="Ficha visual de Taverna" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 19</span><h3>Taverna</h3>
+          <div class="card-links"><a href="construcoes/19-taverna.png" download>PNG ↓</a><a href="fichas/bld_19_taverna.md">Ficha</a><a href="prompts/bld_19_taverna.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Vinícola" data-id="bld_20_vinicola">
+          <button class="preview" type="button" data-image="construcoes/20-vinicola.png" data-title="Vinícola" aria-label="Ampliar Vinícola" ><img src="construcoes/20-vinicola.png" alt="Ficha visual de Vinícola" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 20</span><h3>Vinícola</h3>
+          <div class="card-links"><a href="construcoes/20-vinicola.png" download>PNG ↓</a><a href="fichas/bld_20_vinicola.md">Ficha</a><a href="prompts/bld_20_vinicola.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Curtume" data-id="bld_21_curtume">
+          <button class="preview" type="button" data-image="construcoes/21-curtume.png" data-title="Curtume" aria-label="Ampliar Curtume" ><img src="construcoes/21-curtume.png" alt="Ficha visual de Curtume" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 21</span><h3>Curtume</h3>
+          <div class="card-links"><a href="construcoes/21-curtume.png" download>PNG ↓</a><a href="fichas/bld_21_curtume.md">Ficha</a><a href="prompts/bld_21_curtume.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Carpintaria" data-id="bld_22_carpintaria">
+          <button class="preview" type="button" data-image="construcoes/22-carpintaria.png" data-title="Carpintaria" aria-label="Ampliar Carpintaria" ><img src="construcoes/22-carpintaria.png" alt="Ficha visual de Carpintaria" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 22</span><h3>Carpintaria</h3>
+          <div class="card-links"><a href="construcoes/22-carpintaria.png" download>PNG ↓</a><a href="fichas/bld_22_carpintaria.md">Ficha</a><a href="prompts/bld_22_carpintaria.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Forja de armas" data-id="bld_23_forja_de_armas">
+          <button class="preview" type="button" data-image="construcoes/23-forja_de_armas.png" data-title="Forja de armas" aria-label="Ampliar Forja de armas" ><img src="construcoes/23-forja_de_armas.png" alt="Ficha visual de Forja de armas" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 23</span><h3>Forja de armas</h3>
+          <div class="card-links"><a href="construcoes/23-forja_de_armas.png" download>PNG ↓</a><a href="fichas/bld_23_forja_de_armas.md">Ficha</a><a href="prompts/bld_23_forja_de_armas.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Oficina de armaduras" data-id="bld_24_oficina_de_armaduras">
+          <button class="preview" type="button" data-image="construcoes/24-oficina_de_armaduras.png" data-title="Oficina de armaduras" aria-label="Ampliar Oficina de armaduras" ><img src="construcoes/24-oficina_de_armaduras.png" alt="Ficha visual de Oficina de armaduras" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 24</span><h3>Oficina de armaduras</h3>
+          <div class="card-links"><a href="construcoes/24-oficina_de_armaduras.png" download>PNG ↓</a><a href="fichas/bld_24_oficina_de_armaduras.md">Ficha</a><a href="prompts/bld_24_oficina_de_armaduras.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Enfermaria" data-id="bld_25_enfermaria">
+          <button class="preview" type="button" data-image="construcoes/25-enfermaria.png" data-title="Enfermaria" aria-label="Ampliar Enfermaria" ><img src="construcoes/25-enfermaria.png" alt="Ficha visual de Enfermaria" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 25</span><h3>Enfermaria</h3>
+          <div class="card-links"><a href="construcoes/25-enfermaria.png" download>PNG ↓</a><a href="fichas/bld_25_enfermaria.md">Ficha</a><a href="prompts/bld_25_enfermaria.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Quartel" data-id="bld_26_quartel">
+          <button class="preview" type="button" data-image="construcoes/26-quartel.png" data-title="Quartel" aria-label="Ampliar Quartel" ><img src="construcoes/26-quartel.png" alt="Ficha visual de Quartel" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 26</span><h3>Quartel</h3>
+          <div class="card-links"><a href="construcoes/26-quartel.png" download>PNG ↓</a><a href="fichas/bld_26_quartel.md">Ficha</a><a href="prompts/bld_26_quartel.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Estábulo" data-id="bld_27_estabulo">
+          <button class="preview" type="button" data-image="construcoes/27-estabulo.png" data-title="Estábulo" aria-label="Ampliar Estábulo" ><img src="construcoes/27-estabulo.png" alt="Ficha visual de Estábulo" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 27</span><h3>Estábulo</h3>
+          <div class="card-links"><a href="construcoes/27-estabulo.png" download>PNG ↓</a><a href="fichas/bld_27_estabulo.md">Ficha</a><a href="prompts/bld_27_estabulo.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Oficina de cerco" data-id="bld_28_oficina_de_cerco">
+          <button class="preview" type="button" data-image="construcoes/28-oficina_de_cerco.png" data-title="Oficina de cerco" aria-label="Ampliar Oficina de cerco" ><img src="construcoes/28-oficina_de_cerco.png" alt="Ficha visual de Oficina de cerco" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 28</span><h3>Oficina de cerco</h3>
+          <div class="card-links"><a href="construcoes/28-oficina_de_cerco.png" download>PNG ↓</a><a href="fichas/bld_28_oficina_de_cerco.md">Ficha</a><a href="prompts/bld_28_oficina_de_cerco.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Posto de comando" data-id="bld_29_posto_de_comando">
+          <button class="preview" type="button" data-image="construcoes/29-posto_de_comando.png" data-title="Posto de comando" aria-label="Ampliar Posto de comando" ><img src="construcoes/29-posto_de_comando.png" alt="Ficha visual de Posto de comando" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 29</span><h3>Posto de comando</h3>
+          <div class="card-links"><a href="construcoes/29-posto_de_comando.png" download>PNG ↓</a><a href="fichas/bld_29_posto_de_comando.md">Ficha</a><a href="prompts/bld_29_posto_de_comando.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Acampamento avançado" data-id="bld_30_acampamento_avancado">
+          <button class="preview" type="button" data-image="construcoes/30-acampamento_avancado.png" data-title="Acampamento avançado" aria-label="Ampliar Acampamento avançado" ><img src="construcoes/30-acampamento_avancado.png" alt="Ficha visual de Acampamento avançado" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 30</span><h3>Acampamento avançado</h3>
+          <div class="card-links"><a href="construcoes/30-acampamento_avancado.png" download>PNG ↓</a><a href="fichas/bld_30_acampamento_avancado.md">Ficha</a><a href="prompts/bld_30_acampamento_avancado.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Torre de vigia" data-id="bld_31_torre_de_vigia">
+          <button class="preview" type="button" data-image="construcoes/31-torre_de_vigia.png" data-title="Torre de vigia" aria-label="Ampliar Torre de vigia" ><img src="construcoes/31-torre_de_vigia.png" alt="Ficha visual de Torre de vigia" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 31</span><h3>Torre de vigia</h3>
+          <div class="card-links"><a href="construcoes/31-torre_de_vigia.png" download>PNG ↓</a><a href="fichas/bld_31_torre_de_vigia.md">Ficha</a><a href="prompts/bld_31_torre_de_vigia.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="construcoes" data-name="Fortificações" data-id="bld_32_fortificacoes">
+          <button class="preview" type="button" data-image="construcoes/32-fortificacoes.png" data-title="Fortificações" aria-label="Ampliar Fortificações" ><img src="construcoes/32-fortificacoes.png" alt="Ficha visual de Fortificações" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Construções · 32</span><h3>Fortificações</h3>
+          <div class="card-links"><a href="construcoes/32-fortificacoes.png" download>PNG ↓</a><a href="fichas/bld_32_fortificacoes.md">Ficha</a><a href="prompts/bld_32_fortificacoes.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Morador" data-id="civ_01_morador">
+          <button class="preview" type="button" data-image="civis/01-morador.png" data-title="Morador" aria-label="Ampliar Morador" ><img src="civis/01-morador.png" alt="Ficha visual de Morador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 01</span><h3>Morador</h3>
+          <div class="card-links"><a href="civis/01-morador.png" download>PNG ↓</a><a href="fichas/civ_01_morador.md">Ficha</a><a href="prompts/civ_01_morador.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Servente" data-id="civ_02_servente">
+          <button class="preview" type="button" data-image="civis/02-servente.png" data-title="Servente" aria-label="Ampliar Servente" ><img src="civis/02-servente.png" alt="Ficha visual de Servente" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 02</span><h3>Servente</h3>
+          <div class="card-links"><a href="civis/02-servente.png" download>PNG ↓</a><a href="fichas/civ_02_servente.md">Ficha</a><a href="prompts/civ_02_servente.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Carroceiro" data-id="civ_03_carroceiro">
+          <button class="preview" type="button" data-image="civis/03-carroceiro.png" data-title="Carroceiro" aria-label="Ampliar Carroceiro" ><img src="civis/03-carroceiro.png" alt="Ficha visual de Carroceiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 03</span><h3>Carroceiro</h3>
+          <div class="card-links"><a href="civis/03-carroceiro.png" download>PNG ↓</a><a href="fichas/civ_03_carroceiro.md">Ficha</a><a href="prompts/civ_03_carroceiro.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Construtor" data-id="civ_04_construtor">
+          <button class="preview" type="button" data-image="civis/04-construtor.png" data-title="Construtor" aria-label="Ampliar Construtor" ><img src="civis/04-construtor.png" alt="Ficha visual de Construtor" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 04</span><h3>Construtor</h3>
+          <div class="card-links"><a href="civis/04-construtor.png" download>PNG ↓</a><a href="fichas/civ_04_construtor.md">Ficha</a><a href="prompts/civ_04_construtor.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Lenhador" data-id="civ_05_lenhador">
+          <button class="preview" type="button" data-image="civis/05-lenhador.png" data-title="Lenhador" aria-label="Ampliar Lenhador" ><img src="civis/05-lenhador.png" alt="Ficha visual de Lenhador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 05</span><h3>Lenhador</h3>
+          <div class="card-links"><a href="civis/05-lenhador.png" download>PNG ↓</a><a href="fichas/civ_05_lenhador.md">Ficha</a><a href="prompts/civ_05_lenhador-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Serrador" data-id="civ_06_serrador">
+          <button class="preview" type="button" data-image="civis/06-serrador.png" data-title="Serrador" aria-label="Ampliar Serrador" ><img src="civis/06-serrador.png" alt="Ficha visual de Serrador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 06</span><h3>Serrador</h3>
+          <div class="card-links"><a href="civis/06-serrador.png" download>PNG ↓</a><a href="fichas/civ_06_serrador.md">Ficha</a><a href="prompts/civ_06_serrador-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Canteiro" data-id="civ_07_canteiro">
+          <button class="preview" type="button" data-image="civis/07-canteiro.png" data-title="Canteiro" aria-label="Ampliar Canteiro" ><img src="civis/07-canteiro.png" alt="Ficha visual de Canteiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 07</span><h3>Canteiro</h3>
+          <div class="card-links"><a href="civis/07-canteiro.png" download>PNG ↓</a><a href="fichas/civ_07_canteiro.md">Ficha</a><a href="prompts/civ_07_canteiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Carvoeiro" data-id="civ_08_carvoeiro">
+          <button class="preview" type="button" data-image="civis/08-carvoeiro.png" data-title="Carvoeiro" aria-label="Ampliar Carvoeiro" ><img src="civis/08-carvoeiro.png" alt="Ficha visual de Carvoeiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 08</span><h3>Carvoeiro</h3>
+          <div class="card-links"><a href="civis/08-carvoeiro.png" download>PNG ↓</a><a href="fichas/civ_08_carvoeiro.md">Ficha</a><a href="prompts/civ_08_carvoeiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Mineiro" data-id="civ_09_mineiro">
+          <button class="preview" type="button" data-image="civis/09-mineiro.png" data-title="Mineiro" aria-label="Ampliar Mineiro" ><img src="civis/09-mineiro.png" alt="Ficha visual de Mineiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 09</span><h3>Mineiro</h3>
+          <div class="card-links"><a href="civis/09-mineiro.png" download>PNG ↓</a><a href="fichas/civ_09_mineiro.md">Ficha</a><a href="prompts/civ_09_mineiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Fundidor" data-id="civ_10_fundidor">
+          <button class="preview" type="button" data-image="civis/10-fundidor.png" data-title="Fundidor" aria-label="Ampliar Fundidor" ><img src="civis/10-fundidor.png" alt="Ficha visual de Fundidor" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 10</span><h3>Fundidor</h3>
+          <div class="card-links"><a href="civis/10-fundidor.png" download>PNG ↓</a><a href="fichas/civ_10_fundidor.md">Ficha</a><a href="prompts/civ_10_fundidor-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Horticultor" data-id="civ_11_horticultor">
+          <button class="preview" type="button" data-image="civis/11-horticultor.png" data-title="Horticultor" aria-label="Ampliar Horticultor" ><img src="civis/11-horticultor.png" alt="Ficha visual de Horticultor" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 11</span><h3>Horticultor</h3>
+          <div class="card-links"><a href="civis/11-horticultor.png" download>PNG ↓</a><a href="fichas/civ_11_horticultor.md">Ficha</a><a href="prompts/civ_11_horticultor-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Agricultor" data-id="civ_12_agricultor">
+          <button class="preview" type="button" data-image="civis/12-agricultor.png" data-title="Agricultor" aria-label="Ampliar Agricultor" ><img src="civis/12-agricultor.png" alt="Ficha visual de Agricultor" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 12</span><h3>Agricultor</h3>
+          <div class="card-links"><a href="civis/12-agricultor.png" download>PNG ↓</a><a href="fichas/civ_12_agricultor.md">Ficha</a><a href="prompts/civ_12_agricultor-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Moleiro" data-id="civ_13_moleiro">
+          <button class="preview" type="button" data-image="civis/13-moleiro.png" data-title="Moleiro" aria-label="Ampliar Moleiro" ><img src="civis/13-moleiro.png" alt="Ficha visual de Moleiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 13</span><h3>Moleiro</h3>
+          <div class="card-links"><a href="civis/13-moleiro.png" download>PNG ↓</a><a href="fichas/civ_13_moleiro.md">Ficha</a><a href="prompts/civ_13_moleiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Padeiro" data-id="civ_14_padeiro">
+          <button class="preview" type="button" data-image="civis/14-padeiro.png" data-title="Padeiro" aria-label="Ampliar Padeiro" ><img src="civis/14-padeiro.png" alt="Ficha visual de Padeiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 14</span><h3>Padeiro</h3>
+          <div class="card-links"><a href="civis/14-padeiro.png" download>PNG ↓</a><a href="fichas/civ_14_padeiro.md">Ficha</a><a href="prompts/civ_14_padeiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Pescador" data-id="civ_15_pescador">
+          <button class="preview" type="button" data-image="civis/15-pescador.png" data-title="Pescador" aria-label="Ampliar Pescador" ><img src="civis/15-pescador.png" alt="Ficha visual de Pescador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 15</span><h3>Pescador</h3>
+          <div class="card-links"><a href="civis/15-pescador.png" download>PNG ↓</a><a href="fichas/civ_15_pescador.md">Ficha</a><a href="prompts/civ_15_pescador-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Criador" data-id="civ_16_criador">
+          <button class="preview" type="button" data-image="civis/16-criador.png" data-title="Criador" aria-label="Ampliar Criador" ><img src="civis/16-criador.png" alt="Ficha visual de Criador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 16</span><h3>Criador</h3>
+          <div class="card-links"><a href="civis/16-criador.png" download>PNG ↓</a><a href="fichas/civ_16_criador.md">Ficha</a><a href="prompts/civ_16_criador-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Açougueiro" data-id="civ_17_acougueiro">
+          <button class="preview" type="button" data-image="civis/17-acougueiro.png" data-title="Açougueiro" aria-label="Ampliar Açougueiro" ><img src="civis/17-acougueiro.png" alt="Ficha visual de Açougueiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 17</span><h3>Açougueiro</h3>
+          <div class="card-links"><a href="civis/17-acougueiro.png" download>PNG ↓</a><a href="fichas/civ_17_acougueiro.md">Ficha</a><a href="prompts/civ_17_acougueiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Cozinheiro" data-id="civ_18_cozinheiro">
+          <button class="preview" type="button" data-image="civis/18-cozinheiro.png" data-title="Cozinheiro" aria-label="Ampliar Cozinheiro" ><img src="civis/18-cozinheiro.png" alt="Ficha visual de Cozinheiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 18</span><h3>Cozinheiro</h3>
+          <div class="card-links"><a href="civis/18-cozinheiro.png" download>PNG ↓</a><a href="fichas/civ_18_cozinheiro.md">Ficha</a><a href="prompts/civ_18_cozinheiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Vinhateiro" data-id="civ_19_vinhateiro">
+          <button class="preview" type="button" data-image="civis/19-vinhateiro.png" data-title="Vinhateiro" aria-label="Ampliar Vinhateiro" ><img src="civis/19-vinhateiro.png" alt="Ficha visual de Vinhateiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 19</span><h3>Vinhateiro</h3>
+          <div class="card-links"><a href="civis/19-vinhateiro.png" download>PNG ↓</a><a href="fichas/civ_19_vinhateiro.md">Ficha</a><a href="prompts/civ_19_vinhateiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Curtidor" data-id="civ_20_curtidor">
+          <button class="preview" type="button" data-image="civis/20-curtidor.png" data-title="Curtidor" aria-label="Ampliar Curtidor" ><img src="civis/20-curtidor.png" alt="Ficha visual de Curtidor" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 20</span><h3>Curtidor</h3>
+          <div class="card-links"><a href="civis/20-curtidor.png" download>PNG ↓</a><a href="fichas/civ_20_curtidor.md">Ficha</a><a href="prompts/civ_20_curtidor-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Carpinteiro" data-id="civ_21_carpinteiro">
+          <button class="preview" type="button" data-image="civis/21-carpinteiro.png" data-title="Carpinteiro" aria-label="Ampliar Carpinteiro" ><img src="civis/21-carpinteiro.png" alt="Ficha visual de Carpinteiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 21</span><h3>Carpinteiro</h3>
+          <div class="card-links"><a href="civis/21-carpinteiro.png" download>PNG ↓</a><a href="fichas/civ_21_carpinteiro.md">Ficha</a><a href="prompts/civ_21_carpinteiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Ferreiro" data-id="civ_22_ferreiro">
+          <button class="preview" type="button" data-image="civis/22-ferreiro.png" data-title="Ferreiro" aria-label="Ampliar Ferreiro" ><img src="civis/22-ferreiro.png" alt="Ficha visual de Ferreiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 22</span><h3>Ferreiro</h3>
+          <div class="card-links"><a href="civis/22-ferreiro.png" download>PNG ↓</a><a href="fichas/civ_22_ferreiro.md">Ficha</a><a href="prompts/civ_22_ferreiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Armeiro" data-id="civ_23_armeiro">
+          <button class="preview" type="button" data-image="civis/23-armeiro.png" data-title="Armeiro" aria-label="Ampliar Armeiro" ><img src="civis/23-armeiro.png" alt="Ficha visual de Armeiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 23</span><h3>Armeiro</h3>
+          <div class="card-links"><a href="civis/23-armeiro.png" download>PNG ↓</a><a href="fichas/civ_23_armeiro.md">Ficha</a><a href="prompts/civ_23_armeiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Administrador" data-id="civ_24_administrador">
+          <button class="preview" type="button" data-image="civis/24-administrador.png" data-title="Administrador" aria-label="Ampliar Administrador" ><img src="civis/24-administrador.png" alt="Ficha visual de Administrador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 24</span><h3>Administrador</h3>
+          <div class="card-links"><a href="civis/24-administrador.png" download>PNG ↓</a><a href="fichas/civ_24_administrador.md">Ficha</a><a href="prompts/civ_24_administrador-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Instrutor" data-id="civ_25_instrutor">
+          <button class="preview" type="button" data-image="civis/25-instrutor.png" data-title="Instrutor" aria-label="Ampliar Instrutor" ><img src="civis/25-instrutor.png" alt="Ficha visual de Instrutor" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 25</span><h3>Instrutor</h3>
+          <div class="card-links"><a href="civis/25-instrutor.png" download>PNG ↓</a><a href="fichas/civ_25_instrutor.md">Ficha</a><a href="prompts/civ_25_instrutor-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Mercador" data-id="civ_26_mercador">
+          <button class="preview" type="button" data-image="civis/26-mercador.png" data-title="Mercador" aria-label="Ampliar Mercador" ><img src="civis/26-mercador.png" alt="Ficha visual de Mercador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 26</span><h3>Mercador</h3>
+          <div class="card-links"><a href="civis/26-mercador.png" download>PNG ↓</a><a href="fichas/civ_26_mercador.md">Ficha</a><a href="prompts/civ_26_mercador-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Curandeiro" data-id="civ_27_curandeiro">
+          <button class="preview" type="button" data-image="civis/27-curandeiro.png" data-title="Curandeiro" aria-label="Ampliar Curandeiro" ><img src="civis/27-curandeiro.png" alt="Ficha visual de Curandeiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 27</span><h3>Curandeiro</h3>
+          <div class="card-links"><a href="civis/27-curandeiro.png" download>PNG ↓</a><a href="fichas/civ_27_curandeiro.md">Ficha</a><a href="prompts/civ_27_curandeiro-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Instrutor militar" data-id="civ_28_instrutor_militar">
+          <button class="preview" type="button" data-image="civis/28-instrutor_militar.png" data-title="Instrutor militar" aria-label="Ampliar Instrutor militar" ><img src="civis/28-instrutor_militar.png" alt="Ficha visual de Instrutor militar" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 28</span><h3>Instrutor militar</h3>
+          <div class="card-links"><a href="civis/28-instrutor_militar.png" download>PNG ↓</a><a href="fichas/civ_28_instrutor_militar.md">Ficha</a><a href="prompts/civ_28_instrutor_militar-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="civis" data-name="Tratador" data-id="civ_29_tratador">
+          <button class="preview" type="button" data-image="civis/29-tratador.png" data-title="Tratador" aria-label="Ampliar Tratador" ><img src="civis/29-tratador.png" alt="Ficha visual de Tratador" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Vida na vila · 29</span><h3>Tratador</h3>
+          <div class="card-links"><a href="civis/29-tratador.png" download>PNG ↓</a><a href="fichas/civ_29_tratador.md">Ficha</a><a href="prompts/civ_29_tratador-used.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Miliciano" data-id="mil_01_miliciano">
+          <button class="preview" type="button" data-image="militares/01-miliciano.png" data-title="Miliciano" aria-label="Ampliar Miliciano" ><img src="militares/01-miliciano.png" alt="Ficha visual de Miliciano" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 01</span><h3>Miliciano</h3>
+          <div class="card-links"><a href="militares/01-miliciano.png" download>PNG ↓</a><a href="fichas/mil_01_miliciano.md">Ficha</a><a href="prompts/mil_01_miliciano.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Lanceiro" data-id="mil_02_lanceiro">
+          <button class="preview" type="button" data-image="militares/02-lanceiro.png" data-title="Lanceiro" aria-label="Ampliar Lanceiro" ><img src="militares/02-lanceiro.png" alt="Ficha visual de Lanceiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 02</span><h3>Lanceiro</h3>
+          <div class="card-links"><a href="militares/02-lanceiro.png" download>PNG ↓</a><a href="fichas/mil_02_lanceiro.md">Ficha</a><a href="prompts/mil_02_lanceiro.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Espadachim" data-id="mil_03_espadachim">
+          <button class="preview" type="button" data-image="militares/03-espadachim.png" data-title="Espadachim" aria-label="Ampliar Espadachim" ><img src="militares/03-espadachim.png" alt="Ficha visual de Espadachim" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 03</span><h3>Espadachim</h3>
+          <div class="card-links"><a href="militares/03-espadachim.png" download>PNG ↓</a><a href="fichas/mil_03_espadachim.md">Ficha</a><a href="prompts/mil_03_espadachim.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Arqueiro" data-id="mil_04_arqueiro">
+          <button class="preview" type="button" data-image="militares/04-arqueiro.png" data-title="Arqueiro" aria-label="Ampliar Arqueiro" ><img src="militares/04-arqueiro.png" alt="Ficha visual de Arqueiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 04</span><h3>Arqueiro</h3>
+          <div class="card-links"><a href="militares/04-arqueiro.png" download>PNG ↓</a><a href="fichas/mil_04_arqueiro.md">Ficha</a><a href="prompts/mil_04_arqueiro.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Besteiro" data-id="mil_05_besteiro">
+          <button class="preview" type="button" data-image="militares/05-besteiro.png" data-title="Besteiro" aria-label="Ampliar Besteiro" ><img src="militares/05-besteiro.png" alt="Ficha visual de Besteiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 05</span><h3>Besteiro</h3>
+          <div class="card-links"><a href="militares/05-besteiro.png" download>PNG ↓</a><a href="fichas/mil_05_besteiro.md">Ficha</a><a href="prompts/mil_05_besteiro.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Cavaleiro" data-id="mil_06_cavaleiro">
+          <button class="preview" type="button" data-image="militares/06-cavaleiro.png" data-title="Cavaleiro" aria-label="Ampliar Cavaleiro" ><img src="militares/06-cavaleiro.png" alt="Ficha visual de Cavaleiro" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 06</span><h3>Cavaleiro</h3>
+          <div class="card-links"><a href="militares/06-cavaleiro.png" download>PNG ↓</a><a href="fichas/mil_06_cavaleiro.md">Ficha</a><a href="prompts/mil_06_cavaleiro.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Batedor" data-id="mil_07_batedor">
+          <button class="preview" type="button" data-image="militares/07-batedor.png" data-title="Batedor" aria-label="Ampliar Batedor" ><img src="militares/07-batedor.png" alt="Ficha visual de Batedor" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 07</span><h3>Batedor</h3>
+          <div class="card-links"><a href="militares/07-batedor.png" download>PNG ↓</a><a href="fichas/mil_07_batedor.md">Ficha</a><a href="prompts/mil_07_batedor.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Engenheiro militar" data-id="mil_08_engenheiro_militar">
+          <button class="preview" type="button" data-image="militares/08-engenheiro_militar.png" data-title="Engenheiro militar" aria-label="Ampliar Engenheiro militar" ><img src="militares/08-engenheiro_militar.png" alt="Ficha visual de Engenheiro militar" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 08</span><h3>Engenheiro militar</h3>
+          <div class="card-links"><a href="militares/08-engenheiro_militar.png" download>PNG ↓</a><a href="fichas/mil_08_engenheiro_militar.md">Ficha</a><a href="prompts/mil_08_engenheiro_militar.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Socorrista" data-id="mil_09_socorrista">
+          <button class="preview" type="button" data-image="militares/09-socorrista.png" data-title="Socorrista" aria-label="Ampliar Socorrista" ><img src="militares/09-socorrista.png" alt="Ficha visual de Socorrista" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 09</span><h3>Socorrista</h3>
+          <div class="card-links"><a href="militares/09-socorrista.png" download>PNG ↓</a><a href="fichas/mil_09_socorrista.md">Ficha</a><a href="prompts/mil_09_socorrista.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Intendente" data-id="mil_10_intendente">
+          <button class="preview" type="button" data-image="militares/10-intendente.png" data-title="Intendente" aria-label="Ampliar Intendente" ><img src="militares/10-intendente.png" alt="Ficha visual de Intendente" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 10</span><h3>Intendente</h3>
+          <div class="card-links"><a href="militares/10-intendente.png" download>PNG ↓</a><a href="fichas/mil_10_intendente.md">Ficha</a><a href="prompts/mil_10_intendente.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Capitão" data-id="mil_11_capitao">
+          <button class="preview" type="button" data-image="militares/11-capitao.png" data-title="Capitão" aria-label="Ampliar Capitão" ><img src="militares/11-capitao.png" alt="Ficha visual de Capitão" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 11</span><h3>Capitão</h3>
+          <div class="card-links"><a href="militares/11-capitao.png" download>PNG ↓</a><a href="fichas/mil_11_capitao.md">Ficha</a><a href="prompts/mil_11_capitao.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="militares" data-name="Oficial" data-id="mil_12_oficial">
+          <button class="preview" type="button" data-image="militares/12-oficial.png" data-title="Oficial" aria-label="Ampliar Oficial" ><img src="militares/12-oficial.png" alt="Ficha visual de Oficial" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Exército · 12</span><h3>Oficial</h3>
+          <div class="card-links"><a href="militares/12-oficial.png" download>PNG ↓</a><a href="fichas/mil_12_oficial.md">Ficha</a><a href="prompts/mil_12_oficial.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="kits" data-name="Terreno e vegetação" data-id="kit_01_terreno_e_vegetacao">
+          <button class="preview" type="button" data-image="kits/01-terreno_e_vegetacao.png" data-title="Terreno e vegetação" aria-label="Ampliar Terreno e vegetação" ><img src="kits/01-terreno_e_vegetacao.png" alt="Ficha visual de Terreno e vegetação" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Mundo e objetos · 01</span><h3>Terreno e vegetação</h3>
+          <div class="card-links"><a href="kits/01-terreno_e_vegetacao.png" download>PNG ↓</a><a href="fichas/kit_01_terreno_e_vegetacao.md">Ficha</a><a href="prompts/kit_01_terreno_e_vegetacao.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="kits" data-name="Caminhos e fortificações" data-id="kit_02_caminhos_e_fortificacoes">
+          <button class="preview" type="button" data-image="kits/02-caminhos_e_fortificacoes.png" data-title="Caminhos e fortificações" aria-label="Ampliar Caminhos e fortificações" ><img src="kits/02-caminhos_e_fortificacoes.png" alt="Ficha visual de Caminhos e fortificações" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Mundo e objetos · 02</span><h3>Caminhos e fortificações</h3>
+          <div class="card-links"><a href="kits/02-caminhos_e_fortificacoes.png" download>PNG ↓</a><a href="fichas/kit_02_caminhos_e_fortificacoes.md">Ficha</a><a href="prompts/kit_02_caminhos_e_fortificacoes.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="kits" data-name="Lavouras e vinhedos" data-id="kit_03_lavouras_e_vinhedos">
+          <button class="preview" type="button" data-image="kits/03-lavouras_e_vinhedos.png" data-title="Lavouras e vinhedos" aria-label="Ampliar Lavouras e vinhedos" ><img src="kits/03-lavouras_e_vinhedos.png" alt="Ficha visual de Lavouras e vinhedos" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Mundo e objetos · 03</span><h3>Lavouras e vinhedos</h3>
+          <div class="card-links"><a href="kits/03-lavouras_e_vinhedos.png" download>PNG ↓</a><a href="fichas/kit_03_lavouras_e_vinhedos.md">Ficha</a><a href="prompts/kit_03_lavouras_e_vinhedos.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="kits" data-name="Animais e veículos" data-id="kit_04_animais_e_veiculos">
+          <button class="preview" type="button" data-image="kits/04-animais_e_veiculos.png" data-title="Animais e veículos" aria-label="Ampliar Animais e veículos" ><img src="kits/04-animais_e_veiculos.png" alt="Ficha visual de Animais e veículos" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Mundo e objetos · 04</span><h3>Animais e veículos</h3>
+          <div class="card-links"><a href="kits/04-animais_e_veiculos.png" download>PNG ↓</a><a href="fichas/kit_04_animais_e_veiculos.md">Ficha</a><a href="prompts/kit_04_animais_e_veiculos.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="kits" data-name="Recursos e cargas" data-id="kit_05_recursos_e_cargas">
+          <button class="preview" type="button" data-image="kits/05-recursos_e_cargas.png" data-title="Recursos e cargas" aria-label="Ampliar Recursos e cargas" ><img src="kits/05-recursos_e_cargas.png" alt="Ficha visual de Recursos e cargas" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Mundo e objetos · 05</span><h3>Recursos e cargas</h3>
+          <div class="card-links"><a href="kits/05-recursos_e_cargas.png" download>PNG ↓</a><a href="fichas/kit_05_recursos_e_cargas.md">Ficha</a><a href="prompts/kit_05_recursos_e_cargas.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="kits" data-name="Ferramentas e armas" data-id="kit_06_ferramentas_e_armas">
+          <button class="preview" type="button" data-image="kits/06-ferramentas_e_armas.png" data-title="Ferramentas e armas" aria-label="Ampliar Ferramentas e armas" ><img src="kits/06-ferramentas_e_armas.png" alt="Ficha visual de Ferramentas e armas" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Mundo e objetos · 06</span><h3>Ferramentas e armas</h3>
+          <div class="card-links"><a href="kits/06-ferramentas_e_armas.png" download>PNG ↓</a><a href="fichas/kit_06_ferramentas_e_armas.md">Ficha</a><a href="prompts/kit_06_ferramentas_e_armas.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="kits" data-name="Cerco e acampamento" data-id="kit_07_cerco_e_acampamento">
+          <button class="preview" type="button" data-image="kits/07-cerco_e_acampamento.png" data-title="Cerco e acampamento" aria-label="Ampliar Cerco e acampamento" ><img src="kits/07-cerco_e_acampamento.png" alt="Ficha visual de Cerco e acampamento" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Mundo e objetos · 07</span><h3>Cerco e acampamento</h3>
+          <div class="card-links"><a href="kits/07-cerco_e_acampamento.png" download>PNG ↓</a><a href="fichas/kit_07_cerco_e_acampamento.md">Ficha</a><a href="prompts/kit_07_cerco_e_acampamento.txt">Prompt</a></div></div>
+        </article>
+<article class="card" data-category="kits" data-name="Estados de construção e efeitos" data-id="kit_08_estados_de_construcao_e_efeitos">
+          <button class="preview" type="button" data-image="kits/08-estados_de_construcao_e_efeitos.png" data-title="Estados de construção e efeitos" aria-label="Ampliar Estados de construção e efeitos" ><img src="kits/08-estados_de_construcao_e_efeitos.png" alt="Ficha visual de Estados de construção e efeitos" loading="lazy" decoding="async" width="1536" height="1024"><span class="expand" aria-hidden="true">↗</span></button>
+          <div class="card-copy"><span class="eyebrow">Mundo e objetos · 08</span><h3>Estados de construção e efeitos</h3>
+          <div class="card-links"><a href="kits/08-estados_de_construcao_e_efeitos.png" download>PNG ↓</a><a href="fichas/kit_08_estados_de_construcao_e_efeitos.md">Ficha</a><a href="prompts/kit_08_estados_de_construcao_e_efeitos.txt">Prompt</a></div></div>
+        </article></section><p class="empty" id="empty" hidden>Nenhuma prancha encontrada. Tente outro nome.</p></main><footer><span>Catálogo conceitual · Geração de imagens integrada<br>Fontes, prompts e observações preservados por peça.</span><nav><a href="README.md">Guia do catálogo</a><a href="documentos/regras-do-jogo.md">Regras do jogo</a><a href="documentos/plano-visual.md">Plano visual</a><a href="manifest.json">Inventário</a></nav></footer><dialog id="viewer" aria-labelledby="viewer-title"><div class="modal-bar"><h2 id="viewer-title"></h2><div class="modal-controls"><a id="download" href="#" download>Baixar PNG ↓</a><button id="prev" type="button" aria-label="Prancha anterior">←</button><button id="next" type="button" aria-label="Próxima prancha">→</button><button id="close" type="button" aria-label="Fechar ampliação">×</button></div></div><img id="viewer-image" class="modal-image" alt=""></dialog><script>
+    const cards=[...document.querySelectorAll('.card')],filters=[...document.querySelectorAll('.filter')],search=document.querySelector('#search'),viewer=document.querySelector('#viewer'),large=document.querySelector('#viewer-image');let category='all',current=null;const normalize=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();function apply(){const q=normalize(search.value.trim());let count=0;cards.forEach(card=>{const show=(category==='all'||card.dataset.category===category)&&normalize(card.dataset.name+' '+card.dataset.id).includes(q);card.hidden=!show;if(show)count++});document.querySelector('#results').textContent=count+(count===1?' prancha':' pranchas');document.querySelector('#empty').hidden=count>0}filters.forEach(button=>button.addEventListener('click',()=>{category=button.dataset.filter;filters.forEach(b=>{const selected=b===button;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected))});apply()}));search.addEventListener('input',apply);function show(button){current=button;large.src=button.dataset.image;large.alt='Prancha de '+button.dataset.title;document.querySelector('#viewer-title').textContent=button.dataset.title;document.querySelector('#download').href=button.dataset.image;if(!viewer.open)viewer.showModal()}document.querySelectorAll('.preview:not([disabled])').forEach(button=>button.addEventListener('click',()=>show(button)));function move(direction){const visible=cards.filter(c=>!c.hidden).map(c=>c.querySelector('.preview')).filter(b=>!b.disabled);if(!visible.length)return;const i=visible.indexOf(current);show(visible[(i+direction+visible.length)%visible.length])}document.querySelector('#prev').addEventListener('click',()=>move(-1));document.querySelector('#next').addEventListener('click',()=>move(1));document.querySelector('#close').addEventListener('click',()=>viewer.close());viewer.addEventListener('click',e=>{if(e.target===viewer)viewer.close()});viewer.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'){e.preventDefault();move(1)}});viewer.addEventListener('close',()=>{if(current)current.focus()});apply();
+    </script></body></html>
