@@ -6,7 +6,7 @@ Jogo aberto de construção de uma vila medieval. Você planeja estradas e
 construções e forma profissionais; os moradores trabalham de forma autônoma.
 
 [Jogar no navegador](https://vale-dos-vinhedos.lucas579686.chatgpt.site/) ·
-[English](README.md) · [Como contribuir](CONTRIBUTING.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [Como contribuir](CONTRIBUTING.md)
 
 ## Abrir no seu computador
 

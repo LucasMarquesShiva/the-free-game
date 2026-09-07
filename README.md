@@ -6,7 +6,7 @@ An open medieval village-building game. Plan roads and buildings, train workers,
 and watch the village work autonomously. Built with Godot 4.7.2 and GDScript.
 
 [Play in your browser](https://vale-dos-vinhedos.lucas579686.chatgpt.site/) ·
-[Português](README.pt-BR.md) · [Contribute](CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md)
+[Português](README.pt-BR.md) · [简体中文](README.zh-CN.md) · [Contribute](CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md)
 
 ![The main building](game/assets/approved/previews/hall.png)
 

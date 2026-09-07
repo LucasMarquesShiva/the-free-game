@@ -31,6 +31,7 @@ var event_signature := ""
 var road_path: Array[Vector2i] = []
 
 func _ready() -> void:
+	Locale.setup()
 	_configure_display()
 	get_window().size_changed.connect(_configure_display)
 	sim = Village.new()
@@ -51,6 +52,7 @@ func _ready() -> void:
 	hud.speed_selected.connect(func(value): speed = value)
 	hud.focus_requested.connect(_focus_map)
 	hud.entrance_highlighted.connect(_highlight_entrance)
+	hud.language_changed.connect(_refresh_placement_banner)
 	_setup_audio()
 	print("PLAYABLE_READY: The Free Game — 0.4.4")
 
@@ -87,9 +89,10 @@ func _process(delta: float) -> void:
 		var latest: String = str(sim.events.back().tick)+str(sim.events.back().text)
 		if latest != event_signature:
 			event_signature = latest
-			var message: String = sim.events.back().text
+			var event: Dictionary = sim.events.back()
+			var message: String = str(event.text)
 			hud.show_message(message)
-			if message.contains("concluída") or message.contains("formado") or message.contains("protegido"):
+			if str(event.get("tone","")) == "chime":
 				_chime()
 
 func _select_build(kind: String) -> void:
@@ -104,14 +107,14 @@ func _select_build(kind: String) -> void:
 	hud.set_road_tool(kind)
 	if kind == "road":
 		hud.close_panels()
-		hud.set_mode("Estradas · arraste para traçar · 1 pedra por trecho · Esc termina")
+		_refresh_placement_banner()
 		world.set_road_preview(road_path)
 	elif kind == "remove_road":
 		hud.close_panels()
-		hud.set_mode("Estradas · toque em um trecho para apagar · Esc termina")
+		_refresh_placement_banner()
 	elif not kind.is_empty():
 		hud.close_panels()
-		hud.set_mode("Construir "+sim.definition(kind).name+": toque no terreno. Esc cancela.")
+		_refresh_placement_banner()
 	else:
 		hud.set_mode("")
 
@@ -163,11 +166,11 @@ func _cancel_stroke() -> void:
 	road_path.clear()
 	if build_kind == "road":
 		world.set_road_preview(road_path)
-		hud.set_mode("Estradas · arraste ou clique · 1 pedra por trecho · Esc termina")
+		hud.set_mode(tr("Estradas · arraste ou clique · 1 pedra por trecho · Esc termina"))
 	elif build_kind == "remove_road":
 		hover_cell = Vector2i(-1,-1)
 		world.set_road_removal_preview(hover_cell)
-		hud.set_mode("Estradas · toque em um trecho para apagar · Esc termina")
+		hud.set_mode(tr("Estradas · toque em um trecho para apagar · Esc termina"))
 
 func _focus_map(cell: Vector2i) -> void:
 	_cancel_stroke()
@@ -203,7 +206,7 @@ func _input(event: InputEvent) -> void:
 				world.orbit(-PI/6 if event.keycode == KEY_Q else PI/6)
 			KEY_M:
 				mute = not mute
-				hud.show_message("Sons desativados" if mute else "Sons ativados")
+				hud.show_message(tr("Sons desativados") if mute else tr("Sons ativados"))
 			KEY_LEFT, KEY_A, KEY_RIGHT, KEY_D, KEY_UP, KEY_W, KEY_DOWN, KEY_S:
 				_cancel_stroke()
 				if event.keycode in [KEY_LEFT,KEY_A]: world.pan_by(Vector2(65,0))
@@ -316,7 +319,7 @@ func _write_save(path: String) -> bool:
 	return DirAccess.rename_absolute(temporary,path) == OK
 
 func _save() -> void:
-	hud.show_message("Partida salva neste dispositivo." if _write_save(SAVE_PATH) else "Não foi possível salvar. Verifique espaço e permissões locais.")
+	hud.show_message(tr("Partida salva neste dispositivo.") if _write_save(SAVE_PATH) else tr("Não foi possível salvar. Verifique espaço e permissões locais."))
 
 func _load_save() -> void:
 	_load_paths([SAVE_PATH,SAVE_PATH+".bak","user://vale-approved-autosave-v1.json"])
@@ -341,9 +344,9 @@ func _load_paths(paths: Array) -> bool:
 			speed = int(saved_speed) if typeof(saved_speed) in [TYPE_INT,TYPE_FLOAT] and saved_speed in [1,2,4] else 1
 			_clear_world()
 			hud._dismiss_tutorial()
-			hud.show_message("Partida recuperada. Nada avançou enquanto esteve fechada.")
+			hud.show_message(tr("Partida recuperada. Nada avançou enquanto esteve fechada."))
 			return true
-	hud.show_message("Não há uma partida salva válida neste dispositivo.")
+	hud.show_message(tr("Não há uma partida salva válida neste dispositivo."))
 	return false
 
 func _clear_world() -> void:
@@ -366,7 +369,7 @@ func _restart() -> void:
 	clock = Clock.new(100000)
 	speed = 1
 	_clear_world()
-	hud.show_message("Nova partida iniciada. Seu salvamento manual anterior foi preservado.")
+	hud.show_message(tr("Nova partida iniciada. Seu salvamento manual anterior foi preservado."))
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_PAUSED:
@@ -413,4 +416,20 @@ func _extend_road(cell:Vector2i) -> void:
 	var cost:=0
 	for tile in road_path:
 		if sim.road_at(tile).is_empty() and sim.can_place_road(tile).is_empty():cost+=1
-	hud.set_mode("Estradas · %d trechos · %d pedra · solte para construir · Esc termina" % [road_path.size(),cost])
+	hud.set_mode(tr("Estradas · {tiles} trechos · {stone} pedra · solte para construir · Esc termina").format({"tiles":road_path.size(),"stone":cost}))
+
+func _refresh_placement_banner() -> void:
+	if build_kind == "road":
+		if road_path.is_empty():
+			hud.set_mode(tr("Estradas · arraste para traçar · 1 pedra por trecho · Esc termina"))
+		else:
+			var cost:=0
+			for tile in road_path:
+				if sim.road_at(tile).is_empty() and sim.can_place_road(tile).is_empty():cost+=1
+			hud.set_mode(tr("Estradas · {tiles} trechos · {stone} pedra · solte para construir · Esc termina").format({"tiles":road_path.size(),"stone":cost}))
+	elif build_kind == "remove_road":
+		hud.set_mode(tr("Estradas · toque em um trecho para apagar · Esc termina"))
+	elif not build_kind.is_empty():
+		hud.set_mode(tr("Construir {name}: toque no terreno. Esc cancela.").format({"name":sim.definition(build_kind).name}))
+	else:
+		hud.set_mode("")

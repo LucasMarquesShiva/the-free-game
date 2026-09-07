@@ -74,7 +74,7 @@ func setup(peaceful_mode: bool = false) -> void:
 	if not peaceful:
 		battle = Battle.new()
 		battle.setup(_military_walkable,find_path)
-	_emit("Bem-vindo ao Vale dos Vinhedos. Construa duas casas e uma horta para começar.")
+	_emit(tr("Bem-vindo ao Vale dos Vinhedos. Construa duas casas e uma horta para começar."))
 
 func _empty_items() -> Dictionary:
 	return {"wood":0,"stone":0,"food":0,"grapes":0,"wine":0}
@@ -90,12 +90,20 @@ func _add_building(kind: String, cell: Vector2i, complete: bool = false) -> Dict
 	return b
 
 func _add_worker(role: String, cell: Vector2i) -> Dictionary:
-	var w := {"id":_id(),"role":role,"cell":cell,"previous":cell,"route":[],"state":"Disponível","task":{},"cargo":{},"work":0.0,"wait":0,"goal":cell,"meal":0,"yield_until":0,"jobs":0}
+	var w := {"id":_id(),"role":role,"cell":cell,"previous":cell,"route":[],"state":tr("Disponível"),"task":{},"cargo":{},"work":0.0,"wait":0,"goal":cell,"meal":0,"yield_until":0,"jobs":0}
 	workers.append(w)
 	return w
 
 func definition(kind: String) -> Dictionary:
-	return definitions.get(kind,{})
+	var spec: Dictionary = definitions.get(kind,{})
+	if spec.is_empty():
+		return spec
+	var result := spec.duplicate(true)
+	if typeof(spec.get("name","")) == TYPE_STRING and not str(spec.name).is_empty():
+		result.name = tr(spec.name)
+	if typeof(spec.get("description","")) == TYPE_STRING and not str(spec.description).is_empty():
+		result.description = tr(spec.description)
+	return result
 
 func _terrain_walkable(cell: Vector2i) -> bool:
 	if cell.x < 1 or cell.y < 1 or cell.x >= WIDTH-1 or cell.y >= HEIGHT-1:
@@ -156,24 +164,24 @@ func _can_reach(start: Vector2i, goal: Vector2i) -> bool:
 
 func can_place(kind: String, cell: Vector2i) -> String:
 	if peaceful and kind == "barracks":
-		return "O modo pacífico possui apenas construções da vila."
+		return tr("O modo pacífico possui apenas construções da vila.")
 	if not definitions.has(kind) or kind == "hall":
-		return "Construção desconhecida."
+		return tr("Construção desconhecida.")
 	if cell.x < 2 or cell.x > 19 or cell.y < 2 or cell.y > 23:
-		return "Construa na margem da vila, deixando espaço para a entrada."
+		return tr("Construa na margem da vila, deixando espaço para a entrada.")
 	var area := Rect2i(cell,Vector2i(2,2))
 	for b in buildings:
 		if b.stage == "cancelled":
 			continue
 		if area.intersects(Rect2i(b.cell,Vector2i(2,2))) or area.has_point(b.entrance) or area.has_point(b.cell+Vector2i(-1,1)):
-			return "Espaço ocupado ou entrada de outra construção."
+			return tr("Espaço ocupado ou entrada de outra construção.")
 	for w in workers:
 		if area.has_point(w.cell):
-			return "Há um morador passando. Aguarde um instante."
+			return tr("Há um morador passando. Aguarde um instante.")
 	if battle != null:
 		for u in battle.units:
 			if u.hp > 0 and area.has_point(u.cell):
-				return "Há soldados neste terreno."
+				return tr("Há soldados neste terreno.")
 	var cells: Array[Vector2i] = []
 	for y in range(2):
 		for x in range(2):
@@ -190,19 +198,19 @@ func can_place(kind: String, cell: Vector2i) -> String:
 			valid = false
 	for c in cells:
 		navigation.set_point_solid(c,false)
-	return "" if valid else "Esta obra bloquearia o acesso da vila."
+	return "" if valid else tr("Esta obra bloquearia o acesso da vila.")
 
 func command(kind: String, payload: Dictionary = {}) -> Dictionary:
 	match kind:
 		"build":
 			if typeof(payload.get("cell")) != TYPE_VECTOR2I:
-				return _result(false,"Escolha um terreno válido.")
+				return _result(false,tr("Escolha um terreno válido."))
 			var error := can_place(str(payload.get("kind","")),payload.cell)
 			if not error.is_empty():
 				return _result(false,error)
 			var b := _add_building(payload.kind,payload.cell)
 			_rebuild_navigation()
-			_emit(definition(b.kind).name+": obra marcada. A equipe vai trabalhar automaticamente.")
+			_emit(tr("{name}: obra marcada. A equipe vai trabalhar automaticamente.").format({"name":definition(b.kind).name}))
 			var idle_builders := 0
 			var builders_count := 0
 			for person in workers:
@@ -210,20 +218,20 @@ func command(kind: String, payload: Dictionary = {}) -> Dictionary:
 					builders_count += 1
 					if person.task.is_empty(): idle_builders += 1
 			if builders_count == 0:
-				return _result(true,"Obra na fila: nenhum construtor formado. Use o centro de treinamento.")
+				return _result(true,tr("Obra na fila: nenhum construtor formado. Use o centro de treinamento."))
 			if idle_builders == 0:
-				return _result(true,"Construtores ocupados. A obra começará sozinha quando houver alguém livre.")
-			return _result(true,"Obra marcada. Construtores e serventes vão até ela.")
+				return _result(true,tr("Construtores ocupados. A obra começará sozinha quando houver alguém livre."))
+			return _result(true,tr("Obra marcada. Construtores e serventes vão até ela."))
 		"cancel":
 			return _cancel_building(int(payload.get("id",-1)))
 		"train":
 			var role := str(payload.get("role",""))
 			if not ROLES.has(role) or role == "resident":
-				return _result(false,"Profissão inválida.")
+				return _result(false,tr("Profissão inválida."))
 			var quantity := clampi(int(payload.get("quantity",1)),1,5)
 			for i in range(quantity):
-				training.append({"id":_id(),"role":role,"worker":-1,"building":-1,"progress":0.0,"reason":"Aguardando vaga"})
-			return _result(true,"Formação na fila. O centro seleciona moradores automaticamente.")
+				training.append({"id":_id(),"role":role,"worker":-1,"building":-1,"progress":0.0,"reason":tr("Aguardando vaga")})
+			return _result(true,tr("Formação na fila. O centro seleciona moradores automaticamente."))
 		"cancel_training":
 			for t in training:
 				if t.id == int(payload.get("id",-1)):
@@ -231,40 +239,43 @@ func command(kind: String, payload: Dictionary = {}) -> Dictionary:
 					if not w.is_empty():
 						_release(w)
 					training.erase(t)
-					return _result(true,"Formação cancelada. O morador está disponível.")
-			return _result(false,"Formação não encontrada.")
+					return _result(true,tr("Formação cancelada. O morador está disponível."))
+			return _result(false,tr("Formação não encontrada."))
 		"army":
 			if peaceful:
-				return _result(false,"Esta partida é pacífica, sem exército.")
+				return _result(false,tr("Esta partida é pacífica, sem exército."))
 			if typeof(payload.get("target")) != TYPE_VECTOR2I:
-				return _result(false,"Indique um objetivo no terreno.")
+				return _result(false,tr("Indique um objetivo no terreno."))
 			return battle.issue_order(str(payload.get("order","")),payload.target)
 		"recruit":
 			return _recruit(str(payload.get("role","")))
 		"pause":
 			paused = not paused
-			return _result(true,"Pausado" if paused else "Partida retomada")
+			return _result(true,tr("Pausado") if paused else tr("Partida retomada"))
 		"new_game":
 			setup(peaceful)
-			return _result(true,"Uma nova vila está pronta.")
-	return _result(false,"Comando não permitido. Civis trabalham de forma autônoma.")
+			return _result(true,tr("Uma nova vila está pronta."))
+	return _result(false,tr("Comando não permitido. Civis trabalham de forma autônoma."))
 
 func _result(ok: bool, message: String) -> Dictionary:
 	return {"ok":ok,"message":message}
 
-func _emit(text: String) -> void:
-	events.append({"tick":tick,"text":text})
+func _emit(text: String, tone: String = "") -> void:
+	var event := {"tick":tick,"text":text}
+	if not tone.is_empty():
+		event.tone = tone
+	events.append(event)
 	if events.size() > 80:
 		events.pop_front()
 
 func _cancel_building(id: int) -> Dictionary:
 	var b := _building(id)
 	if b.is_empty() or b.stage == "cancelled":
-		return _result(false,"Obra não encontrada.")
+		return _result(false,tr("Obra não encontrada."))
 	if b.initial or b.stage == "complete":
-		return _result(false,"Edifícios concluídos são preservados nesta missão.")
+		return _result(false,tr("Edifícios concluídos são preservados nesta missão."))
 	b.stage = "cancelled"
-	b.reason = "Sobras aguardando recolhimento"
+	b.reason = tr("Sobras aguardando recolhimento")
 	for item in ITEMS:
 		b.output[item] += b.delivered[item]
 		b.delivered[item] = 0
@@ -272,30 +283,30 @@ func _cancel_building(id: int) -> Dictionary:
 		if int(w.task.get("building",-1)) == id:
 			_release(w)
 	_rebuild_navigation()
-	return _result(true,"Obra cancelada. Os serventes recolherão os materiais restantes.")
+	return _result(true,tr("Obra cancelada. Os serventes recolherão os materiais restantes."))
 
 func _recruit(role: String) -> Dictionary:
 	if peaceful:
-		return _result(false,"Esta partida é pacífica, sem recrutamento militar.")
+		return _result(false,tr("Esta partida é pacífica, sem recrutamento militar."))
 	if role not in ["lancer","archer"]:
-		return _result(false,"Tipo de tropa inválido.")
+		return _result(false,tr("Tipo de tropa inválido."))
 	if _completed("barracks") == 0:
-		return _result(false,"Construa um quartel para recrutar reforços.")
+		return _result(false,tr("Construa um quartel para recrutar reforços."))
 	var resident: Dictionary = {}
 	for w in workers:
 		if w.role == "resident" and w.task.is_empty():
 			resident = w
 			break
 	if resident.is_empty():
-		return _result(false,"Sem moradores livres. Construa casas e mantenha alimentos.")
+		return _result(false,tr("Sem moradores livres. Construa casas e mantenha alimentos."))
 	if available("food") < 6 or available("wood") < 4:
-		return _result(false,"Cada soldado precisa de 6 alimentos e 4 madeiras para equipamento.")
+		return _result(false,tr("Cada soldado precisa de 6 alimentos e 4 madeiras para equipamento."))
 	if not battle.recruit(role):
-		return _result(false,"Companhia cheia ou ponto de reunião ocupado.")
+		return _result(false,tr("Companhia cheia ou ponto de reunião ocupado."))
 	_consume_stock("food",6)
 	_consume_stock("wood",4)
 	workers.erase(resident)
-	return _result(true,"Reforço equipado e incorporado à companhia.")
+	return _result(true,tr("Reforço equipado e incorporado à companhia."))
 
 func _completed(kind: String) -> int:
 	var total := 0
@@ -363,16 +374,16 @@ func step() -> void:
 		var free := _free_cell(Vector2i(5,14))
 		if free.x >= 0:
 			_add_worker("resident",free)
-			_emit("Um novo morador chegou. Ele está disponível para formação.")
+			_emit(tr("Um novo morador chegou. Ele está disponível para formação."))
 	if battle != null:
 		battle.step()
 	var military_objective_done: bool = peaceful or (battle != null and battle.captured)
 	if not won and int(stats.houses_built) >= 2 and _completed("farm") > 0 and int(stats.food_produced) > 0 and int(stats.wine_delivered) >= 12 and military_objective_done:
 		won = true
 		if peaceful:
-			_emit("Sua vila prospera! Casas, alimentos e vinho estão prontos. Você pode continuar construindo.")
+			_emit(tr("Sua vila prospera! Casas, alimentos e vinho estão prontos. Você pode continuar construindo."))
 		else:
-			_emit("Vale protegido! Sua vila prospera e o acampamento foi conquistado. Você pode continuar construindo.")
+			_emit(tr("Vale protegido! Sua vila prospera e o acampamento foi conquistado. Você pode continuar construindo."),"chime")
 
 func _free_cell(origin: Vector2i) -> Vector2i:
 	for radius in range(1,9):
@@ -491,7 +502,7 @@ func _release(w: Dictionary) -> void:
 	w.route = []
 	w.goal = w.cell
 	w.work = 0.0
-	w.state = "Disponível"
+	w.state = tr("Disponível")
 
 func _assign_builder(w: Dictionary) -> void:
 	for b in buildings:
@@ -504,7 +515,7 @@ func _assign_builder(w: Dictionary) -> void:
 			continue
 		b.builder = w.id
 		w.task = {"type":"prepare" if b.stage == "preparing" else "build","building":b.id}
-		w.state = "Indo à obra"
+		w.state = tr("Indo à obra")
 		return
 
 func _materials_ready(b: Dictionary) -> bool:
@@ -581,17 +592,17 @@ func _transport(w: Dictionary, source: int, dest: int, item: String, amount: int
 	w.task = {"type":"delivery","phase":"pickup","source":source,"building":dest,"source_cell":source_b.entrance,"dest_cell":dest_b.entrance,"item":item,"amount":amount}
 	if source == 0:
 		reserved[item] += amount
-	w.state = "Buscando "+ITEM_NAMES[item]
+	w.state = tr("Buscando {item}").format({"item":tr(ITEM_NAMES[item])})
 	return true
 
 func _assign_return(w: Dictionary) -> void:
 	var store := _store_for(w.cell)
 	if store.is_empty():
-		w.state = "Carga preservada: sem acesso ao armazém"
+		w.state = tr("Carga preservada: sem acesso ao armazém")
 		return
 	if _go(w,store.entrance):
 		w.task = {"type":"delivery","phase":"deliver","source":-1,"building":0,"dest_cell":store.entrance,"item":w.cargo.item,"amount":w.cargo.amount}
-		w.state = "Devolvendo materiais"
+		w.state = tr("Devolvendo materiais")
 
 func _assign_workplaces() -> void:
 	for b in buildings:
@@ -610,7 +621,7 @@ func _assign_workplaces() -> void:
 					continue
 			b.worker = w.id
 			w.task = {"type":"produce","building":b.id}
-			w.state = "Indo trabalhar"
+			w.state = tr("Indo trabalhar")
 			break
 
 func _work(w: Dictionary) -> void:
@@ -623,7 +634,7 @@ func _work(w: Dictionary) -> void:
 			if b.is_empty() or b.stage == "cancelled":
 				_release(w)
 				return
-			w.state = "Preparando terreno"
+			w.state = tr("Preparando terreno")
 			b.progress = minf(1.0,float(b.progress)+0.1/3.0)
 			if b.progress >= 1.0:
 				b.stage = "materials"
@@ -642,20 +653,20 @@ func _work(w: Dictionary) -> void:
 					b.delivered[item] -= quantity
 					consumed[item] += quantity
 				b.stage = "building"
-			w.state = "Construindo"
+			w.state = tr("Construindo")
 			b.progress = minf(1.0,float(b.progress)+0.1/float(definition(b.kind).duration))
 			if b.progress >= 1.0:
 				b.stage = "complete"
 				if b.kind == "house":
 					stats.houses_built += 1
-				_emit(definition(b.kind).name+" concluída. Funcionamento automático ativado.")
+				_emit(tr("{name} concluída. Funcionamento automático ativado.").format({"name":definition(b.kind).name}),"chime")
 				_release(w)
 		"delivery":
 			_delivery_work(w)
 		"produce":
 			_produce(w,b)
 		"train":
-			w.state = "Em formação"
+			w.state = tr("Em formação")
 
 func _delivery_work(w: Dictionary) -> void:
 	var task: Dictionary = w.task
@@ -676,13 +687,13 @@ func _delivery_work(w: Dictionary) -> void:
 			source.output[item] -= amount
 		w.cargo = {"item":item,"amount":amount}
 		task.phase = "deliver"
-		w.state = "Transportando "+ITEM_NAMES[item]
+		w.state = tr("Transportando {item}").format({"item":tr(ITEM_NAMES[item])})
 		if not _go(w,task.dest_cell):
 			_release(w)
 		return
 	if task.building == 0:
 		if _storage_used()+amount > storage_capacity():
-			w.state = "Armazém cheio: construa outro"
+			w.state = tr("Armazém cheio: construa outro")
 			return
 		stock[item] += amount
 		if item == "wine" and task.source > 0:
@@ -705,19 +716,19 @@ func _produce(w: Dictionary, b: Dictionary) -> void:
 		_release(w)
 		return
 	if b.kind == "training":
-		w.state = "Ensinando no centro"
+		w.state = tr("Ensinando no centro")
 		return
 	var recipes := {"lumber":["wood",4,8.0],"quarry":["stone",3,10.0],"farm":["food",8,10.0],"vineyard":["grapes",4,12.0],"winery":["wine",2,10.0]}
 	if not recipes.has(b.kind):
 		return
 	var recipe: Array = recipes[b.kind]
 	if int(b.output[recipe[0]]) >= 20:
-		w.state = "Aguardando retirada da produção"
+		w.state = tr("Aguardando retirada da produção")
 		return
 	if b.kind == "winery" and int(b.input.grapes) < 3:
-		w.state = "Aguardando uvas"
+		w.state = tr("Aguardando uvas")
 		return
-	w.state = "Produzindo "+ITEM_NAMES[recipe[0]]
+	w.state = tr("Produzindo {item}").format({"item":tr(ITEM_NAMES[recipe[0]])})
 	b.production += 0.1/float(recipe[2])
 	if b.production >= 1.0:
 		b.production = 0.0
@@ -748,10 +759,10 @@ func _update_training() -> void:
 					center = b
 					break
 			if center.is_empty():
-				t.reason = "Centro ocupado ou sem instrutor"
+				t.reason = tr("Centro ocupado ou sem instrutor")
 				continue
 			if available("food") < 2:
-				t.reason = "Faltam 2 alimentos para a formação"
+				t.reason = tr("Faltam 2 alimentos para a formação")
 				continue
 			var candidate: Dictionary = {}
 			for w in workers:
@@ -759,12 +770,12 @@ func _update_training() -> void:
 					candidate = w
 					break
 			if candidate.is_empty():
-				t.reason = "Sem moradores livres para formação"
+				t.reason = tr("Sem moradores livres para formação")
 				continue
 			t.worker = candidate.id
 			t.building = center.id
 			candidate.task = {"type":"train","building":center.id,"training":t.id}
-			candidate.state = "Indo estudar"
+			candidate.state = tr("Indo estudar")
 			_consume_stock("food",2)
 		var student := _worker(t.worker)
 		if student.is_empty():
@@ -772,15 +783,15 @@ func _update_training() -> void:
 			t.building = -1
 			continue
 		if not student.route.is_empty() or student.cell != student.goal:
-			t.reason = "Morador indo ao centro"
+			t.reason = tr("Morador indo ao centro")
 			continue
-		t.reason = "Formando "+ROLE_NAMES[t.role].to_lower()
+		t.reason = tr("Formando {role}").format({"role":tr(ROLE_NAMES[t.role]).to_lower()})
 		t.progress = minf(1.0,float(t.progress)+0.1/20.0)
 		if t.progress >= 1.0:
 			student.role = t.role
 			_release(student)
 			completed.append(t)
-			_emit(ROLE_NAMES[t.role]+" formado. Já pode assumir trabalho automaticamente.")
+			_emit(tr("{role} formado. Já pode assumir trabalho automaticamente.").format({"role":tr(ROLE_NAMES[t.role])}),"chime")
 	for t in completed:
 		training.erase(t)
 
@@ -790,46 +801,48 @@ func _update_reasons() -> void:
 		b.reason = ""
 		if b.stage in ["preparing","building"]:
 			if b.builder < 0:
-				b.reason = "Nenhum construtor formado" if counts.builder == 0 else "Construtores ocupados: aguardando vez"
+				b.reason = tr("Nenhum construtor formado") if counts.builder == 0 else tr("Construtores ocupados: aguardando vez")
 			else:
-				b.reason = "Construtor a caminho ou trabalhando"
+				b.reason = tr("Construtor a caminho ou trabalhando")
 		elif b.stage == "materials":
 			if _materials_ready(b):
-				b.reason = "Materiais completos. Aguardando construtor"
+				b.reason = tr("Materiais completos. Aguardando construtor")
 			elif counts.servant == 0:
-				b.reason = "Nenhum servente formado. Use o treinamento"
+				b.reason = tr("Nenhum servente formado. Use o treinamento")
 			else:
-				b.reason = "Serventes ocupados ou materiais a caminho"
+				b.reason = tr("Serventes ocupados ou materiais a caminho")
 				for item in definition(b.kind).cost:
 					var missing: int = int(definition(b.kind).cost[item])-int(b.delivered[item])-_incoming(b.id,item)
 					if missing > available(item):
-						b.reason = "Faltam "+str(missing-available(item))+" "+ITEM_NAMES[item]
+						b.reason = tr("Faltam {count} {item}").format({"count":missing-available(item),"item":tr(ITEM_NAMES[item])})
 		elif b.stage == "complete":
 			var role: String = definition(b.kind).profession
 			if not role.is_empty():
-				b.reason = "Forme um "+ROLE_NAMES[role].to_lower() if b.worker < 0 else _worker(b.worker).get("state","Aguardando profissional")
+				b.reason = tr("Forme um {role}").format({"role":tr(ROLE_NAMES[role]).to_lower()}) if b.worker < 0 else _worker(b.worker).get("state",tr("Aguardando profissional"))
 
 func notice() -> String:
 	if available("food") < 10:
-		return "Alimentos baixos. Construa uma horta e forme agricultores."
+		return tr("Alimentos baixos. Construa uma horta e forme agricultores.")
 	if _storage_used() >= storage_capacity()-4:
-		return "Armazém quase cheio. Construa outro para liberar as entregas."
+		return tr("Armazém quase cheio. Construa outro para liberar as entregas.")
 	for b in buildings:
-		if b.stage not in ["complete","cancelled"] and (b.reason.contains("Nenhum") or b.reason.contains("Construtores ocupados")):
+		if b.stage in ["complete","cancelled"]:
+			continue
+		if b.reason in [tr("Nenhum construtor formado"),tr("Construtores ocupados: aguardando vez"),tr("Nenhum servente formado. Use o treinamento")]:
 			return b.reason
 	for t in training:
-		if str(t.reason).begins_with("Sem"):
+		if t.reason == tr("Sem moradores livres para formação"):
 			return t.reason
-	return "Os habitantes trabalham sozinhos. Toque em um prédio para acompanhar."
+	return tr("Os habitantes trabalham sozinhos. Toque em um prédio para acompanhar.")
 
 func objective_rows() -> Array[Dictionary]:
 	var rows: Array[Dictionary] = [
-		{"text":"Construir 2 casas  (%d/2)" % mini(2,int(stats.houses_built)),"done":int(stats.houses_built)>=2},
-		{"text":"Cultivar alimentos em uma horta","done":_completed("farm")>0 and int(stats.food_produced)>0},
-		{"text":"Entregar 12 vinhos  (%d/12)" % mini(12,int(stats.wine_delivered)),"done":int(stats.wine_delivered)>=12}
+		{"text":tr("Construir 2 casas  ({count}/2)").format({"count":mini(2,int(stats.houses_built))}),"done":int(stats.houses_built)>=2},
+		{"text":tr("Cultivar alimentos em uma horta"),"done":_completed("farm")>0 and int(stats.food_produced)>0},
+		{"text":tr("Entregar 12 vinhos  ({count}/12)").format({"count":mini(12,int(stats.wine_delivered))}),"done":int(stats.wine_delivered)>=12}
 	]
 	if not peaceful:
-		rows.append({"text":"Conquistar o acampamento além do rio","done":battle != null and battle.captured})
+		rows.append({"text":tr("Conquistar o acampamento além do rio"),"done":battle != null and battle.captured})
 	return rows
 
 func conservation_errors() -> Array[String]:
