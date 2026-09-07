@@ -19,6 +19,8 @@ func key(code:Key)->void:
 func click(cell:Vector2i)->void:mouse(true,point(cell));mouse(false,point(cell))
 func run()->void:
 	root.content_scale_mode=Window.CONTENT_SCALE_MODE_DISABLED;root.size=Vector2i(1280,800)
+	# This test asserts Portuguese HUD text; pin the language so the OS locale cannot change it.
+	Locale.set_language("pt_BR",false)
 	game=Game.new();root.add_child(game);game.set_process(false);game.sim.paused=true
 	game.hud._dismiss_tutorial();game.hud._toast.hide();await frames(8)
 	game.hud._tabs.road.pressed.emit()

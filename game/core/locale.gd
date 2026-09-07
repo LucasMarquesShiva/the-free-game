@@ -25,11 +25,15 @@ static func setup() -> void:
 	TranslationServer.set_locale(_resolve())
 
 
-static func set_language(code: String) -> bool:
+## Switches the active language. Pass persist=false to change it for this
+## session only (used by tests that assert Portuguese text).
+static func set_language(code: String, persist: bool = true) -> bool:
 	setup()
 	if not SUPPORTED.has(code):
 		return false
 	TranslationServer.set_locale(code)
+	if not persist:
+		return true
 	var config := ConfigFile.new()
 	config.load(SETTINGS_PATH)
 	config.set_value(SETTINGS_SECTION, SETTINGS_KEY, code)

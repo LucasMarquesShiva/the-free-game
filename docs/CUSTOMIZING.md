@@ -45,9 +45,15 @@ and append the code to `Locale.SUPPORTED` (and its display name). The game
 resolves language from `user://settings.cfg`, then `OS.get_locale_language()`,
 then Portuguese.
 
-Desktop builds use system CJK fonts as fallbacks. The browser export does not
-bundle a CJK font; Chinese on the web depends on the visitor's system fonts. A
-subset font packed with the export is follow-up work.
+The HUD keeps Godot's embedded default font, which already falls back to system
+fonts for missing glyphs, so Chinese renders on desktop without extra font
+files. The browser export has no system fonts and does not bundle a CJK font;
+Chinese on the web depends on the visitor's browser. A subset font packed with
+the export is follow-up work.
+
+Tests that assert Portuguese text and instantiate the full game should call
+`Locale.set_language("pt_BR", false)` first so the OS language cannot change
+the result.
 
 ## Change the project name in your fork
 

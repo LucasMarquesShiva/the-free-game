@@ -223,20 +223,11 @@ func setup(sim: RefCounted) -> void:
 func _make_theme() -> Theme:
 	var theme := Theme.new()
 	# A fonte incorporada à engine é distribuível e idêntica no app e na Web.
-	# Do not mutate ThemeDB.fallback_font; wrap it so CJK system fonts can fill gaps.
-	var cjk := SystemFont.new()
-	cjk.font_names = PackedStringArray(["PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "WenQuanYi Micro Hei", "sans-serif"])
-	var body := FontVariation.new()
-	body.base_font = ThemeDB.fallback_font
-	var body_fallbacks: Array[Font] = [cjk]
-	body.fallbacks = body_fallbacks
-	theme.default_font = body
+	# Ela já usa fontes do sistema como reserva (allow_system_fallback), o que
+	# cobre os glifos CJK da tradução chinesa no desktop sem alterar métricas.
+	theme.default_font = ThemeDB.fallback_font
 	var serif := SystemFont.new()
 	serif.font_names = PackedStringArray(["Georgia", "Times New Roman", "Liberation Serif", "serif"])
-	var serif_cjk := SystemFont.new()
-	serif_cjk.font_names = PackedStringArray(["Songti SC", "SimSun", "Noto Serif CJK SC", "serif"])
-	var serif_fallbacks: Array[Font] = [serif_cjk]
-	serif.fallbacks = serif_fallbacks
 	_serif = serif
 	theme.default_font_size = 17
 	theme.set_color("font_color", "Label", INK)

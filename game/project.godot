@@ -23,6 +23,13 @@ window/size/window_height_override=900
 window/stretch/mode="disabled"
 window/handheld/orientation=0
 
+[internationalization]
+
+; Portuguese source strings are the translation keys (see core/locale.gd), so the
+; fallback must stay pt_BR. Godot's default "en" would show English to Portuguese
+; players whenever the English translation is loaded.
+locale/fallback="pt_BR"
+
 [rendering]
 lights_and_shadows/directional_shadow/size=4096
 textures/default_filters/anisotropic_filtering_level=3
