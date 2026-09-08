@@ -9,6 +9,7 @@ signal restart_requested
 signal speed_selected(multiplier: int)
 signal focus_requested(cell: Vector2i)
 signal entrance_highlighted(cell: Vector2i)
+signal language_changed
 
 const PAPER := Color("f5e4bd")
 const PANEL := Color("0b2429")
@@ -18,12 +19,12 @@ const BRONZE := Color("c59a50")
 const WINE := Color("e1bd71")
 const DANGER := Color("eeaa89")
 const SUCCESS := Color("b8d292")
-const BUILD_ORDER := ["lumber", "quarry", "farm", "house", "vineyard", "winery", "store", "training"]
-const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Horticultor", "vintner":"Vinhateiro"}
-const ROLE_DETAILS := {"builder":"Ergue as obras da vila", "servant":"Leva materiais e produção", "instructor":"Forma novos profissionais", "lumberjack":"Produz madeira", "stonecutter":"Extrai pedra", "farmer":"Cultiva alimentos na horta", "vintner":"Cultiva uvas e produz vinho"}
-const ITEM_NAMES := {"wood":"Madeira", "stone":"Pedra", "food":"Alimentos", "grapes":"Uvas", "wine":"Vinho", "population":"Moradores"}
-const SHORT_NAMES := {"house":"Casa", "farm":"Horta", "vineyard":"Parreiral", "winery":"Vinícola", "store":"Armazém", "lumber":"Lenhador", "quarry":"Pedreira", "training":"Escola de instrutores"}
-const BUILD_HINTS := {"house":"Mais espaço para morar", "farm":"Alimento para crescer", "vineyard":"O começo de cada vinho", "winery":"Uvas viram vinho", "store":"Espaço para os recursos", "lumber":"Madeira para construir", "quarry":"Pedra para a vila", "training":"Novos profissionais"}
+const BUILD_ORDER := ["lumber", "sawmill", "quarry", "farm", "mill", "bakery", "inn", "house", "vineyard", "winery", "store", "workshop", "barracks", "training"]
+const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Horticultor", "vintner":"Vinhateiro", "miller":"Moleiro", "baker":"Padeiro", "recruit":"Recruta"}
+const ROLE_DETAILS := {"builder":"Ergue as obras da vila", "servant":"Leva materiais e produção", "instructor":"Forma novos profissionais", "lumberjack":"Corta árvores e serra troncos", "stonecutter":"Extrai pedra", "farmer":"Cultiva alimentos e cereal", "vintner":"Cultiva uvas e produz vinho", "miller":"Moí cereal", "baker":"Asse pães", "recruit":"Caminha até o quartel"}
+const ITEM_NAMES := {"wood":"Madeira", "stone":"Pedra", "food":"Alimentos", "grapes":"Uvas", "wine":"Vinho", "gold":"Ouro", "trunks":"Troncos", "corn":"Cereal", "flour":"Farinha", "loaves":"Pães", "axe":"Machado", "bow":"Arco", "population":"Moradores"}
+const SHORT_NAMES := {"house":"Casa", "farm":"Horta", "vineyard":"Parreiral", "winery":"Vinícola", "store":"Armazém", "lumber":"Lenhador", "quarry":"Pedreira", "training":"Escola", "inn":"Taverna", "sawmill":"Serraria", "mill":"Moinho", "bakery":"Padaria", "workshop":"Armas", "barracks":"Quartel"}
+const BUILD_HINTS := {"house":"Abrigo", "farm":"Alimento e cereal", "vineyard":"O começo de cada vinho", "winery":"Uvas viram vinho", "store":"Depósito físico", "lumber":"Corta árvores", "quarry":"Pedra na jazida", "training":"Forma civis com ouro", "inn":"Os trabalhadores comem aqui", "sawmill":"Troncos viram madeira", "mill":"Cereal vira farinha", "bakery":"Farinha vira pão", "workshop":"Machados e arcos", "barracks":"Recrutas recebem armas"}
 
 class Glyph extends Control:
 
@@ -56,6 +57,42 @@ class Glyph extends Control:
 					draw_line(Vector2(10,y+6),Vector2(31,y),Color("98724b"),8.0,true)
 					draw_circle(Vector2(10,y+6),4.5,Color("d6ac6f"))
 					draw_arc(Vector2(10,y+6),2.0,0,TAU,12,Color("98724b"),1.0,true)
+			"trunks", "sawmill":
+				draw_line(Vector2(8,28),Vector2(32,18),Color("7a5330"),10.0,true)
+				draw_circle(Vector2(8,28),5.0,Color("d6ac6f"))
+				draw_line(Vector2(10,16),Vector2(34,10),Color("98724b"),8.0,true)
+			"mill":
+				draw_circle(Vector2(20,22),8.0,Color("969d94"))
+				draw_colored_polygon(PackedVector2Array([Vector2(12,16),Vector2(20,6),Vector2(28,16)]),Color("ae6948"))
+				draw_line(Vector2(6,20),Vector2(34,20),Color("7a5330"),3.0,true)
+				draw_line(Vector2(20,6),Vector2(20,34),Color("7a5330"),3.0,true)
+			"bakery", "loaves":
+				draw_circle(Vector2(14,24),7.0,Color("c19357"))
+				draw_circle(Vector2(26,22),6.0,Color("d6ac6f"))
+				draw_rect(Rect2(8,10,24,8),Color("ae6948"))
+			"inn":
+				draw_style_box(_rounded(Color("d5c5a0")),Rect2(8,16,26,20))
+				draw_colored_polygon(PackedVector2Array([Vector2(4,18),Vector2(20,5),Vector2(37,18)]),Color("ae6948"))
+				draw_rect(Rect2(16,22,10,12),dark)
+				draw_circle(Vector2(31,28),5.0,gold)
+			"workshop", "axe":
+				draw_rect(Rect2(10,22,20,12),Color("98724b"))
+				draw_line(Vector2(14,10),Vector2(14,24),Color("7a5330"),4.0,true)
+				draw_colored_polygon(PackedVector2Array([Vector2(10,10),Vector2(26,8),Vector2(26,14),Vector2(10,16)]),Color("85867b"))
+			"bow":
+				draw_arc(Vector2(20,20),12.0,-1.2,1.2,12,Color("7a5330"),3.0,true)
+				draw_line(Vector2(10,12),Vector2(10,28),Color("4f3525"),2.0,true)
+			"barracks":
+				draw_style_box(_rounded(Color("969d94")),Rect2(8,16,24,18))
+				draw_colored_polygon(PackedVector2Array([Vector2(6,18),Vector2(20,6),Vector2(34,18)]),Color("ae6948"))
+				draw_rect(Rect2(17,24,8,10),dark)
+				draw_line(Vector2(28,20),Vector2(28,34),Color("7a5330"),3.0,true)
+			"gold":
+				draw_rect(Rect2(8,22,24,10),gold)
+				draw_rect(Rect2(12,14,16,10),Color("d6ac6f"))
+			"corn", "flour":
+				draw_circle(Vector2(16,24),8.0,Color("e2b66b") if kind=="corn" else Color("f3ead3"))
+				draw_circle(Vector2(26,22),7.0,Color("c19357") if kind=="corn" else Color("d5c5a0"))
 			"stone", "quarry":
 				draw_colored_polygon(PackedVector2Array([Vector2(6,29),Vector2(10,12),Vector2(25,8),Vector2(35,18),Vector2(32,32),Vector2(15,35)]),Color("969d94"))
 				draw_colored_polygon(PackedVector2Array([Vector2(10,12),Vector2(25,8),Vector2(26,22),Vector2(6,29)]),Color("c6c8b8"))
@@ -156,6 +193,8 @@ var _inspection_connection: Label
 var _inspection_progress: ProgressBar
 var _inspection_details: Label
 var _inspection_cancel: Button
+var _recruit_melee: Button
+var _recruit_ranged: Button
 var _mode_panel: PanelContainer
 var _mode_label: Label
 var _road_toggle: Button
@@ -165,6 +204,35 @@ var _toast_label: Label
 var _toast_timer: Timer
 var _outcome: Label
 var _layout_queued := false
+var _credit_label: Label
+var _menu_button: Button
+var _tutorial_title: Label
+var _tutorial_intro: Label
+var _tutorial_more: Label
+var _tutorial_button: Button
+var _help_dock_button: Button
+var _drawer_close: Button
+var _quantity_caption: Label
+var _training_cost_label: Label
+var _training_queue_title: Label
+var _inspect_close: Button
+var _inspect_map: Button
+var _menu_title: Label
+var _save_button: Button
+var _load_button: Button
+var _lesson_button: Button
+var _menu_help_button: Button
+var _code_button: Button
+var _restart_button: Button
+var _restart_prompt: Label
+var _restart_yes: Button
+var _restart_back: Button
+var _language_label: Label
+var _language_buttons: Dictionary = {}
+var _help_title: Label
+var _help_close: Button
+var _help_body: VBoxContainer
+var _mode_cancel: Button
 
 func setup(sim: RefCounted) -> void:
 	_sim = sim
@@ -194,6 +262,8 @@ func setup(sim: RefCounted) -> void:
 func _make_theme() -> Theme:
 	var theme := Theme.new()
 	# A fonte incorporada à engine é distribuível e idêntica no app e na Web.
+	# Ela já usa fontes do sistema como reserva (allow_system_fallback), o que
+	# cobre os glifos CJK da tradução chinesa no desktop sem alterar métricas.
 	theme.default_font = ThemeDB.fallback_font
 	var serif := SystemFont.new()
 	serif.font_names = PackedStringArray(["Georgia", "Times New Roman", "Liberation Serif", "serif"])
@@ -319,11 +389,11 @@ func _make_top_bar() -> void:
 	_brand_box.custom_minimum_size.x = 182
 	_brand_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_brand = _label(_brand_box,"The Free Game",24)
-	_label(_brand_box,"Lucas Marques, from Shiva",12,MUTED)
-	for item in ["wood","stone","food","grapes","wine","population"]:
+	_credit_label = _label(_brand_box,"Lucas Marques, from Shiva",12,MUTED)
+	for item in ["wood","stone","food","gold","trunks","loaves","population"]:
 		var button := _button(row,"",_resource_info.bind(item),86)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.tooltip_text = ITEM_NAMES[item]+": toque para detalhes"
+		button.tooltip_text = tr("{item}: toque para detalhes").format({"item":tr(ITEM_NAMES[item])})
 		button.add_theme_stylebox_override("normal",_style(Color("102f34"),Color.TRANSPARENT,8,4))
 		var content := _hbox(button,5)
 		content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -334,20 +404,20 @@ func _make_top_bar() -> void:
 		var values := _vbox(content,0)
 		values.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		_resource_values[item] = _label(values,"0",20)
-		_resource_captions[item] = _label(values,ITEM_NAMES[item],11,MUTED)
+		_resource_captions[item] = _label(values,tr(ITEM_NAMES[item]),11,MUTED)
 		_resource_buttons[item] = button
-	var menu_button := _button(row,"Menu",_toggle_menu,66)
-	menu_button.tooltip_text = "Salvar, carregar, reiniciar e ajuda"
+	_menu_button = _button(row,tr("Menu"),_toggle_menu,66)
+	_menu_button.tooltip_text = tr("Salvar, carregar, reiniciar e ajuda")
 
 func _make_objectives() -> void:
 	_objectives_panel = _panel(_root,true,12)
 	_objectives_panel.name = "MissionPanel"
 	var box := _vbox(_objectives_panel,7)
-	_objectives_toggle = _button(box,"Objetivos  0/3  +",_toggle_objectives)
+	_objectives_toggle = _button(box,tr("Objetivos  {done}/{total}  {mark}").format({"done":0,"total":3,"mark":"+"}),_toggle_objectives)
 	_objectives_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_objectives_toggle.add_theme_stylebox_override("normal",_style(Color.TRANSPARENT,Color.TRANSPARENT,8,4))
 	_objective_details = _vbox(box,9)
-	_outcome = _label(_objective_details,"Um vale para chamar de seu",19,WINE,true)
+	_outcome = _label(_objective_details,tr("Um vale para chamar de seu"),19,WINE,true)
 	for i in range(3):
 		_objective_labels.append(_label(_objective_details,"",15,INK,true))
 	_notice_label = _label(_objective_details,"",14,MUTED,true)
@@ -358,11 +428,12 @@ func _make_tutorial() -> void:
 	_tutorial = _panel(_root,true,14)
 	_tutorial.name = "FirstDayHint"
 	var box := _vbox(_tutorial,8)
-	_label(box,"Primeiro, ligue a escola",21,WINE)
-	var intro := _label(box,"Você começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas, parta de uma borda da praça até a entrada da escola: 1 pedra por trecho.",15,INK,true)
-	intro.max_lines_visible = 7
-	_label(box,"Depois, construa lenhador, pedreira e horta. Clique na escola concluída para formar os profissionais.",14,MUTED,true)
-	_accent(_button(box,"Entendi, vamos começar",_dismiss_tutorial))
+	_tutorial_title = _label(box,tr("Primeiro, ligue a escola"),21,WINE)
+	_tutorial_intro = _label(box,tr("Você começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas, parta de uma borda da praça até a entrada da escola: 1 pedra por trecho."),15,INK,true)
+	_tutorial_intro.max_lines_visible = 7
+	_tutorial_more = _label(box,tr("Depois, construa lenhador, pedreira e horta. Clique na escola concluída para formar os profissionais."),14,MUTED,true)
+	_tutorial_button = _button(box,tr("Entendi, vamos começar"),_dismiss_tutorial)
+	_accent(_tutorial_button)
 
 func _dismiss_tutorial() -> void:
 	_tutorial_dismissed = true
@@ -387,24 +458,27 @@ func _make_dock() -> void:
 	_dock = _panel(_root,true,8)
 	_dock.name = "CommandDock"
 	var row := _hbox(_dock,7)
-	_tabs["build"] = _button(row,"Construir",_toggle_drawer.bind("build"),178)
-	_tabs["road"] = _button(row,"Estradas",_choose_road,140)
-	_tabs["road"].tooltip_text = "Traçar ou apagar estradas · R · 1 pedra por trecho novo"
-	_tabs["training"] = _button(row,"Ofícios",_toggle_drawer.bind("training"),122)
-	_tabs["training"].tooltip_text = "Formar profissionais · também disponível ao clicar em uma escola concluída"
-	_tabs["objectives"] = _button(row,"Objetivos",_toggle_objectives,122)
+	_tabs["build"] = _button(row,tr("Construir"),_toggle_drawer.bind("build"),178)
+	_tabs["road"] = _button(row,tr("Estradas"),_choose_road,140)
+	_tabs["road"].tooltip_text = tr("Traçar ou apagar estradas · R · 1 pedra por trecho novo")
+	_tabs["training"] = _button(row,tr("Ofícios"),_toggle_drawer.bind("training"),122)
+	_tabs["training"].tooltip_text = tr("Formar profissionais · também disponível ao clicar em uma escola concluída")
+	_tabs["army"] = _button(row,tr("Exército"),_choose_army,110)
+	_tabs["army"].tooltip_text = tr("Clique no mapa para dar um objetivo à companhia")
+	_tabs["objectives"] = _button(row,tr("Objetivos"),_toggle_objectives,122)
 	_accent(_tabs["build"])
 	_accent(_tabs["road"])
 	_spacer(row)
-	_village_focus = _button(row,"Vila",_focus_village,70)
-	_village_focus.tooltip_text = "Voltar ao centro da vila"
-	_pause = _button(row,"Pausar",func(): command_requested.emit("pause",{}),88)
+	_village_focus = _button(row,tr("Vila"),_focus_village,70)
+	_village_focus.tooltip_text = tr("Voltar ao centro da vila")
+	_pause = _button(row,tr("Pausar"),func(): command_requested.emit("pause",{}),88)
 	_speed_group = _hbox(row,3)
 	for speed in [1,2,4]:
 		_speed_buttons[speed] = _button(_speed_group,"%d×" % speed,_choose_speed.bind(speed),44)
 	_speed_cycle = _button(row,"1×",_cycle_speed,48)
-	_speed_cycle.tooltip_text = "Alternar velocidade: 1×, 2×, 4×"
-	_button(row,"?",_show_help,44).tooltip_text = "Como jogar"
+	_speed_cycle.tooltip_text = tr("Alternar velocidade: 1×, 2×, 4×")
+	_help_dock_button = _button(row,"?",_show_help,44)
+	_help_dock_button.tooltip_text = tr("Como jogar")
 
 func _make_drawer() -> void:
 	_drawer = _panel(_root,true,16)
@@ -417,7 +491,7 @@ func _make_drawer() -> void:
 	_drawer_title = _label(titles,"",26)
 	_drawer_subtitle = _label(titles,"",15,MUTED,true)
 	_drawer_subtitle.max_lines_visible = 2
-	_button(heading,"Fechar",close_panels,78)
+	_drawer_close = _button(heading,tr("Fechar"),close_panels,78)
 	_drawer_scroll = ScrollContainer.new()
 	_drawer_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_drawer_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -451,20 +525,20 @@ func _toggle_drawer(kind: String) -> void:
 	refresh()
 
 func _populate_build() -> void:
-	_drawer_title.text = "Dê espaço à sua vila"
-	_drawer_subtitle.text = "Construa ao lado da estrada. Ligue a entrada marcada para liberar as entregas automáticas."
+	_drawer_title.text = tr("Dê espaço à sua vila")
+	_drawer_subtitle.text = tr("Construa ao lado da estrada. Ligue a entrada marcada para liberar as entregas automáticas.")
 	_build_grid = GridContainer.new()
 	_build_grid.columns = 4
 	_build_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_build_grid.add_theme_constant_override("h_separation",9)
 	_build_grid.add_theme_constant_override("v_separation",9)
 	_drawer_content.add_child(_build_grid)
-	for kind in BUILD_ORDER:
+	for kind in _available_build_kinds():
 		var definition := _definition(kind)
 		var button := _button(_build_grid,"",_choose_build.bind(kind))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.custom_minimum_size.y = 168
-		button.tooltip_text = str(definition.get("description",BUILD_HINTS[kind]))
+		button.tooltip_text = str(definition.get("description",tr(BUILD_HINTS[kind])))
 		var margin := MarginContainer.new()
 		margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -473,7 +547,7 @@ func _populate_build() -> void:
 		button.add_child(margin)
 		var card := _vbox(margin,4)
 		_thumbnail(card,kind,76)
-		var title := _label(card,SHORT_NAMES[kind],16 if kind == "training" else 19,WINE if kind == "winery" else INK,true)
+		var title := _label(card,tr(SHORT_NAMES[kind]),16 if kind == "training" else 19,WINE if kind == "winery" else INK,true)
 		title.max_lines_visible = 2
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		var cost_label := _label(card,_cost_text(definition.get("cost",{})),14,INK)
@@ -481,31 +555,31 @@ func _populate_build() -> void:
 		_build_costs[kind] = cost_label
 
 func _populate_training() -> void:
-	_drawer_title.text = "Mais mãos para a vila"
-	_drawer_subtitle.text = "Escolha profissão e quantidade. A escola conectada à estrada forma a equipe automaticamente."
+	_drawer_title.text = tr("Mais mãos para a vila")
+	_drawer_subtitle.text = tr("Escolha profissão e quantidade. A escola conectada à estrada forma a equipe automaticamente.")
 	_training_context = _label(_drawer_content,"",15,MUTED,true)
 	_training_context.hide()
 	var settings := _hbox(_drawer_content)
 	_resident_label = _label(settings,"",16,INK)
 	_spacer(settings)
-	_label(settings,"Quantidade",15,MUTED)
+	_quantity_caption = _label(settings,tr("Quantidade"),15,MUTED)
 	for qty in [1,3,5]:
 		var btn := _button(settings,str(qty),_set_quantity.bind(qty),44)
 		btn.name = "Quantity%d" % qty
 		if qty == _quantity:
 			_accent(btn)
-	_label(_drawer_content,"Cada pessoa: 2 alimentos · 50 s de formação em 1×",14,MUTED)
+	_training_cost_label = _label(_drawer_content,tr("Cada pessoa: 1 ouro · 50 s de formação em 1×"),14,MUTED)
 	_role_grid = GridContainer.new()
 	_role_grid.columns = 4
 	_role_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_role_grid.add_theme_constant_override("h_separation",8)
 	_role_grid.add_theme_constant_override("v_separation",8)
 	_drawer_content.add_child(_role_grid)
-	for role in ["builder","servant","farmer","vintner","lumberjack","stonecutter","instructor"]:
+	for role in ["builder","servant","farmer","vintner","lumberjack","stonecutter","miller","baker","recruit","instructor"]:
 		var button := _button(_role_grid,"",_train_role.bind(role))
 		button.custom_minimum_size.y = 96
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.tooltip_text = ROLE_DETAILS[role]+". Formação e trabalho automáticos."
+		button.tooltip_text = tr("{detail}. Formação e trabalho automáticos.").format({"detail":tr(ROLE_DETAILS[role])})
 		var row := _hbox(button,8)
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -525,10 +599,10 @@ func _populate_training() -> void:
 		var content := _vbox(row,2)
 		content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		content.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		_role_count_labels[role] = _label(content,ROLE_NAMES[role],17)
-		_label(content,ROLE_DETAILS[role],12,MUTED,true)
-		_label(content,"+ Formar",13,WINE)
-	_label(_drawer_content,"Fila de formação",18)
+		_role_count_labels[role] = _label(content,tr(ROLE_NAMES[role]),17)
+		_label(content,tr(ROLE_DETAILS[role]),12,MUTED,true)
+		_label(content,tr("+ Formar"),13,WINE)
+	_training_queue_title = _label(_drawer_content,tr("Fila de formação"),18)
 	_training_queue = _vbox(_drawer_content,6)
 
 func open_training(building: Dictionary) -> void:
@@ -553,16 +627,16 @@ func _refresh_school_context() -> void:
 	var compact := _compact_layout()
 	_training_context.visible = not school.is_empty() and not compact
 	if school.is_empty():
-		_drawer_subtitle.text = "Formação automática · %d por pedido · 2 alimentos por pessoa" % _quantity if compact else "Escolha profissão e quantidade. A escola conectada à estrada forma a equipe automaticamente."
+		_drawer_subtitle.text = tr("Formação automática · {count} por pedido · 2 alimentos por pessoa").format({"count":_quantity}) if compact else tr("Escolha profissão e quantidade. A escola conectada à estrada forma a equipe automaticamente.")
 		return
-	_drawer_title.text = "Escola de instrutores"
-	_drawer_subtitle.text = "Escolha quem formar. Os moradores vão estudar e assumem seus ofícios automaticamente."
+	_drawer_title.text = tr("Escola de instrutores")
+	_drawer_subtitle.text = tr("Escolha quem formar. Os moradores vão estudar e assumem seus ofícios automaticamente.")
 	var connected := bool(_sim.call("is_building_connected",school)) if _sim.has_method("is_building_connected") else false
-	var context := "Escola conectada ao principal."
+	var context := tr("Escola conectada ao principal.")
 	if not connected:
-		context = "Falta uma estrada concluída entre esta escola e o principal."
+		context = tr("Falta uma estrada concluída entre esta escola e o principal.")
 	elif int(school.get("worker",-1)) < 0:
-		context += " Aguardando um instrutor."
+		context += " "+tr("Aguardando um instrutor.")
 	else:
 		var ready := false
 		var current_role := ""
@@ -575,16 +649,16 @@ func _refresh_school_context() -> void:
 				ready = _array(worker.get("route",[])).is_empty()
 				break
 		if not current_role.is_empty():
-			context += " Formando "+str(ROLE_NAMES.get(current_role,"profissional")).to_lower()+"."
+			context += " "+tr("Formando {role}.").format({"role":tr(str(ROLE_NAMES.get(current_role,"profissional"))).to_lower()})
 		else:
-			context += " Instrutor pronto para ensinar." if ready else " Instrutor a caminho."
-	_training_context.text = context+"\nA fila é atendida pelas escolas disponíveis."
+			context += " "+(tr("Instrutor pronto para ensinar.") if ready else tr("Instrutor a caminho."))
+	_training_context.text = context+"\n"+tr("A fila é atendida pelas escolas disponíveis.")
 	_training_context.add_theme_color_override("font_color",SUCCESS if connected else DANGER)
 	if compact:
-		var state := "Escola conectada" if connected else "Falta estrada até o principal"
+		var state := tr("Escola conectada") if connected else tr("Falta estrada até o principal")
 		if connected and int(school.get("worker",-1)) < 0:
-			state = "Aguardando instrutor"
-		_drawer_subtitle.text = "%s · fila compartilhada · %d por pedido" % [state,_quantity]
+			state = tr("Aguardando instrutor")
+		_drawer_subtitle.text = tr("{state} · fila compartilhada · {count} por pedido").format({"state":state,"count":_quantity})
 
 func _set_quantity(qty: int) -> void:
 	_quantity = qty
@@ -604,14 +678,30 @@ func _choose_road() -> void:
 	_dismiss_tutorial()
 	close_panels()
 	_mode_type = "road"
-	set_mode("Estradas · arraste ou clique · 1 pedra/trecho · Esc para sair")
+	set_mode(tr("Estradas · arraste ou clique · 1 pedra/trecho · Esc para sair"))
 	build_selected.emit("road")
+
+func _choose_army() -> void:
+	_dismiss_tutorial()
+	close_panels()
+	_mode_type = "army"
+	set_mode(tr("Exército · clique no mapa para conquistar · Esc para sair"))
+	build_selected.emit("army")
+
+func _available_build_kinds() -> Array[String]:
+	var kinds: Array[String] = []
+	var spec: Variant = _sim.get("mission") if _sim != null else null
+	for kind in BUILD_ORDER:
+		if spec != null and spec.has_method("allows_building") and not spec.allows_building(kind):
+			continue
+		kinds.append(kind)
+	return kinds
 
 func _choose_build(kind: String) -> void:
 	_dismiss_tutorial()
 	close_panels()
 	_mode_type = "build"
-	set_mode(SHORT_NAMES.get(kind,kind)+" · toque no terreno para construir")
+	set_mode(tr("{name} · toque no terreno para construir").format({"name":tr(str(SHORT_NAMES.get(kind,kind)))}))
 	build_selected.emit(kind)
 
 func _make_inspector() -> void:
@@ -621,7 +711,8 @@ func _make_inspector() -> void:
 	var box := _vbox(_inspector,9)
 	var row := _hbox(box)
 	_inspection_title = _label(row,"",21,INK,true)
-	_button(row,"×",close_panels,44).tooltip_text = "Fechar inspeção"
+	_inspect_close = _button(row,"×",close_panels,44)
+	_inspect_close.tooltip_text = tr("Fechar inspeção")
 	_inspector_scroll = ScrollContainer.new()
 	_inspector_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_inspector_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -638,12 +729,14 @@ func _make_inspector() -> void:
 	content.add_child(_inspection_progress)
 	_inspection_details = _label(content,"",15,INK,true)
 	var actions := _hbox(box)
-	var focus := _button(actions,"Ver no mapa",_focus_inspected)
-	focus.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_inspection_cancel = _button(actions,"Cancelar obra",_cancel_inspected)
+	_inspect_map = _button(actions,tr("Ver no mapa"),_focus_inspected)
+	_inspect_map.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_inspection_cancel = _button(actions,tr("Cancelar obra"),_cancel_inspected)
 	_inspection_cancel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_inspection_cancel.add_theme_color_override("font_color",DANGER)
-	_inspection_cancel.tooltip_text = "Interromper esta obra e liberar os materiais que ainda não foram usados"
+	_inspection_cancel.tooltip_text = tr("Interromper esta obra e liberar os materiais que ainda não foram usados")
+	_recruit_melee = _button(box, tr("Recrutar lanceiro (machado)"), func(): command_requested.emit("recruit", {"role": "lancer"}))
+	_recruit_ranged = _button(box, tr("Recrutar arqueiro (arco)"), func(): command_requested.emit("recruit", {"role": "archer"}))
 
 func inspect(building: Dictionary) -> void:
 	if not is_instance_valid(_root):
@@ -674,7 +767,7 @@ func _make_menu() -> void:
 	_menu.visible = false
 	var box := _vbox(_menu,8)
 	var title_row := _hbox(box)
-	_label(title_row,"Sua partida",22)
+	_menu_title = _label(title_row,tr("Sua partida"),22)
 	_spacer(title_row)
 	_button(title_row,"×",close_panels,44)
 	_menu_scroll = ScrollContainer.new()
@@ -683,21 +776,35 @@ func _make_menu() -> void:
 	box.add_child(_menu_scroll)
 	var content := _vbox(_menu_scroll,8)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_accent(_button(content,"Salvar partida",func(): save_requested.emit()))
-	_button(content,"Carregar partida",func(): load_requested.emit())
-	_button(content,"Como jogar",_show_help)
-	_button(content,"Código e artes do jogo ↗",func(): OS.shell_open("https://github.com/LucasMarquesShiva/the-free-game"))
-	_button(content,"Reiniciar partida",_toggle_restart_confirmation)
+	_language_label = _label(content,tr("Idioma"),15,MUTED)
+	var languages := _hbox(content,6)
+	_language_buttons.clear()
+	for code in Locale.SUPPORTED:
+		var language_button := _button(languages,Locale.display_name(code),_choose_language.bind(code))
+		language_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_language_buttons[code] = language_button
+	_refresh_language_buttons()
+	_save_button = _button(content,tr("Salvar partida"),func(): save_requested.emit())
+	_accent(_save_button)
+	_load_button = _button(content,tr("Carregar partida"),func(): load_requested.emit())
+	_lesson_button = _button(content,tr("Missão: primeira lição"),func():
+		close_panels()
+		command_requested.emit("load_mission", {"id": "tsk-01"})
+	)
+	_menu_help_button = _button(content,tr("Como jogar"),_show_help)
+	_code_button = _button(content,tr("Código e artes do jogo ↗"),func(): OS.shell_open("https://github.com/LucasMarquesShiva/the-free-game"))
+	_restart_button = _button(content,tr("Reiniciar partida"),_toggle_restart_confirmation)
 	_restart_confirm = _vbox(content,7)
 	_restart_confirm.visible = false
-	_label(_restart_confirm,"Começar uma nova vila? O progresso atual que não foi salvo será perdido.",15,DANGER,true)
+	_restart_prompt = _label(_restart_confirm,tr("Começar uma nova vila? O progresso atual que não foi salvo será perdido."),15,DANGER,true)
 	var actions := _hbox(_restart_confirm)
-	_accent(_button(actions,"Reiniciar",func():
+	_restart_yes = _button(actions,tr("Reiniciar"),func():
 		close_panels()
 		set_mode("")
 		restart_requested.emit()
-	),DANGER)
-	_button(actions,"Voltar",func(): _restart_confirm.hide())
+	)
+	_accent(_restart_yes,DANGER)
+	_restart_back = _button(actions,tr("Voltar"),func(): _restart_confirm.hide())
 
 func _toggle_restart_confirmation() -> void:
 	_restart_confirm.visible = not _restart_confirm.visible
@@ -721,30 +828,144 @@ func _make_help() -> void:
 	_help.visible = false
 	var box := _vbox(_help,10)
 	var head := _hbox(box)
-	_label(head,"Bem-vindo ao vale",24,WINE)
+	_help_title = _label(head,tr("Bem-vindo ao vale"),24,WINE)
 	_spacer(head)
-	_button(head,"Fechar",close_panels,78)
+	_help_close = _button(head,tr("Fechar"),close_panels,78)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(scroll)
-	var content := _vbox(scroll,12)
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	for entry in [
-		["1. Ligue as entradas","A vila começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas (R), arraste ou clique a partir de uma borda da praça até a entrada da escola. Cada trecho novo custa 1 pedra. Na barra, Apagar trecho remove um por clique; a pedra reservada é liberada se a obra ainda não começou."],
-		["2. Garanta os recursos","Construa lenhador, pedreira e horta e ligue suas entradas. Obras aguardam a estrada antes de receber materiais. Os serventes transportam apenas por caminhos concluídos; uma interrupção preserva a carga até a reconexão."],
-		["3. Forme a equipe","Clique na escola concluída ou abra Ofícios para formar lenhador, canteiro e horticultor. A escola precisa de estrada até o principal e de um instrutor. Construtores erguem os prédios; serventes levam os materiais. Você nunca precisa direcionar pessoas."],
-		["Do parreiral à vinícola","Construa ambos. Cada um precisa de um vinhateiro. Serventes levam as uvas para a vinícola e retiram o vinho. Entregue 12 vinhos ao depósito do principal."],
-		["Câmera e atalhos","Arraste o terreno para mover a câmera; a roda do mouse aproxima. Q/E giram a visão. R inicia estradas; Esc encerra a colocação. Vila retorna ao principal. Pausar permite planejar; 1×, 2× e 4× ajustam o ritmo."],
-		["Guarde sua partida","Menu → Salvar preserva sua vila. Use Carregar para retomar. Reiniciar pede confirmação antes de começar de novo."]
-	]:
-		_label(content,entry[0],19,INK,true)
-		_label(content,entry[1],17,MUTED,true)
+	_help_body = _vbox(scroll,12)
+	_help_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_fill_help(_help_body)
 
 func _show_help() -> void:
 	close_panels()
 	_help.show()
 	_layout()
+
+func _help_entries() -> Array:
+	return [
+		[tr("1. Ligue as entradas"),tr("A vila começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas (R), arraste ou clique a partir de uma borda da praça até a entrada da escola. Cada trecho novo custa 1 pedra. Na barra, Apagar trecho remove um por clique; a pedra reservada é liberada se a obra ainda não começou.")],
+		[tr("2. Garanta os recursos"),tr("Construa lenhador, pedreira e horta e ligue suas entradas. Obras aguardam a estrada antes de receber materiais. Os serventes transportam apenas por caminhos concluídos; uma interrupção preserva a carga até a reconexão.")],
+		[tr("3. Forme a equipe"),tr("Clique na escola concluída ou abra Ofícios. A escola gasta ouro entregue pelos serventes e forma civis novos. Construtores e serventes trabalham sozinhos.")],
+		[tr("Taverna e comida"),tr("Os trabalhadores comem na taverna. Construa horta, moinho e padaria para pão; o vinho também serve de bebida.")],
+		[tr("Exército"),tr("Construa o quartel, forme recrutas e entregue machados ou arcos. Em Exército, clique no mapa para dar um objetivo à companhia.")],
+		[tr("Primeira lição"),tr("Menu → Missão: primeira lição trava a vinha e a horta até você ter escola, taverna, lenhador e pedreira.")],
+		[tr("Câmera e atalhos"),tr("Arraste o terreno para mover a câmera; a roda do mouse aproxima. Q/E giram a visão. R inicia estradas; Esc encerra a colocação. Vila retorna ao principal. Pausar permite planejar; 1×, 2× e 4× ajustam o ritmo.")],
+		[tr("Guarde sua partida"),tr("Menu → Salvar preserva sua vila. Use Carregar para retomar. Reiniciar pede confirmação antes de começar de novo.")]
+	]
+
+func _fill_help(content: VBoxContainer) -> void:
+	_clear_children(content)
+	for entry in _help_entries():
+		_label(content,entry[0],19,INK,true)
+		_label(content,entry[1],17,MUTED,true)
+
+func _choose_language(code: String) -> void:
+	if Locale.current() == code:
+		return
+	if not Locale.set_language(code):
+		return
+	_retranslate()
+	show_message(tr("Idioma alterado para {language}.").format({"language":Locale.display_name(code)}))
+
+func _refresh_language_buttons() -> void:
+	var selected := Locale.current()
+	for code in _language_buttons:
+		var button: Button = _language_buttons[code]
+		button.text = Locale.display_name(code)
+		if code == selected:
+			_accent(button)
+		else:
+			button.remove_theme_stylebox_override("normal")
+			button.remove_theme_stylebox_override("hover")
+			button.remove_theme_stylebox_override("pressed")
+			button.remove_theme_color_override("font_color")
+			button.remove_theme_color_override("font_hover_color")
+			button.remove_theme_color_override("font_pressed_color")
+
+func _retranslate() -> void:
+	if not is_instance_valid(_root):
+		return
+	if is_instance_valid(_menu_button):
+		_menu_button.text = tr("Menu")
+		_menu_button.tooltip_text = tr("Salvar, carregar, reiniciar e ajuda")
+	for item in _resource_buttons:
+		var button: Button = _resource_buttons[item]
+		button.tooltip_text = tr("{item}: toque para detalhes").format({"item":tr(ITEM_NAMES[item])})
+		if _resource_captions.has(item):
+			var caption: Label = _resource_captions[item]
+			caption.text = tr(ITEM_NAMES[item])
+	if is_instance_valid(_tutorial_title):
+		_tutorial_title.text = tr("Primeiro, ligue a escola")
+		_tutorial_intro.text = tr("Você começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas, parta de uma borda da praça até a entrada da escola: 1 pedra por trecho.")
+		_tutorial_more.text = tr("Depois, construa lenhador, pedreira e horta. Clique na escola concluída para formar os profissionais.")
+		_tutorial_button.text = tr("Entendi, vamos começar")
+	if _tabs.has("build"):
+		_tabs["build"].text = tr("Construir")
+		_tabs["road"].text = tr("Estradas")
+		_tabs["road"].tooltip_text = tr("Traçar ou apagar estradas · R · 1 pedra por trecho novo")
+		_tabs["training"].text = tr("Ofícios")
+		_tabs["training"].tooltip_text = tr("Formar profissionais · também disponível ao clicar em uma escola concluída")
+		if _tabs.has("army"):
+			_tabs["army"].text = tr("Exército")
+			_tabs["army"].tooltip_text = tr("Clique no mapa para dar um objetivo à companhia")
+		_tabs["objectives"].text = tr("Objetivos")
+	if is_instance_valid(_village_focus):
+		_village_focus.text = tr("Vila")
+		_village_focus.tooltip_text = tr("Voltar ao centro da vila")
+	if is_instance_valid(_speed_cycle):
+		_speed_cycle.tooltip_text = tr("Alternar velocidade: 1×, 2×, 4×")
+	if is_instance_valid(_help_dock_button):
+		_help_dock_button.tooltip_text = tr("Como jogar")
+	if is_instance_valid(_drawer_close):
+		_drawer_close.text = tr("Fechar")
+	if is_instance_valid(_inspect_close):
+		_inspect_close.tooltip_text = tr("Fechar inspeção")
+	if is_instance_valid(_inspect_map):
+		_inspect_map.text = tr("Ver no mapa")
+	if is_instance_valid(_inspection_cancel):
+		_inspection_cancel.text = tr("Cancelar obra")
+		_inspection_cancel.tooltip_text = tr("Interromper esta obra e liberar os materiais que ainda não foram usados")
+	if is_instance_valid(_recruit_melee):
+		_recruit_melee.text = tr("Recrutar lanceiro (machado)")
+	if is_instance_valid(_recruit_ranged):
+		_recruit_ranged.text = tr("Recrutar arqueiro (arco)")
+	if is_instance_valid(_menu_title):
+		_menu_title.text = tr("Sua partida")
+		_language_label.text = tr("Idioma")
+		_save_button.text = tr("Salvar partida")
+		_load_button.text = tr("Carregar partida")
+		if is_instance_valid(_lesson_button):
+			_lesson_button.text = tr("Missão: primeira lição")
+		_menu_help_button.text = tr("Como jogar")
+		_code_button.text = tr("Código e artes do jogo ↗")
+		_restart_button.text = tr("Reiniciar partida")
+		_restart_prompt.text = tr("Começar uma nova vila? O progresso atual que não foi salvo será perdido.")
+		_restart_yes.text = tr("Reiniciar")
+		_restart_back.text = tr("Voltar")
+	_refresh_language_buttons()
+	if is_instance_valid(_help_title):
+		_help_title.text = tr("Bem-vindo ao vale")
+		_help_close.text = tr("Fechar")
+	if is_instance_valid(_help_body):
+		_fill_help(_help_body)
+	if is_instance_valid(_mode_cancel):
+		_mode_cancel.text = tr("Cancelar")
+	if not _mode_type.is_empty():
+		set_road_tool(_mode_type)
+	if _drawer.visible:
+		var kind := _drawer_kind
+		var school_id := _training_school_id
+		_drawer.visible = false
+		_toggle_drawer(kind)
+		if school_id >= 0:
+			var school := _find_building(school_id)
+			if not school.is_empty():
+				open_training(school)
+	language_changed.emit()
+	refresh()
 
 func _make_mode_and_toast() -> void:
 	_mode_panel = _panel(_root,true,8)
@@ -753,9 +974,9 @@ func _make_mode_and_toast() -> void:
 	var mode_row := _hbox(_mode_panel)
 	_mode_label = _label(mode_row,"",17,INK,true)
 	_mode_label.max_lines_visible = 2
-	_road_toggle = _button(mode_row,"Apagar trecho",_toggle_road_tool,132)
+	_road_toggle = _button(mode_row,tr("Apagar trecho"),_toggle_road_tool,132)
 	_road_toggle.visible = false
-	_button(mode_row,"Cancelar",_cancel_mode,88)
+	_mode_cancel = _button(mode_row,tr("Cancelar"),_cancel_mode,88)
 	_toast = _panel(_root,false,13)
 	_toast.name = "FeedbackToast"
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -774,8 +995,8 @@ func _cancel_mode() -> void:
 func set_road_tool(kind: String) -> void:
 	_mode_type = kind if kind in ["road","remove_road"] else ""
 	_road_toggle.visible = not _mode_type.is_empty()
-	_road_toggle.text = "Traçar estrada" if kind == "remove_road" else "Apagar trecho"
-	_road_toggle.tooltip_text = "Voltar a desenhar estradas" if kind == "remove_road" else "Apagar um trecho por clique; pedras reservadas de obras não iniciadas são liberadas"
+	_road_toggle.text = tr("Traçar estrada") if kind == "remove_road" else tr("Apagar trecho")
+	_road_toggle.tooltip_text = tr("Voltar a desenhar estradas") if kind == "remove_road" else tr("Apagar um trecho por clique; pedras reservadas de obras não iniciadas são liberadas")
 
 func _toggle_road_tool() -> void:
 	build_selected.emit("road" if _mode_type == "remove_road" else "remove_road")
@@ -858,7 +1079,7 @@ func refresh() -> void:
 		else:
 			label.text = str(int(stock.get(item,0)))
 			label.add_theme_color_override("font_color",DANGER if item == "food" and int(stock.get(item,0)) < 20 else INK)
-	_pause.text = "Retomar" if bool(_sim.get("paused")) else "Pausar"
+	_pause.text = tr("Retomar") if bool(_sim.get("paused")) else tr("Pausar")
 	var rows: Array = _call_value("objective_rows",[])
 	var done := 0
 	for i in range(_objective_labels.size()):
@@ -870,13 +1091,13 @@ func refresh() -> void:
 			done += 1 if complete else 0
 			label.text = ("[x]  " if complete else "[ ]  ")+str(row.get("text",""))
 			label.add_theme_color_override("font_color",SUCCESS if complete else INK)
-	_objectives_toggle.text = "Objetivos  %d/%d  %s" % [done,rows.size(),"−" if _objectives_open else "+"]
-	_notice_label.text = _profession_text(str(_call_value("notice","Os habitantes encontram trabalho sozinhos.")))
-	_outcome.text = "Sua vila prosperou!" if bool(_sim.get("won")) else ("A vila precisa recomeçar" if bool(_sim.get("lost")) else "Um vale para chamar de seu")
+	_objectives_toggle.text = tr("Objetivos  {done}/{total}  {mark}").format({"done":done,"total":rows.size(),"mark":"−" if _objectives_open else "+"})
+	_notice_label.text = _profession_text(str(_call_value("notice",tr("Os habitantes encontram trabalho sozinhos."))))
+	_outcome.text = tr("Sua vila prosperou!") if bool(_sim.get("won")) else (tr("A vila precisa recomeçar") if bool(_sim.get("lost")) else tr("Um vale para chamar de seu"))
 	if bool(_sim.get("lost")):
-		_notice_label.text = "Abra Menu → Reiniciar para tentar uma nova partida."
+		_notice_label.text = tr("Abra Menu → Reiniciar para tentar uma nova partida.")
 	elif bool(_sim.get("won")):
-		_notice_label.text = "Todos os objetivos cumpridos. Você pode continuar observando a vila."
+		_notice_label.text = tr("Todos os objetivos cumpridos. Você pode continuar observando a vila.")
 	if _drawer.visible:
 		for kind in _build_costs:
 			var cost: Dictionary = _definition(kind).get("cost",{})
@@ -888,10 +1109,10 @@ func refresh() -> void:
 			cost_label.add_theme_color_override("font_color",INK if enough else DANGER)
 		if _drawer_kind == "training":
 			_refresh_school_context()
-			_resident_label.text = "%d moradores disponíveis" % int(counts.get("resident",0))
+			_resident_label.text = tr("{count} moradores disponíveis").format({"count":int(counts.get("resident",0))})
 			for role in _role_count_labels:
 				var role_label: Label = _role_count_labels[role]
-				role_label.text = "%s · %d" % [ROLE_NAMES[role],int(counts.get(role,0))]
+				role_label.text = tr("{role} · {count}").format({"role":tr(ROLE_NAMES[role]),"count":int(counts.get(role,0))})
 			_refresh_training()
 	_refresh_inspection()
 	_refresh_speed()
@@ -909,7 +1130,7 @@ func _refresh_training() -> void:
 		_queue_labels.clear()
 		_queue_bars.clear()
 		if queue.is_empty():
-			_label(_training_queue,"Nenhuma formação na fila. Os profissionais formados procuram trabalho automaticamente.",15,MUTED,true)
+			_label(_training_queue,tr("Nenhuma formação na fila. Os profissionais formados procuram trabalho automaticamente."),15,MUTED,true)
 		for record in queue:
 			var id := int(record.get("id",-1))
 			var line := _hbox(_training_queue)
@@ -921,13 +1142,13 @@ func _refresh_training() -> void:
 			progress.custom_minimum_size.y = 5
 			info.add_child(progress)
 			_queue_bars[id] = progress
-			_button(line,"Cancelar",_cancel_training.bind(id),84)
+			_button(line,tr("Cancelar"),_cancel_training.bind(id),84)
 	for record in queue:
 		var id := int(record.get("id",-1))
 		if _queue_labels.has(id):
 			var label: Label = _queue_labels[id]
 			var progress: ProgressBar = _queue_bars[id]
-			label.text = "%s · %s" % [ROLE_NAMES.get(record.get("role",""),"Profissional"),_profession_text(str(record.get("reason","Em formação")))]
+			label.text = tr("{role} · {reason}").format({"role":tr(str(ROLE_NAMES.get(record.get("role",""),"Profissional"))),"reason":_profession_text(str(record.get("reason",tr("Em formação"))))})
 			progress.value = clampf(float(record.get("progress",0))*100.0,0,100)
 
 func _cancel_training(id: int) -> void:
@@ -942,16 +1163,16 @@ func _refresh_inspection() -> void:
 		_inspector.hide()
 		return
 	var definition := _definition(str(building.get("kind","")))
-	_inspection_title.text = str(definition.get("name","Construção"))
+	_inspection_title.text = str(definition.get("name",tr("Construção")))
 	_inspection_description.text = str(definition.get("description",""))
 	var stage := str(building.get("stage",""))
 	var complete := stage == "complete"
 	var connected := bool(_sim.call("is_building_connected",building)) if _sim.has_method("is_building_connected") else false
 	var main := str(building.get("kind","")) == "hall"
-	_inspection_connection.text = "Entrada marcada · origem da rede de estradas" if main else ("Entrada marcada · conectada ao principal" if connected else "Entrada marcada · falta estrada até o principal")
+	_inspection_connection.text = tr("Entrada marcada · origem da rede de estradas") if main else (tr("Entrada marcada · conectada ao principal") if connected else tr("Entrada marcada · falta estrada até o principal"))
 	_inspection_connection.add_theme_color_override("font_color",SUCCESS if connected else DANGER)
 	var reason := str(building.get("reason",""))
-	var states := {"preparing":"Preparando o terreno","materials":"Recebendo materiais","building":"Em construção","complete":"Concluída"}
+	var states := {"preparing":tr("Preparando o terreno"),"materials":tr("Recebendo materiais"),"building":tr("Em construção"),"complete":tr("Concluída")}
 	_inspection_state.text = _profession_text(reason if not reason.is_empty() else str(states.get(stage,stage)))
 	_inspection_progress.value = 100.0 * float(building.get("production",0) if complete else building.get("progress",0))
 	_inspection_progress.visible = not complete or not str(definition.get("profession","")).is_empty()
@@ -962,36 +1183,41 @@ func _refresh_inspection() -> void:
 		var profession := str(definition.get("profession",""))
 		if not profession.is_empty():
 			var worker_id := int(building.get("worker",-1))
-			var worker_state := "Aguardando profissional" if worker_id < 0 else "Em atividade"
+			var worker_state := tr("Aguardando profissional") if worker_id < 0 else tr("Em atividade")
 			for worker in _array(_sim.get("workers")):
 				if int(worker.get("id",-1)) == worker_id:
 					worker_state = str(worker.get("state",worker_state))
 					break
-			details.append(ROLE_NAMES.get(profession,profession)+" · "+worker_state)
+			details.append(tr("{role} · {state}").format({"role":tr(str(ROLE_NAMES.get(profession,profession))),"state":worker_state}))
 		for key in ["input","output"]:
 			var inventory: Dictionary = building.get(key,{})
 			for item in inventory:
 				if int(inventory[item]) > 0:
-					details.append("%s: %d %s" % ["Entrada" if key == "input" else "Para retirar",int(inventory[item]),str(ITEM_NAMES.get(item,item)).to_lower()])
+					details.append(tr("{kind}: {amount} {item}").format({"kind":tr("Entrada") if key == "input" else tr("Para retirar"),"amount":int(inventory[item]),"item":tr(str(ITEM_NAMES.get(item,item))).to_lower()}))
 		if str(building.get("kind","")) == "house":
-			details.append("4 vagas de moradia · chegada automática de moradores")
+			details.append(tr("Abrigo civil. Novos habitantes saem da escola."))
 		elif str(building.get("kind","")) == "farm" and _sim.has_method("crop_status"):
 			var crop := _dictionary(_sim.call("crop_status",building))
 			if not crop.is_empty():
-				_inspection_state.text = _profession_text(str(crop.get("label","Cultivando a horta")))
+				_inspection_state.text = _profession_text(str(crop.get("label",tr("Cultivando a horta"))))
 				var crop_progress := clampf(float(crop.get("progress",0)),0,1)
 				_inspection_progress.value = crop_progress*100.0
-				details.append("Ciclo da horta: %d%% · colheita de %d alimentos" % [roundi(crop_progress*100),int(crop.get("output_amount",8))])
+				details.append(tr("Ciclo da horta: {percent}% · colheita de {amount} alimentos").format({"percent":roundi(crop_progress*100),"amount":int(crop.get("output_amount",8))}))
 				if not bool(crop.get("active",false)) and not str(crop.get("reason","")).is_empty():
-					details.append("Cultivo pausado: "+str(crop.reason))
+					details.append(tr("Cultivo pausado: {reason}").format({"reason":str(crop.reason)}))
 	_inspection_details.text = _profession_text("\n".join(details))
 	_inspection_cancel.visible = not complete and not bool(building.get("initial",false))
+	var barracks := complete and str(building.get("kind","")) == "barracks"
+	if is_instance_valid(_recruit_melee):
+		_recruit_melee.visible = barracks
+	if is_instance_valid(_recruit_ranged):
+		_recruit_ranged.visible = barracks
 	var content := _inspection_details.get_parent()
 	content.move_child(_inspection_details,0 if _compact_layout() and not complete else content.get_child_count()-1)
 
 func _construction_material_lines(building: Dictionary, definition: Dictionary, connected: bool) -> Array[String]:
 	var compact := _compact_layout()
-	var lines: Array[String] = ["Entregues / necessários" if compact else "Materiais · entregues / necessários"]
+	var lines: Array[String] = [tr("Entregues / necessários") if compact else tr("Materiais · entregues / necessários")]
 	var quantities: Array[String] = []
 	var costs: Dictionary = definition.get("cost",{})
 	var delivered: Dictionary = building.get("delivered",{})
@@ -1002,14 +1228,14 @@ func _construction_material_lines(building: Dictionary, definition: Dictionary, 
 		# The simulation consumes delivered materials when construction starts.
 		# A zero remaining inventory then means 'applied', not 'never delivered'.
 		var received := required if applying else int(delivered.get(item,0))
-		quantities.append("%s: %d / %d" % [ITEM_NAMES.get(item,item),received,required])
+		quantities.append(tr("{item}: {received} / {required}").format({"item":tr(str(ITEM_NAMES.get(item,item))),"received":received,"required":required}))
 		missing = missing or received < required
 	if compact:
 		lines.append(" · ".join(quantities))
 	else:
 		lines.append_array(quantities)
 	if applying:
-		lines.append("Já entregues e aplicados na obra.")
+		lines.append(tr("Já entregues e aplicados na obra."))
 		return lines
 	var carrying: Dictionary = {}
 	var picking_up := 0
@@ -1027,19 +1253,19 @@ func _construction_material_lines(building: Dictionary, definition: Dictionary, 
 		elif task.get("phase","") == "pickup":
 			picking_up += 1
 	if not carrying.is_empty():
-		lines.append("Nas mãos dos serventes: "+_cost_text(carrying)+".")
+		lines.append(tr("Nas mãos dos serventes: {cargo}.").format({"cargo":_cost_text(carrying)}))
 	if picking_up > 0:
-		lines.append("%d retirada(s) no depósito em andamento." % picking_up)
+		lines.append(tr("{count} retirada(s) no depósito em andamento.").format({"count":picking_up}))
 	if not connected:
-		lines.append("Entregas aguardam estrada concluída até a entrada.")
+		lines.append(tr("Entregas aguardam estrada concluída até a entrada."))
 	elif building.get("stage","") == "preparing":
-		lines.append("Entregas começam após preparar o terreno.")
+		lines.append(tr("Entregas começam após preparar o terreno."))
 	elif not missing:
-		lines.append("Materiais entregues. Aguardando construtor.")
+		lines.append(tr("Materiais entregues. Aguardando construtor."))
 	elif servants == 0:
-		lines.append("Forme serventes na escola para trazer os materiais.")
+		lines.append(tr("Forme serventes na escola para trazer os materiais."))
 	elif carrying.is_empty() and picking_up == 0:
-		lines.append("Serventes trazem os materiais pela estrada, conforme ficam disponíveis.")
+		lines.append(tr("Serventes trazem os materiais pela estrada, conforme ficam disponíveis."))
 	return lines
 
 func _profession_text(text: String) -> String:
@@ -1052,11 +1278,11 @@ func _compact_layout() -> bool:
 func _resource_info(item: String) -> void:
 	if item == "population":
 		var counts := _call_dictionary("profession_counts")
-		show_message("%d moradores disponíveis para formação. Casas e alimentos atraem mais habitantes." % int(counts.get("resident",0)))
+		show_message(tr("{count} moradores disponíveis para formação. Casas e alimentos atraem mais habitantes.").format({"count":int(counts.get("resident",0))}))
 	else:
 		var stock := _dictionary(_sim.get("stock")) if _sim != null else {}
 		var reserved := int(stock.get(item,0))-_available(item)
-		show_message("%s no depósito principal: %d · livres: %d · reservados: %d. Cargas e produção nos prédios ficam fora deste total." % [ITEM_NAMES.get(item,item),int(stock.get(item,0)),_available(item),reserved])
+		show_message(tr("{item} no depósito principal: {stock} · livres: {free} · reservados: {reserved}. Cargas e produção nos prédios ficam fora deste total.").format({"item":tr(str(ITEM_NAMES.get(item,item))),"stock":int(stock.get(item,0)),"free":_available(item),"reserved":reserved}))
 
 func _available(item: String) -> int:
 	if _sim != null and _sim.has_method("available"):
@@ -1066,8 +1292,8 @@ func _available(item: String) -> int:
 func _definition(kind: String) -> Dictionary:
 	if _sim != null and _sim.has_method("definition"):
 		var value := _dictionary(_sim.call("definition",kind)).duplicate(true)
-		if kind == "hall": value.name = "Prédio principal"
-		if kind == "training": value.name = "Escola de instrutores"
+		if kind == "hall": value.name = tr("Prédio principal")
+		if kind == "training": value.name = tr("Escola de instrutores")
 		# The controller runs the fixed simulation clock at CIVIL_PACE=0.4 in1×.
 		# Keep the shared simulation definitions unchanged for previous versions.
 		var descriptions := {
@@ -1077,7 +1303,7 @@ func _definition(kind: String) -> Dictionary:
 			"vineyard":"Um vinhateiro colhe 4 uvas a cada 30 segundos em 1×.",
 			"winery":"Um vinhateiro transforma 3 uvas em 2 vinhos a cada 25 segundos em 1×."
 		}
-		if descriptions.has(kind):value.description = descriptions[kind]
+		if descriptions.has(kind):value.description = tr(descriptions[kind])
 		return value
 	return {}
 
@@ -1104,8 +1330,8 @@ func _cost_text(cost: Dictionary) -> String:
 	var parts: Array[String] = []
 	for item in ["wood","stone","food","grapes","wine"]:
 		if int(cost.get(item,0)) > 0:
-			parts.append("%d %s" % [int(cost[item]),str(ITEM_NAMES[item]).to_lower()])
-	return " · ".join(parts) if not parts.is_empty() else "Sem custo"
+			parts.append(tr("{count} {item}").format({"count":int(cost[item]),"item":tr(ITEM_NAMES[item]).to_lower()}))
+	return " · ".join(parts) if not parts.is_empty() else tr("Sem custo")
 
 func _clear_children(parent: Node) -> void:
 	for child in parent.get_children():
@@ -1148,6 +1374,9 @@ func _layout() -> void:
 	_tabs["build"].custom_minimum_size.x = 116.0 if compact else 160.0
 	_tabs["road"].custom_minimum_size.x = 116.0 if compact else 160.0
 	_tabs["training"].custom_minimum_size.x = 91.0 if compact else 122.0
+	if _tabs.has("army"):
+		_tabs["army"].custom_minimum_size.x = 88.0 if compact else 110.0
+		_tabs["army"].visible = width >= 980.0
 	_tabs["objectives"].custom_minimum_size.x = 102.0 if compact else 122.0
 	_tabs["objectives"].visible = width >= 960.0
 	_village_focus.visible = width >= 860.0

@@ -72,7 +72,7 @@ func run() -> void:
 		expect(minimum.y>-0.01,role+" grounded feet")
 		var rig: Dictionary=person.get_meta("approved_rig")
 		verify_walk(person)
-		for item: String in ["wood","stone","food","grapes","wine"]:
+		for item: String in ["wood","stone","food","grapes","wine","trunks","corn","flour","loaves","gold","axe","bow"]:
 			People.animate(person,0.8,true,false,true,item)
 			expect(rig.cargo.visible and not rig.tool.visible,"visible cargo hidden tool")
 			expect(rig.cargo_mesh.mesh!=null and person.get_meta("cargo_kind")==item,"resource-specific cargo")

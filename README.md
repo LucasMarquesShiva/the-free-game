@@ -6,7 +6,7 @@ An open medieval village-building game. Plan roads and buildings, train workers,
 and watch the village work autonomously. Built with Godot 4.7.2 and GDScript.
 
 [Play in your browser](https://vale-dos-vinhedos.lucas579686.chatgpt.site/) ·
-[Português](README.pt-BR.md) · [Contribute](CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md)
+[Português](README.pt-BR.md) · [简体中文](README.zh-CN.md) · [Contribute](CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md)
 
 ![The main building](game/assets/approved/previews/hall.png)
 
@@ -56,13 +56,15 @@ roads, place buildings, train professions, and expand the economy.
 
 - Civilians accept tasks automatically and gather in the plaza when idle.
 - Servants deliver materials; builders construct buildings and road tiles.
-- Every building requires wood and stone.
-- Gardens visibly grow and food is harvested and transported.
-- The economic chain includes vineyards and a winery.
-- The school opens the training panel when clicked.
+- The school spends gold (carried to the school) and trains new people.
+- Woodcutters harvest map trees into trunks; the sawmill turns trunks into timber.
+- Quarries need a stone deposit. Workers eat at the inn.
+- Grain goes through mill and bakery to loaves; wine is inn drink, not the identity win.
+- Barracks take walking recruits plus axes or bows. Army mode sets a company objective.
+- Menu → first lesson locks the farm/wine chain until school, inn, woodcutter and quarry exist.
 - Manual saves and autosaves are local to each browser/device.
 
-There is no army, multiplayer, cloud save, or server economy in this beta.
+There is no multiplayer, cloud save, or server economy in this beta.
 Mobile controls and performance still need dedicated work. Concept art includes
 ideas for later versions; it is not a promise that all depicted features exist.
 

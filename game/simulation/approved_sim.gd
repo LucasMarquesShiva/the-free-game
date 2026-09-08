@@ -21,6 +21,7 @@ var _plaza: Array[Vector2i] = []
 
 func setup(_peaceful_mode: bool = true) -> void:
 	peaceful = true
+	mission = null
 	battle = null
 	tick = 0
 	next_id = 1
@@ -32,7 +33,13 @@ func setup(_peaceful_mode: bool = true) -> void:
 	won = false
 	lost = false
 	paused = false
-	stock = {"wood":140,"stone":160,"food":280,"grapes":0,"wine":0}
+	stock = _empty_items()
+	stock.wood = 140
+	stock.stone = 160
+	stock.food = 280
+	stock.gold = 50
+	stock.axe = 2
+	stock.bow = 2
 	initial = stock.duplicate(true)
 	reserved = _empty_items()
 	consumed = _empty_items()
@@ -42,10 +49,12 @@ func setup(_peaceful_mode: bool = true) -> void:
 	arrival_ticks = 0
 	last_notice = ""
 	definitions = definitions.duplicate(true)
-	definitions.erase("barracks")
+	harvest_map = load("res://simulation/harvest_map.gd").new()
+	harvest_map.setup_from_natural_cells(natural_cells)
+	stone_deposits = [Vector2i(12, 19), Vector2i(12, 20), Vector2i(11, 19), Vector2i(13, 19), Vector2i(10, 19)]
 	definitions.hall.name = "Edifício principal"
 	definitions.hall.description = "Abriga os primeiros moradores e o estoque inicial. Sua entrada inicia a rede de estradas."
-	definitions.store.description = "Amplia em 200 unidades a capacidade do depósito principal, com acesso pela rede."
+	definitions.store.description = "Depósito físico. Serventes buscam e deixam mercadorias na entrada."
 	definitions.farm.description = "O horticultor semeia, cultiva e colhe 8 alimentos por ciclo, em cerca de 25 s na velocidade 1×."
 	_add_building("hall",Vector2i(7,10),true)
 	_add_building("training",Vector2i(12,10),true)
@@ -61,16 +70,16 @@ func setup(_peaceful_mode: bool = true) -> void:
 	instructor.previous = instructor.cell
 	instructor.goal = instructor.cell
 	instructor.task = {"type":"produce","building":buildings[1].id}
-	instructor.state = "Ensinando no centro"
+	instructor.state = tr("Ensinando no centro")
 	buildings[1].worker = instructor.id
 	for person in workers:
 		if person.task.is_empty():
 			person.cell = plaza_rest_cell(person)
 			person.previous = person.cell
 			person.goal = person.cell
-			person.state = "Na praça"
+			person.state = tr("Na praça")
 	_rebuild_roads()
-	_emit("A praça reúne os moradores livres. Trace uma estrada até a escola; a equipe trabalha sozinha.")
+	_emit(tr("A praça reúne os moradores livres. Trace uma estrada até a escola; a equipe trabalha sozinha."))
 
 
 func population_capacity() -> int:
@@ -118,20 +127,20 @@ func command(kind: String, payload: Dictionary = {}) -> Dictionary:
 		var notices: Array[String] = []
 		for role in ["builder","servant"]:
 			if total[role] == 0:
-				notices.append("Nenhum "+("construtor" if role=="builder" else "servente")+" formado")
+				notices.append(tr("Nenhum construtor formado") if role=="builder" else tr("Nenhum servente formado"))
 			elif idle[role] == 0:
-				notices.append("Construtores ocupados" if role=="builder" else "Serventes ocupados")
+				notices.append(tr("Construtores ocupados") if role=="builder" else tr("Serventes ocupados"))
 		if not notices.is_empty():
-			return _result(true,"Obra na fila. "+"; ".join(notices)+". Forme mais na escola ou aguarde: a equipe assumirá automaticamente.")
+			return _result(true,tr("Obra na fila. {details}. Forme mais na escola ou aguarde: a equipe assumirá automaticamente.").format({"details":"; ".join(notices)}))
 		return result
 	if kind == "road":
 		var requested: Variant = payload.get("cells",[payload.get("cell")])
 		if not requested is Array or requested.is_empty() or requested.size() > 200:
-			return _result(false,"Escolha até 200 terrenos para a estrada.")
+			return _result(false,tr("Escolha até 200 terrenos para a estrada."))
 		var cells: Array[Vector2i] = []
 		for cell in requested:
 			if typeof(cell) != TYPE_VECTOR2I:
-				return _result(false,"Trecho de estrada inválido.")
+				return _result(false,tr("Trecho de estrada inválido."))
 			if is_plaza_cell(cell) or cell == HUB or not road_at(cell).is_empty() or cells.has(cell):
 				continue
 			var error := can_place_road(cell)
@@ -139,41 +148,41 @@ func command(kind: String, payload: Dictionary = {}) -> Dictionary:
 				return _result(false,error)
 			cells.append(cell)
 		if cells.size() > available("stone"):
-			return _result(false,"Cada trecho reserva 1 pedra. Não há pedra suficiente para este caminho.")
+			return _result(false,tr("Cada trecho reserva 1 pedra. Não há pedra suficiente para este caminho."))
 		for cell in cells:
-			roads.append({"id":_id(),"cell":cell,"stage":"planned","progress":0.0,"builder":-1,"funded":true,"delivered":0,"carrier":-1,"reason":"Aguardando servente e traçado conectado"})
+			roads.append({"id":_id(),"cell":cell,"stage":"planned","progress":0.0,"builder":-1,"funded":true,"delivered":0,"carrier":-1,"reason":tr("Aguardando servente e traçado conectado")})
 			reserved.stone += 1
 		_road_supply_dirty = true
-		return _result(true,"Estrada planejada. Serventes levam pedra às frentes conectadas e construtores trabalham em paralelo." if not cells.is_empty() else "Este caminho já está planejado.")
+		return _result(true,tr("Estrada planejada. Serventes levam pedra às frentes conectadas e construtores trabalham em paralelo.") if not cells.is_empty() else tr("Este caminho já está planejado."))
 	if kind == "remove_road":
 		if payload.get("cell") is Vector2i and is_plaza_cell(payload.cell):
-			return _result(false,"A praça é o ponto de encontro da vila e permanece livre.")
+			return _result(false,tr("A praça é o ponto de encontro da vila e permanece livre."))
 		if typeof(payload.get("cell")) != TYPE_VECTOR2I:
-			return _result(false,"Escolha um trecho de estrada.")
+			return _result(false,tr("Escolha um trecho de estrada."))
 		var road := road_at(payload.cell)
 		if road.is_empty():
-			return _result(false,"Não há estrada neste terreno.")
+			return _result(false,tr("Não há estrada neste terreno."))
 		if road.builder != -1 or _occupied(road.cell):
-			return _result(false,"Aguarde a pessoa sair deste trecho antes de removê-lo.")
+			return _result(false,tr("Aguarde a pessoa sair deste trecho antes de removê-lo."))
 		if road.funded:
 			reserved.stone -= 1
 			road.funded = false
 		road.stage = "cancelled"
 		_rebuild_roads()
 		_road_supply_cancel(road)
-		return _result(true,"Trecho removido. Cargas permanecem com os serventes até existir um caminho.")
+		return _result(true,tr("Trecho removido. Cargas permanecem com os serventes até existir um caminho."))
 	return super.command(kind,payload)
 
 
 func can_place_road(cell: Vector2i) -> String:
 	if is_plaza_cell(cell):
-		return "A praça já está pavimentada. Comece sua estrada em uma de suas bordas."
+		return tr("A praça já está pavimentada. Comece sua estrada em uma de suas bordas.")
 	if cell == HUB:
-		return "A entrada do edifício principal já é a origem da rede."
+		return tr("A entrada do edifício principal já é a origem da rede.")
 	if not is_walkable(cell):
-		return "Estradas precisam de terreno livre."
+		return tr("Estradas precisam de terreno livre.")
 	if not road_at(cell).is_empty():
-		return "Este trecho já existe ou está planejado."
+		return tr("Este trecho já existe ou está planejado.")
 	return ""
 
 
@@ -309,40 +318,44 @@ func _is_access(cell: Vector2i) -> bool:
 
 
 func can_place(kind: String, cell: Vector2i) -> String:
+	if mission != null and mission.has_method("allows_building") and not mission.allows_building(kind):
+		return tr("Esta construção ainda não está disponível nesta missão.")
 	if not definitions.has(kind) or kind == "hall":
-		return "Construção desconhecida ou não disponível nesta vila."
+		return tr("Construção desconhecida ou não disponível nesta vila.")
+	if kind == "quarry" and not _quarry_has_deposit(cell):
+		return tr("A pedreira precisa ficar junto a uma jazida de pedra.")
 	var size := footprint_size(kind)
 	if cell.x < 2 or cell.x > WIDTH-1-size.x or cell.y < 2 or cell.y > 23:
-		return "Deixe espaço para toda a construção e sua entrada dentro do vale."
+		return tr("Deixe espaço para toda a construção e sua entrada dentro do vale.")
 	var area := Rect2i(cell,size)
 	for y in range(size.y):
 		for x in range(size.x):
 			var tile := cell+Vector2i(x,y)
 			if is_plaza_cell(tile):
-				return "A praça fica livre para os moradores. Construa ao redor dela."
+				return tr("A praça fica livre para os moradores. Construa ao redor dela.")
 			if tile.x>=22 and tile.x<=24:
-				return "A ponte é uma passagem. Construa em terra firme, ao lado da estrada."
+				return tr("A ponte é uma passagem. Construa em terra firme, ao lado da estrada.")
 			if is_terrain_natural(tile):
-				return "Este terreno faz parte do bosque. Escolha uma área livre."
+				return tr("Este terreno faz parte do bosque. Escolha uma área livre.")
 			if not _terrain_walkable(tile):
-				return "A construção precisa de terreno firme em toda a área."
+				return tr("A construção precisa de terreno firme em toda a área.")
 	for road in roads:
 		if road.stage != "cancelled" and area.has_point(road.cell):
-			return "Preserve o caminho: escolha um terreno ao lado da estrada."
+			return tr("Preserve o caminho: escolha um terreno ao lado da estrada.")
 	if area.has_point(HUB):
-		return "Preserve a entrada do edifício principal."
+		return tr("Preserve a entrada do edifício principal.")
 	for building in buildings:
 		if building.stage == "cancelled":
 			continue
 		if area.intersects(Rect2i(building.cell,footprint_size(building.kind))) or area.has_point(building.entrance) or area.has_point(_professional_work_cell(building)) or area.has_point(_builder_work_cell(building)):
-			return "Espaço ocupado ou acesso de outra construção."
+			return tr("Espaço ocupado ou acesso de outra construção.")
 	for person in workers:
 		if area.has_point(person.cell):
-			return "Há um morador passando. Aguarde um instante."
+			return tr("Há um morador passando. Aguarde um instante.")
 	var access := cell+_entrance_offset(kind)
 	var work_cell := access+Vector2i.RIGHT
 	if not is_walkable(access) or not is_walkable(work_cell):
-		return "Deixe livre a entrada e o espaço de trabalho da construção."
+		return tr("Deixe livre a entrada e o espaço de trabalho da construção.")
 	var temporary_cells: Array[Vector2i] = []
 	for y in range(size.y):
 		for x in range(size.x):
@@ -358,10 +371,13 @@ func can_place(kind: String, cell: Vector2i) -> String:
 			valid = false
 	for tile in temporary_cells:
 		navigation.set_point_solid(tile,false)
-	return "" if valid else "Esta obra bloquearia o acesso da vila."
+	return "" if valid else tr("Esta obra bloquearia o acesso da vila.")
 
 
 func _store_for(_cell: Vector2i) -> Dictionary:
+	for building in buildings:
+		if building.kind == "store" and building.stage == "complete" and is_building_connected(building):
+			return building
 	for building in buildings:
 		if building.kind == "hall" and building.stage == "complete":
 			return building
@@ -402,7 +418,7 @@ func _go(person: Dictionary, goal: Vector2i) -> bool:
 	person.route = _person_road_path(person,person.cell,goal)
 	person.wait = 0
 	if person.cell != goal and person.route.is_empty():
-		person.state = "Estrada interrompida: carga preservada" if not person.cargo.is_empty() else "Aguardando estrada conectada"
+		person.state = tr("Estrada interrompida: carga preservada") if not person.cargo.is_empty() else tr("Aguardando estrada conectada")
 		return false
 	return _person_road_node(person,person.cell) and _person_road_node(person,goal)
 
@@ -420,7 +436,7 @@ func _transport(person: Dictionary, source: int, dest: int, item: String, amount
 		return false
 	if source == 0:
 		reserved[item] += amount
-	person.state = "Buscando "+ITEM_NAMES[item]+" pela estrada"
+	person.state = tr("Buscando {item} pela estrada").format({"item":tr(ITEM_NAMES[item])})
 	return true
 
 
@@ -429,7 +445,7 @@ func _assign_delivery(person: Dictionary) -> void:
 	if not _road_node(person.cell):
 		if _has_pending_road_delivery() and super._go(person,HUB):
 			person.task = {"type":"join_road","building":buildings[0].id}
-			person.state = "Indo ao depósito para iniciar entregas"
+			person.state = tr("Indo ao depósito para iniciar entregas")
 		return
 	super._assign_delivery(person)
 	if person.task.is_empty(): _assign_road_supply(person)
@@ -441,7 +457,7 @@ func _has_pending_road_delivery() -> bool:
 	# A producer existing does not imply work: its output may be empty, reserved,
 	# or already stocked to its target. Idle servants should keep access clear.
 	var can_export := _storage_used()+_incoming(0,"food") < storage_capacity()
-	var export_targets := {"wood":100,"stone":60,"food":_food_stock_target(),"grapes":24,"wine":32}
+	var export_targets := {"wood":100,"stone":60,"food":_food_stock_target(),"grapes":24,"wine":32,"gold":40,"trunks":24,"corn":24,"flour":16,"loaves":24,"axe":8,"bow":8}
 	for building in buildings:
 		if not _connected_roads.has(building.entrance):
 			continue
@@ -453,12 +469,26 @@ func _has_pending_road_delivery() -> bool:
 		if building.kind == "winery" and building.stage == "complete":
 			if 6-int(building.input.grapes)-_incoming(building.id,"grapes") > 0 and available("grapes") > 0:
 				return true
+		if building.kind == "training" and building.stage == "complete" and _school_gold_need(building) > 0 and available("gold") > 0:
+			return true
+		if building.kind == "sawmill" and building.stage == "complete" and 6-int(building.input.get("trunks",0))-_incoming(building.id,"trunks") > 0 and available("trunks") > 0:
+			return true
+		if building.kind == "mill" and building.stage == "complete" and 6-int(building.input.get("corn",0))-_incoming(building.id,"corn") > 0 and available("corn") > 0:
+			return true
+		if building.kind == "bakery" and building.stage == "complete" and 6-int(building.input.get("flour",0))-_incoming(building.id,"flour") > 0 and available("flour") > 0:
+			return true
+		if building.kind == "inn" and building.stage == "complete":
+			for item in ["loaves", "food", "wine"]:
+				if 8-int(building.input.get(item,0))-_incoming(building.id,item) > 0 and available(item) > 0:
+					return true
+		if building.kind == "workshop" and building.stage == "complete" and 6-int(building.input.get("wood",0))-_incoming(building.id,"wood") > 0 and available("wood") > 0:
+			return true
 		for item in ITEMS:
 			if int(building.output[item])-_outgoing(building.id,item) <= 0:
 				continue
 			if building.stage == "cancelled" and _storage_used()+2 <= storage_capacity():
 				return true
-			if can_export and int(stock[item])+_incoming(0,item) < int(export_targets[item]):
+			if can_export and int(stock[item])+_incoming(0,item) < int(export_targets.get(item, 12)):
 				return true
 	return false
 
@@ -490,14 +520,14 @@ func _assign_return(person: Dictionary) -> void:
 	if _road_reaches(person.cell,HUB):
 		person.task = {"type":"delivery","phase":"deliver","source":-1,"building":0,"dest_cell":HUB,"item":person.cargo.item,"amount":person.cargo.amount}
 		_go(person,HUB)
-		person.state = "Devolvendo materiais pela estrada"
+		person.state = tr("Devolvendo materiais pela estrada")
 	else:
-		person.state = "Carga preservada: reconecte a estrada ao depósito"
+		person.state = tr("Carga preservada: reconecte a estrada ao depósito")
 
 
 func _delivery_work(person: Dictionary) -> void:
 	if person.task.get("phase","") == "pickup" and not _road_reaches(person.cell,person.task.dest_cell):
-		person.state = "Aguardando reconexão da estrada"
+		person.state = tr("Aguardando reconexão da estrada")
 		return
 	super._delivery_work(person)
 
@@ -509,7 +539,7 @@ func _assign_builder(person: Dictionary) -> void:
 		if not super._go(person,road.cell): continue
 		road.builder = person.id
 		person.task = {"type":"road","phase":"build","road":road.id,"building":buildings[0].id}
-		person.state = "Indo pavimentar trecho abastecido"
+		person.state = tr("Indo pavimentar trecho abastecido")
 		return
 	for building in buildings:
 		if building.builder != -1 or building.stage not in ["preparing","materials","building"]:
@@ -520,7 +550,7 @@ func _assign_builder(person: Dictionary) -> void:
 			continue
 		building.builder = person.id
 		person.task = {"type":"prepare" if building.stage == "preparing" else "build","building":building.id}
-		person.state = "Indo à obra"
+		person.state = tr("Indo à obra")
 		return
 
 
@@ -553,7 +583,7 @@ func _work(person: Dictionary) -> void:
 		return
 	if person.task.phase == "pickup":
 		if stock.stone < 1:
-			person.state = "Aguardando pedra reservada"
+			person.state = tr("Aguardando pedra reservada")
 			return
 		stock.stone -= 1
 		reserved.stone -= 1
@@ -563,7 +593,7 @@ func _work(person: Dictionary) -> void:
 		person.task.phase = "build"
 		person.goal = road.cell
 		super._go(person,road.cell)
-		person.state = "Levando pedra à frente da estrada"
+		person.state = tr("Levando pedra à frente da estrada")
 		return
 	# Legacy saves may contain a builder already carrying its own road stone.
 	if person.cargo.get("item","") == "stone" and int(person.cargo.get("amount",0)) == 1:
@@ -574,7 +604,7 @@ func _work(person: Dictionary) -> void:
 		return
 	road.stage = "building"
 	road.progress = minf(1.0,float(road.progress)+0.05)
-	person.state = "Construindo estrada"
+	person.state = tr("Construindo estrada")
 	if road.progress >= 1.0:
 		road.stage = "complete"
 		road.reason = ""
@@ -595,11 +625,13 @@ func _assign_workplaces() -> void:
 		for person in workers:
 			if person.role != profession or not person.task.is_empty() or not person.cargo.is_empty():
 				continue
+			if int(person.get("meal", 0)) <= 0:
+				continue
 			if not _go(person,_professional_work_cell(building)) and not _go(person,_builder_work_cell(building)):
 				continue
 			building.worker = person.id
 			person.task = {"type":"produce","building":building.id}
-			person.state = "Indo trabalhar"
+			person.state = tr("Indo trabalhar")
 			break
 
 
@@ -618,27 +650,31 @@ func crop_status(building: Dictionary) -> Dictionary:
 	for i in range(1,4):
 		if progress >= CROP_STAGE_EDGES[i]:index = i
 	var phase: String = CROP_STAGE_KEYS[index]
-	var label: String = CROP_STAGE_LABELS[index]
+	var label: String = tr(CROP_STAGE_LABELS[index])
 	if progress == 0.0:
 		phase = "soil"
-		label = "Solo preparado"
+		label = tr("Solo preparado")
 	var reason := ""
 	var person: Dictionary = _worker(int(building.get("worker",-1)))
-	if building.get("stage","") != "complete":reason = "A horta ainda está em construção"
-	elif not is_building_connected(building):reason = "Conecte a horta ao edifício principal"
+	if building.get("stage","") != "complete":reason = tr("A horta ainda está em construção")
+	elif not is_building_connected(building):reason = tr("Conecte a horta ao edifício principal")
 	elif person.is_empty() or person.role != "farmer" or person.task.get("type","") != "produce" or person.task.get("building",-1) != building.id:
-		reason = "Aguardando horticultor formado"
+		reason = tr("Aguardando horticultor formado")
 	elif not person.route.is_empty() or person.cell != person.goal or person.cell not in [_professional_work_cell(building),_builder_work_cell(building)]:
-		reason = "Horticultor a caminho da horta"
+		reason = tr("Horticultor a caminho da horta")
 	elif int(building.output.food) >= 20:
-		reason = "Reserva de alimentos abastecida: aguardando consumo" if int(stock.food)+_incoming(0,"food") >= _food_stock_target() else "Aguardando retirada dos alimentos pelos serventes"
-	elif paused:reason = "Jogo pausado"
-	elif lost:reason = "Cultivo interrompido"
+		reason = tr("Reserva de alimentos abastecida: aguardando consumo") if int(stock.food)+_incoming(0,"food") >= _food_stock_target() else tr("Aguardando retirada dos alimentos pelos serventes")
+	elif paused:reason = tr("Jogo pausado")
+	elif lost:reason = tr("Cultivo interrompido")
 	return {"stage":phase,"label":label,"progress":progress,"stage_progress":inverse_lerp(CROP_STAGE_EDGES[index],CROP_STAGE_EDGES[index+1],progress),"active":reason.is_empty(),"reason":reason,"completed_cycles":int(building.get("crop_cycles",0)),"seconds_remaining":(1.0-progress)*CROP_CYCLE_SECONDS,"output_amount":CROP_OUTPUT_AMOUNT,"cycle_seconds":CROP_CYCLE_SECONDS}
 
 func _produce(person: Dictionary, building: Dictionary) -> void:
 	if building.is_empty() or building.get("kind","") != "farm":
 		super._produce(person,building)
+		return
+	if int(person.get("meal", 0)) <= 0:
+		_release(person)
+		_seek_inn(person)
 		return
 	if building.stage != "complete":
 		_release(person)
@@ -647,7 +683,7 @@ func _produce(person: Dictionary, building: Dictionary) -> void:
 	if not crop.active:
 		person.state = crop.reason
 		return
-	person.state = "Trabalhando na horta: "+str(crop.label).to_lower()
+	person.state = tr("Trabalhando na horta: {stage}").format({"stage":str(crop.label)})
 	# Each harvest takes exactly 100 fixed simulation ticks. Quantize to that
 	# grid so a JSON roundtrip cannot shift a visible stage by floating drift.
 	building.production = float(roundi(float(building.production)*100.0)+1)/100.0
@@ -657,7 +693,9 @@ func _produce(person: Dictionary, building: Dictionary) -> void:
 		building.output.food += CROP_OUTPUT_AMOUNT
 		produced.food += CROP_OUTPUT_AMOUNT
 		stats.food_produced += CROP_OUTPUT_AMOUNT
-		person.state = "Colheita recolhida: iniciando novo plantio"
+		building.output.corn = int(building.output.get("corn", 0)) + CROP_OUTPUT_AMOUNT
+		produced.corn += CROP_OUTPUT_AMOUNT
+		person.state = tr("Colheita recolhida: iniciando novo plantio")
 
 
 func _update_training() -> void:
@@ -679,26 +717,28 @@ func _update_training() -> void:
 					center = b
 					break
 			if center.is_empty():
-				t.reason = "Conecte a escola ou aguarde um instrutor e uma vaga"
+				t.reason = tr("Conecte a escola ou aguarde um instrutor e uma vaga")
 				continue
-			if available("food") < 2:
-				t.reason = "Faltam 2 alimentos para a formação"
+			if int(center.input.get("gold",0)) < 1:
+				t.reason = tr("Aguardando ouro na escola")
 				continue
-			var candidate: Dictionary = {}
-			for w in workers:
-				if w.role == "resident" and w.task.is_empty() and _go(w,_builder_work_cell(center)):
-					candidate = w
-					break
-			if candidate.is_empty():
-				t.reason = "Sem moradores livres para formação"
+			var spawn: Vector2i = _builder_work_cell(center)
+			if not is_walkable(spawn) or _occupied(spawn):
+				spawn = center.entrance
+			if not is_walkable(spawn) or _occupied(spawn):
+				t.reason = tr("Entrada da escola ocupada")
 				continue
+			var candidate: Dictionary = _add_worker("resident", spawn)
 			t.worker = candidate.id
 			t.building = center.id
 			candidate.task = {"type":"train","building":center.id,"training":t.id}
-			candidate.state = "Indo estudar"
-			_consume_stock("food",2)
+			candidate.goal = spawn
+			candidate.previous = spawn
+			candidate.state = tr("Novo civil em formação")
+			center.input.gold -= 1
+			consumed.gold += 1
 		if not is_building_connected(_building(int(t.building))):
-			t.reason = "Conecte a escola ao edifício principal"
+			t.reason = tr("Conecte a escola ao edifício principal")
 			continue
 		var student := _worker(t.worker)
 		if student.is_empty():
@@ -706,15 +746,15 @@ func _update_training() -> void:
 			t.building = -1
 			continue
 		if not student.route.is_empty() or student.cell != student.goal:
-			t.reason = "Morador indo ao centro"
+			t.reason = tr("Morador indo ao centro")
 			continue
-		t.reason = "Formando "+ROLE_NAMES[t.role].to_lower()
+		t.reason = tr("Formando {role}").format({"role":tr(ROLE_NAMES[t.role]).to_lower()})
 		t.progress = minf(1.0,float(t.progress)+0.1/20.0)
 		if t.progress >= 1.0:
 			student.role = t.role
 			_release(student)
 			completed.append(t)
-			_emit(ROLE_NAMES[t.role]+" formado. Já pode assumir trabalho automaticamente.")
+			_emit(tr("{role} formado. Já pode assumir trabalho automaticamente.").format({"role":tr(ROLE_NAMES[t.role])}),"chime")
 	for t in completed:
 		training.erase(t)
 
@@ -736,7 +776,7 @@ func _detour(person: Dictionary) -> void:
 		person.route = route
 	elif not _person_road_reaches(person,person.cell,person.goal):
 		person.route = []
-		person.state = "Estrada interrompida: aguardando reconexão"
+		person.state = tr("Estrada interrompida: aguardando reconexão")
 
 
 func _yield_worker(person: Dictionary) -> void:
@@ -767,10 +807,10 @@ func _move_workers() -> void:
 				if person.cell == resting:
 					person.route = []
 					person.goal = resting
-					person.state = "Na praça"
+					person.state = tr("Na praça")
 				elif person.goal != resting or person.route.is_empty():
 					super._go(person,resting)
-					person.state = "Voltando à praça"
+					person.state = tr("Voltando à praça")
 		if person.route.is_empty():
 			if not person.task.is_empty() and person.cell != person.goal:
 				_go(person,person.goal)
@@ -815,29 +855,29 @@ func _update_reasons() -> void:
 	super._update_reasons()
 	for building in buildings:
 		if building.kind != "hall" and building.stage not in ["cancelled","preparing","building"] and not is_building_connected(building):
-			building.reason = "Conecte a entrada à estrada do edifício principal"
+			building.reason = tr("Conecte a entrada à estrada do edifício principal")
 	_road_supply_prepare()
 	for road in roads:
 		if road.stage not in ["planned","building"]: continue
 		if road.builder != -1:
-			road.reason = "Construtor pavimentando" if road.stage == "building" else "Construtor a caminho"
+			road.reason = tr("Construtor pavimentando") if road.stage == "building" else tr("Construtor a caminho")
 		elif int(road.get("delivered",0)) == 1:
-			road.reason = "Pedra entregue: aguardando construtor"
+			road.reason = tr("Pedra entregue: aguardando construtor")
 		elif int(road.get("carrier",-1)) != -1:
 			var courier := _worker(int(road.carrier))
-			road.reason = "Pedra em transporte" if not courier.cargo.is_empty() else "Servente buscando pedra"
+			road.reason = tr("Pedra em transporte") if not courier.cargo.is_empty() else tr("Servente buscando pedra")
 		elif not _road_supply_connected.has(road.cell):
-			road.reason = "Conecte o traçado à praça ou à estrada"
+			road.reason = tr("Conecte o traçado à praça ou à estrada")
 		else:
-			road.reason = "Aguardando servente para levar pedra"
+			road.reason = tr("Aguardando servente para levar pedra")
 
 
 func notice() -> String:
 	if not is_building_connected(buildings[1]):
-		return "Trace uma estrada da praça até a entrada da escola para iniciar as formações."
+		return tr("Trace uma estrada da praça até a entrada da escola para iniciar as formações.")
 	for building in buildings:
 		if building.stage == "materials" and not is_building_connected(building):
-			return "A obra aguarda estrada até sua entrada. Os serventes só transportam por caminhos concluídos."
+			return tr("A obra aguarda estrada até sua entrada. Os serventes só transportam por caminhos concluídos.")
 	return super.notice()
 
 
@@ -1129,7 +1169,7 @@ func _assign_road_supply(person: Dictionary) -> bool:
 				continue
 			road.carrier = person.id
 			_go(person,goal)
-			person.state = "Recolhendo pedra do trecho cancelado" if recovery else "Buscando pedra para a estrada"
+			person.state = tr("Recolhendo pedra do trecho cancelado") if recovery else tr("Buscando pedra para a estrada")
 			return true
 	return false
 
@@ -1138,7 +1178,7 @@ func _road_supply_return(person: Dictionary) -> void:
 	person.task.phase = "return"
 	person.task.dest_cell = HUB
 	_go(person,HUB)
-	person.state = "Devolvendo pedra de estrada" if not person.route.is_empty() or person.cell == HUB else "Pedra preservada: reconecte o traçado ao depósito"
+	person.state = tr("Devolvendo pedra de estrada") if not person.route.is_empty() or person.cell == HUB else tr("Pedra preservada: reconecte o traçado ao depósito")
 
 
 func _road_supply_work(person: Dictionary) -> void:
@@ -1152,10 +1192,10 @@ func _road_supply_work(person: Dictionary) -> void:
 				_release(person)
 				return
 			if not _person_road_reaches(person,HUB,road.cell):
-				person.state = "Aguardando reconexão do traçado"
+				person.state = tr("Aguardando reconexão do traçado")
 				return
 			if stock.stone < 1:
-				person.state = "Aguardando pedra reservada"
+				person.state = tr("Aguardando pedra reservada")
 				return
 			stock.stone -= 1
 			reserved.stone -= 1
@@ -1163,7 +1203,7 @@ func _road_supply_work(person: Dictionary) -> void:
 			person.cargo = {"item":"stone","amount":1}
 			person.task.phase = "deliver"
 			_go(person,road.cell)
-			person.state = "Levando pedra ao trecho da estrada"
+			person.state = tr("Levando pedra ao trecho da estrada")
 		"deliver":
 			if road.stage == "cancelled":
 				_road_supply_return(person)
@@ -1181,7 +1221,7 @@ func _road_supply_work(person: Dictionary) -> void:
 			_road_supply_return(person)
 		"return":
 			if _storage_used()+1 > storage_capacity():
-				person.state = "Depósito cheio: pedra preservada"
+				person.state = tr("Depósito cheio: pedra preservada")
 				return
 			stock.stone += 1
 			person.cargo = {}

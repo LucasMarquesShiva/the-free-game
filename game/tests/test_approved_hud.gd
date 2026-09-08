@@ -58,7 +58,7 @@ func run() -> void:
   await frames(10)
   if resolution.x>=1280:
    for card:Control in hud._build_grid.get_children():expect(hud._drawer_scroll.get_global_rect().encloses(card.get_global_rect()),"desktop catalog shows full card without clipping: "+str(resolution))
-  expect(hud._build_grid.get_child_count() == 8 and bounds.encloses(hud._drawer.get_global_rect()),"building drawer fits "+str(resolution))
+  expect(hud._build_grid.get_child_count() == HUD.BUILD_ORDER.size() and bounds.encloses(hud._drawer.get_global_rect()),"building drawer fits "+str(resolution))
   hud._show_help()
   await frames(5)
   expect(bounds.encloses(hud._help.get_global_rect()),"help fits "+str(resolution))

@@ -121,7 +121,8 @@ static func animate(person: Node3D,phase: float,walking: bool,working: bool,load
 			hand_mesh.mesh=_cached(role+"_hand_"+suffix+("_grip" if gripping else ""),func():return Sculpt.hand(role,side,gripping))
 		person.set_meta("grip_state",grip_state)
 	if loaded:
-		var kind: String=cargo_kind if cargo_kind in ["wood","stone","food","grapes","wine"] else "food"
+		var kind: String=cargo_kind
+		if kind not in ["wood","stone","food","grapes","wine","trunks","corn","flour","loaves","gold","axe","bow"]:kind="food"
 		if person.get_meta("cargo_kind")!=kind:
 			rig.cargo_mesh.mesh=_cached("cargo_"+kind,func():return _cargo(kind));person.set_meta("cargo_kind",kind)
 		cargo.rotation.z=wave*0.009 if walking else 0.0
@@ -576,6 +577,36 @@ static func _cargo(kind: String) -> Array:
 		"wine":
 			_add(p,_loft([Vector4(-0.13,0.105,0.105,0),Vector4(-0.11,0.12,0.12,0),Vector4(0,0.132,0.132,0),Vector4(0.11,0.12,0.12,0),Vector4(0.13,0.105,0.105,0)]),Vector3.ZERO,"wood")
 			for y: float in [-0.10,0.1]:_add(p,_loft([Vector4(y,0.125,0.125,0),Vector4(y+0.016,0.125,0.125,0)]),Vector3.ZERO,"metal")
+		"trunks":
+			for i in range(2):
+				var pos:=Vector3(0,0.02+float(i)*0.09,(float(i)-0.5)*0.08)
+				_cylinder(p,pos,0.07,0.52,"wood",Vector3(0,0,PI*0.5))
+				for side: int in [-1,1]:_cylinder(p,pos+Vector3(float(side)*0.26,0,0),0.066,0.004,"wood_end",Vector3(0,0,PI*0.5))
+			for x: float in [-0.11,0.11]:_line(p,Vector3(x,-0.06,-0.12),Vector3(x,0.16,-0.10),0.006,"leather_dark")
+		"corn":
+			_add(p,_loft([Vector4(-0.12,0.17,0.11,0),Vector4(-0.105,0.19,0.125,0),Vector4(0.027,0.22,0.145,0)]),Vector3.ZERO,"wood")
+			for i in range(6):_oval(p,Vector3((float(i%3)-1.0)*0.09,0.04+float(i/3)*0.05,(float(i%2)-0.5)*0.08),Vector3(0.055,0.09,0.04),"gold",Vector3(0.4,0.2*float(i),0.15))
+		"flour":
+			_add(p,_loft([Vector4(-0.12,0.17,0.11,0),Vector4(-0.105,0.19,0.125,0),Vector4(0.027,0.22,0.145,0)]),Vector3.ZERO,"wood")
+			for i in range(2):
+				_oval(p,Vector3((float(i)-0.5)*0.12,0.06,0.0),Vector3(0.09,0.11,0.07),"chalk")
+				_cylinder(p,Vector3((float(i)-0.5)*0.12,0.16,0.0),0.03,0.03,"linen")
+		"loaves":
+			_add(p,_loft([Vector4(-0.12,0.17,0.11,0),Vector4(-0.105,0.19,0.125,0),Vector4(0.027,0.22,0.145,0)]),Vector3.ZERO,"wood")
+			for i in range(5):_oval(p,Vector3((float(i%3)-1.0)*0.08,0.03+float(i/3)*0.045,(float(i%2)-0.5)*0.07),Vector3(0.06,0.04,0.10),"bread",Vector3(0,0.12*float(i),0.08))
+		"gold":
+			_box(p,Vector3(0,-0.05,0),Vector3(0.36,0.03,0.22),"wood")
+			for i in range(4):_box(p,Vector3((float(i%2)-0.5)*0.12,0.02+float(i/2)*0.045,0),Vector3(0.11,0.04,0.16),"gold")
+		"axe":
+			_box(p,Vector3(0,-0.03,0),Vector3(0.34,0.08,0.22),"wood")
+			for i in range(2):
+				_box(p,Vector3((float(i)-0.5)*0.11,0.06,0.0),Vector3(0.04,0.16,0.04),"wood")
+				_box(p,Vector3((float(i)-0.5)*0.11,0.16,0.06),Vector3(0.10,0.04,0.14),"metal")
+		"bow":
+			_box(p,Vector3(0,-0.03,0),Vector3(0.30,0.06,0.20),"wood")
+			for i in range(2):
+				_cylinder(p,Vector3((float(i)-0.5)*0.08,0.08,0.0),0.018,0.28,"wood",Vector3(0,0,0.35 if i==0 else -0.35))
+				_line(p,Vector3((float(i)-0.5)*0.08,0.20,-0.04),Vector3((float(i)-0.5)*0.08,-0.04,0.04),0.004,"leather_dark")
 		_:
 			_add(p,_loft([Vector4(-0.12,0.17,0.11,0),Vector4(-0.105,0.19,0.125,0),Vector4(0.027,0.22,0.145,0)]),Vector3.ZERO,"wood")
 			for y: float in [-0.105,-0.079,-0.053,-0.027,0.0,0.023]:_add(p,_loft([Vector4(y,0.215,0.14,0),Vector4(y+0.008,0.216,0.141,0)]),Vector3.ZERO,"wood_end")

@@ -4,8 +4,8 @@ extends RefCounted
 const Core = preload("res://presentation/approved_buildings.gd")
 const Base = preload("res://presentation/approved_primitives.gd")
 const EarthYard = preload("res://presentation/approved_earth_yard.gd")
-const KINDS := ["house","store","lumber","quarry","farm","vineyard","winery"]
-const IDS := {"house":"bld_02_casas","store":"bld_03_armazem","lumber":"bld_06_cabana_do_lenhador","quarry":"bld_08_pedreira","farm":"bld_12_horta","vineyard":"kit_03_lavouras_e_vinhedos","winery":"bld_20_vinicola"}
+const KINDS := ["house","store","lumber","sawmill","quarry","farm","vineyard","winery","inn","mill","bakery","workshop","barracks"]
+const IDS := {"house":"bld_02_casas","store":"bld_03_armazem","lumber":"bld_06_cabana_do_lenhador","sawmill":"bld_07_serraria","quarry":"bld_08_pedreira","farm":"bld_12_horta","vineyard":"kit_03_lavouras_e_vinhedos","winery":"bld_20_vinicola","inn":"bld_19_taverna","mill":"bld_14_moinho","bakery":"bld_15_padaria","workshop":"bld_22_carpintaria","barracks":"bld_26_quartel"}
 const WOOD := Color("81582f")
 const DARK_WOOD := Color("4d3521")
 const LIGHT_WOOD := Color("ae8248")
@@ -28,9 +28,15 @@ static func building(kind: String) -> Node3D:
 			"store": _store(b)
 			"winery": _winery(b)
 			"lumber": _lumber(b)
+			"sawmill": _sawmill(b)
 			"quarry": _quarry(b)
 			"farm": _farm(b)
 			"vineyard": _vineyard(b)
+			"inn": _inn(b)
+			"mill": _mill(b)
+			"bakery": _bakery(b)
+			"workshop": _workshop(b)
+			"barracks": _barracks(b)
 		for key in Base.MATERIAL_KEYS:
 			if not _materials.has(key):
 				_materials[key] = Base._material(key).duplicate()
@@ -475,6 +481,47 @@ static func _lumber(b) -> void:
 		var at := Vector3(-1.69+b.rng.randf()*1.4,0.22,-0.9+b.rng.randf()*2.7)
 		_box(b,at,Vector3(0.09,0.018,0.16),LIGHT_WOOD,"wood",Vector3(0,b.rng.randf()*TAU,0))
 
+static func _sawmill(b) -> void:
+	_base(b)
+	# Closed hut on +X; open teal workshop on -X. Serra, logs and timber piles.
+	Core._masonry(b,Vector3(0.78,0.23,-0.50),1.86,2.10,1.16)
+	_plaster_floor(b,Vector3(0.78,1.45,-0.50),1.88,2.12,0.86,true)
+	_roof(b,Vector3(0.78,2.38,-0.50),2.38,2.56,1.06,true)
+	Core._door(b,Vector3(0.78,0.34,0.70),0.66,1.78)
+	Core._steps(b,Vector3(0.78,0.17,0.94),0.88,3)
+	Core._small_window(b,Vector3(1.81,1.74,-0.38),0.46,0.54,PI*0.5,true)
+	_dormer(b,Vector3(0.88,2.74,0.20),0.48)
+	Core._chimney(b,Vector3(1.08,3.02,-0.96),0.98,0.43)
+	for x in [-1.92,-0.26]:
+		for z in [-1.28,0.86]:
+			Core._masonry(b,Vector3(x,0.20,z),0.26,0.26,0.40)
+			_box(b,Vector3(x,1.48,z),Vector3(0.16,1.78,0.16),WOOD)
+	Core._lean_roof(b,Vector3(-1.10,2.32,-0.22),2.10,1.72,0.38,true)
+	Core._gable(b,Vector3(-1.10,2.28,0.96),1.72,0.82)
+	_circular_saw(b,Vector3(-1.10,0.78,0.08),0.46)
+	Base._workbench(b,Vector3(-1.10,0.21,0.92),1.18)
+	_saw(b,Vector3(-1.10,1.10,0.94),0.82)
+	for row in range(3):
+		for col in range(3-row):
+			Base._log(b,Vector3(-1.58+col*0.36+row*0.18,0.42+row*0.30,-0.62),0.18,1.48)
+	for layer in range(4):
+		for board in range(3):
+			_box(b,Vector3(-0.72+board*0.20,0.26+layer*0.075,1.78),Vector3(0.18,0.07,0.62),b.shade(WOOD,0.10))
+	Core._banner(b,Vector3(-1.10,3.12,1.02),0.46,0.82)
+	_beam(b,Vector3(-1.78,2.28,-0.22),Vector3(-0.42,2.28,-0.22),0.08,WOOD)
+
+static func _circular_saw(b, at: Vector3, radius: float) -> void:
+	# Disc faces +Z so the blade is readable from the front of the lot.
+	Base._cylinder(b,at,radius,0.036,Color("b4b7b0"),"metal",Vector3(PI*0.5,0,0))
+	Base._cylinder(b,at,0.08,0.09,DARK,"metal",Vector3(PI*0.5,0,0))
+	for i in range(16):
+		var angle := float(i)*TAU/16.0
+		_box(b,at+Vector3(cos(angle)*radius,sin(angle)*radius,0),Vector3(0.07,0.08,0.04),Color("a5aba1"),"metal",Vector3(0,0,angle))
+	for side in [-1.0,1.0]:
+		_box(b,at+Vector3(side*0.52,0.02,0),Vector3(0.10,1.18,0.10),WOOD)
+	_box(b,at+Vector3(0,0.62,0),Vector3(1.14,0.10,0.10),DARK_WOOD)
+	_box(b,at+Vector3(0,-0.02,0),Vector3(0.16,0.16,0.16),DARK,"metal")
+
 static func _saw(b, at: Vector3, length: float) -> void:
 	b.quad(at+Vector3(-length*0.5,0,0),at+Vector3(length*0.5,0,0),at+Vector3(length*0.5,0.17,0),at+Vector3(-length*0.5,0.17,0),"metal",Color("afb2aa"))
 	for i in range(12):
@@ -652,3 +699,152 @@ static func _climbing_vine(b, at: Vector3, height: float, side: float) -> void:
 			_beam(b,next,tip,0.012,WOOD)
 			_leaf(b,tip,0.23+b.rng.randf()*0.10,Vector3(PI*0.5,0,side*b.rng.randf_range(-0.45,0.45)),b.shade(LEAF,0.15))
 		if i%4 == 0: _grapes(b,next+Vector3(0,0,0.10),0.80)
+
+static func _inn(b) -> void:
+	_base(b)
+	var at := Vector3(0.04,0.23,-0.42)
+	Core._masonry(b,at,2.48,2.18,1.08)
+	_plaster_floor(b,at+Vector3.UP*1.14,2.50,2.20,1.72,true)
+	_roof(b,at+Vector3.UP*2.92,3.02,2.68,1.18,true)
+	_dormer(b,Vector3(-0.62,3.42,0.28),0.50)
+	Core._chimney(b,Vector3(0.72,3.18,-0.88),1.28,0.42)
+	Core._door(b,Vector3(0.04,0.33,0.82),0.70,1.80)
+	Core._steps(b,Vector3(0.04,0.17,1.04),0.90,3)
+	Core._small_window(b,Vector3(-0.72,2.28,0.78),0.40,0.52)
+	Core._small_window(b,Vector3(0.78,2.28,0.78),0.40,0.52)
+	Core._small_window(b,Vector3(1.40,1.72,-0.30),0.44,0.56,PI*0.5,true)
+	_awning(b,Vector3(1.18,1.88,0.72),1.22,0.70,0.22,PI*0.5)
+	_box(b,Vector3(1.28,0.92,0.86),Vector3(0.62,0.10,0.38),WOOD)
+	for i in range(3): Base._barrel(b,Vector3(-1.58+i*0.36,0.20,1.42),0.62)
+	_bench(b,Vector3(-1.42,0.20,0.72),0.86,0.15)
+	_bench(b,Vector3(1.46,0.20,1.42),0.80,PI*0.5)
+	Core._banner(b,Vector3(0.04,3.22,0.92),0.42,0.74)
+	_beam(b,Vector3(-1.62,2.42,1.02),Vector3(-0.72,2.42,1.02),0.06,WOOD)
+	Base._cylinder(b,Vector3(-1.18,2.10,1.08),0.13,0.22,Color("8a5a28"),"plaster",Vector3(PI*0.5,0,0))
+	Base._cylinder(b,Vector3(-1.18,2.10,1.08),0.08,0.10,Color("d8c49a"),"plaster",Vector3(PI*0.5,0,0))
+	_box(b,Vector3(-1.18,2.26,1.08),Vector3(0.06,0.16,0.06),DARK_WOOD)
+	_box(b,Vector3(1.72,0.72,1.58),Vector3(0.36,0.62,0.08),DARK_WOOD)
+	_box(b,Vector3(1.72,0.72,1.60),Vector3(0.30,0.52,0.02),Color("c4b387"),"plaster")
+	for pair in [[Vector3(-2.08,0.18,-1.72),Vector3(-2.08,0.18,1.86)],[Vector3(2.08,0.18,-1.72),Vector3(2.08,0.18,1.86)],[Vector3(-2.08,0.18,1.86),Vector3(-0.62,0.18,1.86)],[Vector3(0.68,0.18,1.86),Vector3(2.08,0.18,1.86)]]:
+		_yard_fence(b,pair[0],pair[1],0.52)
+	Base._crate(b,Vector3(1.62,0.20,-1.28),0.72)
+
+static func _mill(b) -> void:
+	_base(b)
+	Core._masonry(b,Vector3(0.02,0.22,-0.28),1.86,1.86,1.62)
+	_plaster_floor(b,Vector3(0.02,1.90,-0.28),1.68,1.68,1.28)
+	_roof(b,Vector3(0.02,3.22,-0.28),2.22,2.22,1.12)
+	Core._door(b,Vector3(0.02,0.34,0.76),0.62,1.70)
+	Core._steps(b,Vector3(0.02,0.17,0.98),0.80,3)
+	Core._small_window(b,Vector3(1.00,2.38,-0.28),0.38,0.48,PI*0.5,true)
+	Core._small_window(b,Vector3(-0.96,2.38,-0.28),0.38,0.48,-PI*0.5,true)
+	Core._banner(b,Vector3(0.02,2.48,0.82),0.38,0.66)
+	_mill_sails(b,Vector3(0.02,3.02,0.88),1.22)
+	_sack(b,Vector3(-1.52,0.20,1.28),0.58)
+	_sack(b,Vector3(-1.18,0.20,1.48),0.52)
+	_cart(b,Vector3(1.48,0.17,1.08),0.58,0.74,-0.18,"sacks")
+	Core._lean_roof(b,Vector3(-1.28,1.72,-0.28),1.36,0.70,0.24,true,-PI*0.5)
+	for z in [-0.72,0.18]: _box(b,Vector3(-1.78,0.86,z),Vector3(0.12,1.28,0.12),WOOD)
+	_yard_fence(b,Vector3(-2.04,0.18,0.72),Vector3(-2.04,0.18,1.72),0.46)
+	_yard_fence(b,Vector3(-2.04,0.18,1.72),Vector3(-0.40,0.18,1.72),0.46)
+
+static func _mill_sails(b, at: Vector3, length: float) -> void:
+	Base._cylinder(b,at,0.15,0.20,DARK_WOOD,"wood",Vector3(PI*0.5,0,0))
+	Base._cylinder(b,at+Vector3(0,0,0.12),0.07,0.10,DARK,"metal",Vector3(PI*0.5,0,0))
+	_box(b,at+Vector3(0,0,-0.28),Vector3(0.10,0.10,0.58),DARK_WOOD)
+	for i in range(4):
+		var angle := float(i)*PI*0.5+0.32
+		var dir := Vector3(cos(angle),sin(angle),0)
+		_box(b,at+dir*(length*0.52),Vector3(0.09,length,0.05),WOOD,"wood",Vector3(0,0,angle))
+		_box(b,at+dir*(length*0.54)+Vector3(0,0,0.04),Vector3(0.38,length*0.70,0.02),Color("c4b387"),"cloth",Vector3(0,0,angle))
+
+static func _bakery(b) -> void:
+	_base(b)
+	var at := Vector3(-0.18,0.23,-0.46)
+	Core._masonry(b,at,2.22,2.06,1.12)
+	_plaster_floor(b,at+Vector3.UP*1.18,2.24,2.08,1.48,true)
+	_roof(b,at+Vector3.UP*2.72,2.72,2.52,1.10,true)
+	_dormer(b,Vector3(-0.18,3.18,0.22),0.48)
+	Core._chimney(b,Vector3(0.62,3.02,-0.86),1.36,0.46)
+	Core._door(b,Vector3(-0.18,0.33,0.72),0.64,1.74)
+	Core._steps(b,Vector3(-0.18,0.17,0.94),0.84,3)
+	Core._small_window(b,Vector3(-0.86,2.12,0.68),0.38,0.50)
+	_awning(b,Vector3(0.72,1.78,0.78),1.28,0.62,0.20)
+	_box(b,Vector3(0.72,0.86,0.86),Vector3(1.10,0.12,0.42),WOOD)
+	for i in range(4): _loaf_basket(b,Vector3(0.28+i*0.28,0.98,0.86),0.72)
+	for i in range(3): _loaf_basket(b,Vector3(-1.42+i*0.28,0.20,1.48),0.80)
+	Core._masonry(b,Vector3(1.42,0.22,-0.18),0.92,1.10,1.18)
+	Base._cylinder(b,Vector3(1.42,1.28,-0.18),0.34,0.28,STONE,"stone",Vector3(PI*0.5,0,0))
+	Base._cylinder(b,Vector3(1.42,1.28,0.02),0.16,0.08,Color("c19741"),"metal",Vector3(PI*0.5,0,0))
+	for layer in range(3):
+		for board in range(2): _box(b,Vector3(1.62+board*0.16,0.24+layer*0.08,0.72),Vector3(0.14,0.07,0.42),b.shade(WOOD,0.10))
+	_sack(b,Vector3(-1.52,0.20,0.62),0.56)
+	_sack(b,Vector3(-1.22,0.20,0.86),0.50)
+	Core._banner(b,Vector3(-0.18,3.08,0.86),0.40,0.70)
+	_beam(b,Vector3(-1.48,2.28,0.86),Vector3(-0.72,2.28,0.86),0.05,WOOD)
+	for i in range(2): _oval(b,Vector3(-1.10,2.02,0.92)+Vector3(i*0.08,0,0),0.10)
+
+static func _loaf_basket(b, at: Vector3, scale_factor: float = 1.0) -> void:
+	_box(b,at,Vector3(0.28,0.08,0.22)*scale_factor,WOOD)
+	for i in range(2):
+		Base._ellipsoid(b,at+Vector3((float(i)-0.5)*0.08,0.08,0)*scale_factor,Vector3(0.09,0.05,0.12)*scale_factor,Color("c19357"),"plaster")
+
+static func _oval(b, at: Vector3, size: float) -> void:
+	Base._ellipsoid(b,at,Vector3(size,size*0.7,size*0.55),Color("c19357"),"plaster")
+
+static func _workshop(b) -> void:
+	_base(b)
+	Core._masonry(b,Vector3(0.72,0.23,-0.46),1.72,2.02,1.14)
+	_plaster_floor(b,Vector3(0.72,1.43,-0.46),1.74,2.04,0.82,true)
+	_roof(b,Vector3(0.72,2.32,-0.46),2.18,2.46,1.02,true)
+	Core._door(b,Vector3(0.72,0.34,0.70),0.64,1.76)
+	Core._steps(b,Vector3(0.72,0.17,0.92),0.84,3)
+	Core._small_window(b,Vector3(1.70,1.68,-0.36),0.42,0.52,PI*0.5,true)
+	_dormer(b,Vector3(0.78,2.68,0.16),0.46)
+	Core._chimney(b,Vector3(1.02,2.96,-0.92),0.96,0.40)
+	for x in [-1.86,-0.22]:
+		for z in [-1.18,0.78]:
+			Core._masonry(b,Vector3(x,0.20,z),0.24,0.24,0.38)
+			_box(b,Vector3(x,1.36,z),Vector3(0.14,1.58,0.14),WOOD)
+	Core._lean_roof(b,Vector3(-1.04,2.18,-0.20),1.96,1.58,0.34,true)
+	_awning(b,Vector3(-1.04,1.92,0.92),1.72,0.58,0.18)
+	Base._workbench(b,Vector3(-1.04,0.21,0.86),1.16)
+	_saw(b,Vector3(-1.04,1.10,0.88),0.78)
+	_wheel(b,Vector3(-1.72,0.48,1.42),0.28)
+	for i in range(3):
+		_box(b,Vector3(-1.62+i*0.12,0.72,1.58),Vector3(0.05,1.22,0.05),WOOD,"wood",Vector3(0.08,0,0.12*float(i)))
+	for i in range(2):
+		Base._cylinder(b,Vector3(-0.52,0.62+i*0.28,1.52),0.20,0.04,WOOD,"wood",Vector3(PI*0.5,0.2,0))
+		_box(b,Vector3(-0.52,0.62+i*0.28,1.52),Vector3(0.22,0.04,0.22),LIGHT_WOOD)
+	for row in range(2):
+		for col in range(3-row):
+			Base._log(b,Vector3(-1.48+col*0.32+row*0.16,0.40+row*0.26,-0.58),0.16,1.28)
+	for layer in range(3):
+		for board in range(3): _box(b,Vector3(-0.68+board*0.18,0.24+layer*0.07,1.72),Vector3(0.16,0.06,0.52),b.shade(WOOD,0.10))
+	_cart(b,Vector3(1.62,0.17,-0.72),0.64,0.92,0.08)
+	Core._banner(b,Vector3(-1.04,3.02,0.96),0.42,0.74)
+
+static func _barracks(b) -> void:
+	_base(b)
+	var at := Vector3(-0.36,0.23,-0.52)
+	Core._masonry(b,at,2.28,2.10,1.28)
+	_plaster_floor(b,at+Vector3.UP*1.34,2.30,2.12,1.22)
+	_roof(b,at+Vector3.UP*2.62,2.78,2.56,1.08,true)
+	Core._door(b,Vector3(-0.36,0.34,0.68),0.68,1.78)
+	Core._steps(b,Vector3(-0.36,0.17,0.90),0.88,3)
+	Core._small_window(b,Vector3(-1.12,2.08,0.64),0.36,0.48)
+	Core._small_window(b,Vector3(0.38,2.08,0.64),0.36,0.48)
+	Core._small_window(b,Vector3(0.90,1.72,-0.40),0.40,0.52,PI*0.5,true)
+	Core._chimney(b,Vector3(0.42,3.02,-0.92),1.08,0.42)
+	Core._banner(b,Vector3(-0.36,3.02,0.78),0.44,0.78)
+	_yard_fence(b,Vector3(0.72,0.18,0.86),Vector3(0.72,0.18,1.86),0.48)
+	_yard_fence(b,Vector3(0.72,0.18,1.86),Vector3(1.96,0.18,1.86),0.48)
+	_yard_fence(b,Vector3(1.96,0.18,0.86),Vector3(1.96,0.18,1.86),0.48)
+	_box(b,Vector3(1.34,0.86,1.18),Vector3(0.10,1.18,0.10),WOOD)
+	_box(b,Vector3(1.34,1.42,1.18),Vector3(0.28,0.42,0.16),Color("c4b387"),"plaster")
+	_box(b,Vector3(1.70,0.72,1.52),Vector3(0.08,1.02,0.08),WOOD)
+	for i in range(3): _box(b,Vector3(1.70,0.42+i*0.22,1.58),Vector3(0.22,0.04,0.22),WOOD)
+	for i in range(4): _box(b,Vector3(0.96+i*0.08,0.78,1.72),Vector3(0.04,1.10,0.04),WOOD,"wood",Vector3(0.06,0,0))
+	Base._crate(b,Vector3(1.62,0.20,0.72),0.70)
+	Base._barrel(b,Vector3(-1.62,0.20,1.42),0.70)
+	_awning(b,Vector3(1.28,1.72,-0.08),1.10,0.58,0.18,PI*0.5)

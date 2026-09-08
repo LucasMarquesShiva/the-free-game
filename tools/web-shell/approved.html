@@ -10,40 +10,40 @@
   <link rel="stylesheet" href="@@CSS@@">
 </head>
 <body>
-  <canvas id="canvas" aria-label="The Free Game, cenário da vila" tabindex="0">Seu navegador não consegue exibir o jogo. Tente abrir o link em um navegador atualizado.</canvas>
+  <canvas id="canvas" aria-label="The Free Game, cenário da vila" data-i18n-aria="canvasAria" tabindex="0">Seu navegador não consegue exibir o jogo. Tente abrir o link em um navegador atualizado.</canvas>
   <main id="status" aria-labelledby="game-title">
     <div class="entry">
       <div class="entry-copy">
-        <p class="eyebrow">THE FREE GAME <span>VERSÃO DE TESTES</span></p>
+        <p class="eyebrow">THE FREE GAME <span data-i18n="versionBadge">VERSÃO DE TESTES</span></p>
         <h1 id="game-title">The Free<br>Game</h1>
-        <p class="intro">Você planeja a vila.<br>Seus moradores dão vida a ela.</p>
+        <p class="intro" data-i18n-html="intro">Você planeja a vila.<br>Seus moradores dão vida a ela.</p>
         <div class="loading" id="loading-state">
-          <div class="progress-heading"><p id="status-label" role="status">Preparando o jogo…</p><span id="status-percent" aria-hidden="true"></span></div>
-          <progress id="status-progress" aria-label="Download do jogo"></progress>
-          <p id="status-detail">O primeiro carregamento pode levar um pouco mais de tempo.</p>
+          <div class="progress-heading"><p id="status-label" role="status" data-i18n="preparingGame">Preparando o jogo…</p><span id="status-percent" aria-hidden="true"></span></div>
+          <progress id="status-progress" aria-label="Download do jogo" data-i18n-aria="downloadAria"></progress>
+          <p id="status-detail" data-i18n="firstLoad">O primeiro carregamento pode levar um pouco mais de tempo.</p>
         </div>
         <section id="failure-state" aria-labelledby="failure-title" hidden>
-          <h2 id="failure-title" tabindex="-1">Não foi possível abrir a vila</h2>
-          <p id="failure-message">Confira sua conexão e tente novamente.</p>
-          <details id="technical-details"><summary>Detalhes do erro</summary><pre id="failure-detail"></pre></details>
+          <h2 id="failure-title" tabindex="-1" data-i18n="failureTitle">Não foi possível abrir a vila</h2>
+          <p id="failure-message" data-i18n="checkConnection">Confira sua conexão e tente novamente.</p>
+          <details id="technical-details"><summary data-i18n="errorDetails">Detalhes do erro</summary><pre id="failure-detail"></pre></details>
         </section>
-        <button id="retry" class="primary" type="button" hidden>Tentar novamente</button>
-        <p id="loading-tip" class="tip">Seu primeiro caminho: ligue a praça à escola com uma estrada.</p>
+        <button id="retry" class="primary" type="button" hidden data-i18n="retry">Tentar novamente</button>
+        <p id="loading-tip" class="tip" data-i18n="loadingTip">Seu primeiro caminho: ligue a praça à escola com uma estrada.</p>
       </div>
-      <figure class="village-art" aria-label="Modelos 3D usados no jogo">
-        <img class="hall" src="@@HALL@@" width="384" height="320" alt="Prédio principal de pedra e madeira, com telhados de barro e uma torre de relógio">
+      <figure class="village-art" aria-label="Modelos 3D usados no jogo" data-i18n-aria="villageArtAria">
+        <img class="hall" src="@@HALL@@" width="384" height="320" alt="Prédio principal de pedra e madeira, com telhados de barro e uma torre de relógio" data-i18n-alt="hallAlt">
         <img class="servant" src="@@SERVANT@@" width="256" height="320" alt="" aria-hidden="true">
       </figure>
     </div>
-    <footer><span>Lucas Marques, from Shiva</span><a href="https://github.com/LucasMarquesShiva/the-free-game" target="_blank" rel="noopener noreferrer">Código e artes · construa sua versão ↗</a></footer>
+    <footer><span>Lucas Marques, from Shiva</span><a href="https://github.com/LucasMarquesShiva/the-free-game" target="_blank" rel="noopener noreferrer" data-i18n="footerLink">Código e artes · construa sua versão ↗</a></footer>
   </main>
-  <aside id="screen-hint" aria-label="Tamanho da janela" hidden>
-    <p>Amplie a janela para ver todos os controles.</p>
-    <button id="fullscreen" type="button">Tela cheia</button>
-    <button id="dismiss-hint" type="button" aria-label="Fechar aviso">×</button>
+  <aside id="screen-hint" aria-label="Tamanho da janela" data-i18n-aria="screenHintAria" hidden>
+    <p data-i18n="enlargeWindow">Amplie a janela para ver todos os controles.</p>
+    <button id="fullscreen" type="button" data-i18n="fullscreen">Tela cheia</button>
+    <button id="dismiss-hint" type="button" aria-label="Fechar aviso" data-i18n-aria="dismissHint">×</button>
     <p id="screen-status" role="status"></p>
   </aside>
-  <noscript><section class="noscript"><h1>Ative o JavaScript para jogar</h1><p>O The Free Game precisa dele para abrir a vila. Ative-o neste site e recarregue a página.</p></section></noscript>
+  <noscript><section class="noscript"><h1 data-i18n="noscriptTitle">Ative o JavaScript para jogar</h1><p data-i18n="noscriptBody">O The Free Game precisa dele para abrir a vila. Ative-o neste site e recarregue a página.</p></section></noscript>
   <script>
 const GODOT_CONFIG = @@CONFIG@@;
 const GODOT_THREADS_ENABLED = @@THREADS@@;

@@ -31,7 +31,7 @@ var _last_reason: String = ""
 var _order_finished: bool = false
 
 
-func setup(walkable: Callable, pathfinder: Callable) -> void:
+func setup(walkable: Callable, pathfinder: Callable, garrison: bool = true) -> void:
 	_walkable = walkable
 	_pathfinder = pathfinder
 	units.clear()
@@ -49,6 +49,10 @@ func setup(walkable: Callable, pathfinder: Callable) -> void:
 	_risk_ticks = 0
 	_last_reason = ""
 	_order_finished = false
+	if not garrison:
+		_initial_health = 1
+		_notice("ready", "Quartel pronto. Recrute soldados com equipamento.")
+		return
 	for index in range(8):
 		_spawn("ally", "lancer", Vector2i(17 + index / 4, 11 + index % 4))
 		units.back().reserve = index >= 6

@@ -36,9 +36,15 @@ func run()->void:
 		if p.role=="servant":expect(p.cell==positions[p.id] and p.task.is_empty(),"idle producer does not send a parked servant back to the hub")
 	order(sim,"train",{"role":"lumberjack"})
 	steps(sim,1000)
-	expect(sim.produced.wood>0 and sim.stock.wood>=100,"production fills output while stock is above its existing target")
-	expect(not sim._has_pending_road_delivery(),"surplus output above stock target creates no collection demand")
-	expect(idle_servants(sim)==5,"surplus output does not trigger an idle traffic loop")
+	expect(int(sim.produced.get("trunks",0))>0 and sim.stock.wood>=100,"woodcutter fills trunk output while timber stock stays above its target")
+	var parked:=false
+	for i in range(1500):
+		sim.step();expect(sim.conservation_errors().is_empty(),"resources conserved while trunks are collected")
+		if not sim._has_pending_road_delivery() and idle_servants(sim)==5:
+			parked=true
+			break
+	expect(parked and not sim._has_pending_road_delivery(),"servants re-park after trunks reach the storehouse target")
+	expect(idle_servants(sim)==5,"trunk collection does not leave an idle traffic loop")
 	order(sim,"build",{"kind":"house","cell":Vector2i(16,11)})
 	var branch:Array[Vector2i]=[]
 	for x in range(13,17):branch.append(Vector2i(x,13))

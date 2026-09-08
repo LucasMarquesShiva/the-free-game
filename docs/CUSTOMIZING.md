@@ -34,6 +34,27 @@ The in-game interface is in `game/ui/approved_hud.gd`. The browser loading scree
 is in `tools/web-shell/`. Run `export-web` after editing the loading screen; it
 is embedded into the exported HTML by `tools/prepare_web.py`.
 
+## Localization / 本地化
+
+Player-visible text uses Portuguese as the gettext key. Wrap a new string in
+`tr("Portuguese source")` and add the same key to `game/locale/en.json` and
+`game/locale/zh_CN.json`. Runtime loading lives in `game/core/locale.gd`.
+
+To add another language, create `game/locale/<code>.json` with that same key set
+and append the code to `Locale.SUPPORTED` (and its display name). The game
+resolves language from `user://settings.cfg`, then `OS.get_locale_language()`,
+then Portuguese.
+
+The HUD keeps Godot's embedded default font, which already falls back to system
+fonts for missing glyphs, so Chinese renders on desktop without extra font
+files. The browser export has no system fonts and does not bundle a CJK font;
+Chinese on the web depends on the visitor's browser. A subset font packed with
+the export is follow-up work.
+
+Tests that assert Portuguese text and instantiate the full game should call
+`Locale.set_language("pt_BR", false)` first so the OS language cannot change
+the result.
+
 ## Change the project name in your fork
 
 Change `config/name` in `game/project.godot`, visible HUD labels and the browser
