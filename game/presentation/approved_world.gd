@@ -143,7 +143,13 @@ func sync(delta: float) -> void:
   var continuing:bool=not worker.route.is_empty() and int(worker.get("wait",0))==0
   var walking: bool=(fraction<1.0 or continuing) and direction.length_squared()>0.01
   if walking:actor.rotation.y=lerp_angle(actor.rotation.y,atan2(-direction.x,-direction.z),minf(1,delta*visual_speed*14))
-  var working: bool=not walking and (worker.state.contains("Constru") or worker.state.contains("Produz") or worker.state.contains("Trabalh") or worker.state.contains("Paviment") or worker.state.contains("Prepar") or worker.state.contains("Ensin"))
+  var chopping: bool=not walking and str(worker.task.get("type",""))=="harvest"
+  if chopping:
+   var tree: Vector2i=worker.task.get("tree",Vector2i(-1,-1))
+   var toward:=Vector2(tree.x-worker.cell.x,tree.y-worker.cell.y)
+   if toward.length_squared()>0.0:
+    actor.rotation.y=lerp_angle(actor.rotation.y,atan2(-toward.x,-toward.y),minf(1,delta*visual_speed*14))
+  var working: bool=chopping or (not walking and (worker.state.contains("Constru") or worker.state.contains("Produz") or worker.state.contains("Trabalh") or worker.state.contains("Paviment") or worker.state.contains("Prepar") or worker.state.contains("Ensin") or worker.state.contains("Cort")))
   if detail_index==detail_cursor:People.set_quality(actor,detail_tier)
   detail_index+=1
   var gait_phase:float=actor.get_meta("gait_phase",worker.id*0.83)

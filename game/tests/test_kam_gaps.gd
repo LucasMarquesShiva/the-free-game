@@ -150,8 +150,12 @@ func _test_trees_trunks_timber() -> void:
 	expect(wait_complete(sim, "lumber", 5000), "woodcutter hut completes")
 	var trunks := 0
 	var chopped := 0
+	var saw_chopping := false
 	for i in range(2500):
 		sim.step()
+		for person in sim.workers:
+			if str(person.state).contains("Cort"):
+				saw_chopping = true
 		trunks = int(sim.produced.get("trunks", 0))
 		if sim.harvest_map != null:
 			for cell in sim.harvest_map.tree_cells():
@@ -160,6 +164,7 @@ func _test_trees_trunks_timber() -> void:
 					break
 		if trunks >= 1:
 			break
+	expect(saw_chopping, "woodcutter spends time chopping a standing tree")
 	expect(trunks >= 1, "woodcutters harvest map trees into trunks")
 	expect(chopped >= 1, "a grove cell is marked harvested")
 	expect(sim.command("build", {"kind": "sawmill", "cell": Vector2i(16, 11)}).ok, "sawmill places")

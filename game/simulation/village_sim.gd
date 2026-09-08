@@ -869,9 +869,17 @@ func _chop_tree(w: Dictionary, hut: Dictionary) -> void:
 	if harvest_map == null or hut.is_empty():
 		_release(w)
 		return
+	if int(w.get("meal", 0)) <= 0:
+		_release(w)
+		_seek_inn(w)
+		return
 	var tree: Vector2i = w.task.get("tree", Vector2i(-1, -1))
 	if not harvest_map.has_tree(tree):
 		_release(w)
+		return
+	w.state = tr("Cortando árvore")
+	w.task.progress = float(w.task.get("progress", 0.0)) + 0.1 / 6.0
+	if float(w.task.progress) < 1.0:
 		return
 	harvest_map.harvest(tree)
 	hut.output.trunks = int(hut.output.get("trunks", 0)) + 2
@@ -1111,7 +1119,7 @@ func conservation_errors() -> Array[String]:
 	return errors
 
 func snapshot() -> Dictionary:
-	return _encode({"version":SAVE_VERSION,"mode":"peaceful" if peaceful else "standard","tick":tick,"next_id":next_id,"buildings":buildings,"workers":workers,"stock":stock,"reserved":reserved,"consumed":consumed,"produced":produced,"initial":initial,"training":training,"events":events,"stats":stats,"won":won,"lost":lost,"paused":paused,"food_shortage":food_shortage,"arrival_ticks":arrival_ticks,"battle":battle.snapshot() if battle != null else null})
+	return _encode({"version":SAVE_VERSION,"mode":"peaceful" if peaceful else "standard","tick":tick,"next_id":next_id,"buildings":buildings,"workers":workers,"stock":stock,"reserved":reserved,"consumed":consumed,"produced":produced,"initial":initial,"training":training,"events":events,"stats":stats,"won":won,"lost":lost,"paused":paused,"food_shortage":food_shortage,"arrival_ticks":arrival_ticks,"battle":battle.snapshot() if battle != null else null,"harvested_cells":harvest_map.harvested_cells() if harvest_map != null else []})
 
 func _encode(value: Variant) -> Variant:
 	if typeof(value) == TYPE_VECTOR2I:
@@ -1172,6 +1180,8 @@ func _apply(s: Dictionary) -> void:
 	paused = s.paused
 	food_shortage = int(s.food_shortage)
 	arrival_ticks = int(s.arrival_ticks)
+	if harvest_map != null:
+		harvest_map.apply_harvested(s.get("harvested_cells", []))
 	_rebuild_navigation()
 
 func _safe_int(value: Variant) -> bool:
@@ -1264,6 +1274,12 @@ func _valid_save(s: Dictionary) -> bool:
 			return false
 		for key in ["worker","building","progress"]:
 			if typeof(t.get(key)) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(t[key])):
+				return false
+	if s.has("harvested_cells"):
+		if not s.harvested_cells is Array or s.harvested_cells.size() > WIDTH * HEIGHT:
+			return false
+		for cell in s.harvested_cells:
+			if not _valid_cell(cell):
 				return false
 	return true
 

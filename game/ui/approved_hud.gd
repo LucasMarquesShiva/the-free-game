@@ -22,7 +22,7 @@ const SUCCESS := Color("b8d292")
 const BUILD_ORDER := ["lumber", "sawmill", "quarry", "farm", "mill", "bakery", "inn", "house", "vineyard", "winery", "store", "workshop", "barracks", "training"]
 const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Horticultor", "vintner":"Vinhateiro", "miller":"Moleiro", "baker":"Padeiro", "recruit":"Recruta"}
 const ROLE_DETAILS := {"builder":"Ergue as obras da vila", "servant":"Leva materiais e produção", "instructor":"Forma novos profissionais", "lumberjack":"Corta árvores e serra troncos", "stonecutter":"Extrai pedra", "farmer":"Cultiva alimentos e cereal", "vintner":"Cultiva uvas e produz vinho", "miller":"Moí cereal", "baker":"Asse pães", "recruit":"Caminha até o quartel"}
-const ITEM_NAMES := {"wood":"Madeira", "stone":"Pedra", "food":"Alimentos", "grapes":"Uvas", "wine":"Vinho", "gold":"Ouro", "trunks":"Troncos", "loaves":"Pães", "population":"Moradores"}
+const ITEM_NAMES := {"wood":"Madeira", "stone":"Pedra", "food":"Alimentos", "grapes":"Uvas", "wine":"Vinho", "gold":"Ouro", "trunks":"Troncos", "corn":"Cereal", "flour":"Farinha", "loaves":"Pães", "axe":"Machado", "bow":"Arco", "population":"Moradores"}
 const SHORT_NAMES := {"house":"Casa", "farm":"Horta", "vineyard":"Parreiral", "winery":"Vinícola", "store":"Armazém", "lumber":"Lenhador", "quarry":"Pedreira", "training":"Escola", "inn":"Taverna", "sawmill":"Serraria", "mill":"Moinho", "bakery":"Padaria", "workshop":"Armas", "barracks":"Quartel"}
 const BUILD_HINTS := {"house":"Abrigo", "farm":"Alimento e cereal", "vineyard":"O começo de cada vinho", "winery":"Uvas viram vinho", "store":"Depósito físico", "lumber":"Corta árvores", "quarry":"Pedra na jazida", "training":"Forma civis com ouro", "inn":"Os trabalhadores comem aqui", "sawmill":"Troncos viram madeira", "mill":"Cereal vira farinha", "bakery":"Farinha vira pão", "workshop":"Machados e arcos", "barracks":"Recrutas recebem armas"}
 
@@ -57,6 +57,42 @@ class Glyph extends Control:
 					draw_line(Vector2(10,y+6),Vector2(31,y),Color("98724b"),8.0,true)
 					draw_circle(Vector2(10,y+6),4.5,Color("d6ac6f"))
 					draw_arc(Vector2(10,y+6),2.0,0,TAU,12,Color("98724b"),1.0,true)
+			"trunks", "sawmill":
+				draw_line(Vector2(8,28),Vector2(32,18),Color("7a5330"),10.0,true)
+				draw_circle(Vector2(8,28),5.0,Color("d6ac6f"))
+				draw_line(Vector2(10,16),Vector2(34,10),Color("98724b"),8.0,true)
+			"mill":
+				draw_circle(Vector2(20,22),8.0,Color("969d94"))
+				draw_colored_polygon(PackedVector2Array([Vector2(12,16),Vector2(20,6),Vector2(28,16)]),Color("ae6948"))
+				draw_line(Vector2(6,20),Vector2(34,20),Color("7a5330"),3.0,true)
+				draw_line(Vector2(20,6),Vector2(20,34),Color("7a5330"),3.0,true)
+			"bakery", "loaves":
+				draw_circle(Vector2(14,24),7.0,Color("c19357"))
+				draw_circle(Vector2(26,22),6.0,Color("d6ac6f"))
+				draw_rect(Rect2(8,10,24,8),Color("ae6948"))
+			"inn":
+				draw_style_box(_rounded(Color("d5c5a0")),Rect2(8,16,26,20))
+				draw_colored_polygon(PackedVector2Array([Vector2(4,18),Vector2(20,5),Vector2(37,18)]),Color("ae6948"))
+				draw_rect(Rect2(16,22,10,12),dark)
+				draw_circle(Vector2(31,28),5.0,gold)
+			"workshop", "axe":
+				draw_rect(Rect2(10,22,20,12),Color("98724b"))
+				draw_line(Vector2(14,10),Vector2(14,24),Color("7a5330"),4.0,true)
+				draw_colored_polygon(PackedVector2Array([Vector2(10,10),Vector2(26,8),Vector2(26,14),Vector2(10,16)]),Color("85867b"))
+			"bow":
+				draw_arc(Vector2(20,20),12.0,-1.2,1.2,12,Color("7a5330"),3.0,true)
+				draw_line(Vector2(10,12),Vector2(10,28),Color("4f3525"),2.0,true)
+			"barracks":
+				draw_style_box(_rounded(Color("969d94")),Rect2(8,16,24,18))
+				draw_colored_polygon(PackedVector2Array([Vector2(6,18),Vector2(20,6),Vector2(34,18)]),Color("ae6948"))
+				draw_rect(Rect2(17,24,8,10),dark)
+				draw_line(Vector2(28,20),Vector2(28,34),Color("7a5330"),3.0,true)
+			"gold":
+				draw_rect(Rect2(8,22,24,10),gold)
+				draw_rect(Rect2(12,14,16,10),Color("d6ac6f"))
+			"corn", "flour":
+				draw_circle(Vector2(16,24),8.0,Color("e2b66b") if kind=="corn" else Color("f3ead3"))
+				draw_circle(Vector2(26,22),7.0,Color("c19357") if kind=="corn" else Color("d5c5a0"))
 			"stone", "quarry":
 				draw_colored_polygon(PackedVector2Array([Vector2(6,29),Vector2(10,12),Vector2(25,8),Vector2(35,18),Vector2(32,32),Vector2(15,35)]),Color("969d94"))
 				draw_colored_polygon(PackedVector2Array([Vector2(10,12),Vector2(25,8),Vector2(26,22),Vector2(6,29)]),Color("c6c8b8"))

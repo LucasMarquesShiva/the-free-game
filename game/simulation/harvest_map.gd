@@ -60,3 +60,20 @@ func nearest_standing_tree(from: Vector2i) -> Vector2i:
 			best_d = d
 			best = cell
 	return best
+
+
+func harvested_cells() -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for cell: Vector2i in _cells:
+		if _harvested.has(cell):
+			cells.append(cell)
+	return cells
+
+
+func apply_harvested(cells: Array) -> void:
+	_harvested.clear()
+	for item in cells:
+		var cell: Vector2i = item
+		if _index.has(cell):
+			_harvested[cell] = true
+	revision += 1
