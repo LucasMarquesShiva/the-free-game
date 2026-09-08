@@ -1,0 +1,36 @@
+{
+  "id": "tsk-01",
+  "save_mission_key": "tsk-01",
+  "briefing": [
+    "Build a school, an inn, a woodcutter and a quarry.",
+    "Train lumberjacks and stonecutters after the school is connected.",
+    "Farm, vineyard and winery stay locked. This is the original KaM first-lesson set, not the sandbox wine checklist."
+  ],
+  "available_buildings": ["hall", "training", "inn", "lumber", "quarry"],
+  "available_roles": ["builder", "servant", "instructor", "lumberjack", "stonecutter"],
+  "start": {
+    "buildings": [
+      {"kind": "hall", "cell": [7, 10], "complete": true}
+    ],
+    "workers": [
+      {"role": "builder", "n": 2},
+      {"role": "servant", "n": 2},
+      {"role": "resident", "n": 6}
+    ],
+    "stock": {
+      "wood": 24,
+      "stone": 16,
+      "food": 40,
+      "grapes": 0,
+      "wine": 0
+    }
+  },
+  "objectives": [
+    {"op": "completed", "kind": "training", "count": 1, "text": "Build a school"},
+    {"op": "completed", "kind": "inn", "count": 1, "text": "Build an inn"},
+    {"op": "completed", "kind": "lumber", "count": 1, "text": "Build a woodcutter"},
+    {"op": "completed", "kind": "quarry", "count": 1, "text": "Build a quarry"}
+  ],
+  "win": {"all_objectives": true},
+  "lose": [{"op": "completed", "kind": "hall", "count": 0}]
+}

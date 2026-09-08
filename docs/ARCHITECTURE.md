@@ -36,12 +36,14 @@ those sheets are visual references, not automatically rigged 3D models.
 
 - New games begin with the main building, instructor school and a paved plaza.
 - Idle civilians gather in the plaza; the player does not command individuals.
-- Placing a building creates a job. Available servants deliver wood and stone,
+- Placing a building creates a job. Available servants deliver goods
   and builders work autonomously. Missing workers must be visible to the player.
 - Completed roads connect building deliveries. Planned road tiles permit
   parallel material delivery and construction, not one sequential tile at a time.
-- Every building requires both wood and stone.
-- School selection opens training. A trained profession must affect real work.
+- School spends gold and spawns a new civilian. Workers eat at the inn.
+- The storehouse is the physical pick/drop node once built; the hall is only the fallback depot.
+- Woodcutters harvest map trees into trunks; the sawmill turns trunks into timber.
+- A quarry requires a stone deposit. Barracks consume a walking recruit plus weapon wares.
 - Crop growth and harvesting are visible; harvested goods must be transported.
 - Inventory must remain consistent when jobs are assigned, canceled or restored.
 

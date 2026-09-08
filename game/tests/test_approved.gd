@@ -24,7 +24,7 @@ func connect_school(sim: RefCounted) -> Dictionary:
 func run() -> void:
  var sim := fresh()
  expect(sim.buildings.size() == 2 and sim.workers.size() == 17 and sim.battle == null and sim.roads.is_empty(),"approved starts with two buildings, seventeen civilians and no army or roads")
- expect(sim.stock == {"wood":140,"stone":160,"food":280,"grapes":0,"wine":0},"bootstrap stock remains unchanged")
+ expect(int(sim.stock.wood)==140 and int(sim.stock.stone)==160 and int(sim.stock.food)==280 and int(sim.stock.gold)>=1,"bootstrap stock keeps wood, stone, food and school gold")
  expect(sim.footprint_size("hall") == Vector2i(3,3) and sim.footprint_size("training") == Vector2i(3,3),"main building and school occupy three by three cells")
  expect(sim.footprint_size("store") == Vector2i(3,3) and sim.footprint_size("winery") == Vector2i(3,3),"store and winery occupy three by three cells")
  for kind in ["house","lumber","quarry","farm","vineyard"]:
@@ -154,7 +154,7 @@ func _test_expanded_industry(kind: String) -> void:
  expect(not inside and sim.conservation_errors().is_empty(),kind+" workers and resources respect the new collision area")
  expect(state(sim) == state(restored),kind+" enlarged construction continues identically after save")
  if kind == "store":
-  expect(sim.storage_capacity() == 1000 and sim._store_for(Vector2i(19,20)).kind == "hall","expanded store still adds capacity to the principal depot")
+  expect(sim.storage_capacity() == 1000 and sim._store_for(Vector2i(19,20)).kind == "store","completed storehouse is the physical depot and still expands capacity")
  else:
   expect(building.worker != -1 and sim._worker(building.worker).role == "vintner","trained vintner automatically occupies the expanded winery")
 
@@ -222,7 +222,7 @@ func _test_mission() -> void:
   for person in sim.workers:
    if not sim.is_walkable(person.cell): invalid_movement = true
    if person.role == "servant" and not person.cargo.is_empty() and not _loaded_servant_uses_allowed_road(sim,person): invalid_movement = true
-  if sim.won:
+  if sim._completed("lumber")>0 and sim._completed("quarry")>0 and sim._completed("farm")>0 and sim._completed("vineyard")>0 and sim._completed("winery")>0 and sim._completed("store")>0:
    won_tick = sim.tick
    break
  expect(won_tick > 0,"civil mission completes through legal construction, roads and training commands")

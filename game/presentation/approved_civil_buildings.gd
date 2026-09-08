@@ -4,8 +4,8 @@ extends RefCounted
 const Core = preload("res://presentation/approved_buildings.gd")
 const Base = preload("res://presentation/approved_primitives.gd")
 const EarthYard = preload("res://presentation/approved_earth_yard.gd")
-const KINDS := ["house","store","lumber","quarry","farm","vineyard","winery"]
-const IDS := {"house":"bld_02_casas","store":"bld_03_armazem","lumber":"bld_06_cabana_do_lenhador","quarry":"bld_08_pedreira","farm":"bld_12_horta","vineyard":"kit_03_lavouras_e_vinhedos","winery":"bld_20_vinicola"}
+const KINDS := ["house","store","lumber","sawmill","quarry","farm","vineyard","winery"]
+const IDS := {"house":"bld_02_casas","store":"bld_03_armazem","lumber":"bld_06_cabana_do_lenhador","sawmill":"bld_07_serraria","quarry":"bld_08_pedreira","farm":"bld_12_horta","vineyard":"kit_03_lavouras_e_vinhedos","winery":"bld_20_vinicola"}
 const WOOD := Color("81582f")
 const DARK_WOOD := Color("4d3521")
 const LIGHT_WOOD := Color("ae8248")
@@ -28,6 +28,7 @@ static func building(kind: String) -> Node3D:
 			"store": _store(b)
 			"winery": _winery(b)
 			"lumber": _lumber(b)
+			"sawmill": _sawmill(b)
 			"quarry": _quarry(b)
 			"farm": _farm(b)
 			"vineyard": _vineyard(b)
@@ -474,6 +475,47 @@ static func _lumber(b) -> void:
 	for i in range(8):
 		var at := Vector3(-1.69+b.rng.randf()*1.4,0.22,-0.9+b.rng.randf()*2.7)
 		_box(b,at,Vector3(0.09,0.018,0.16),LIGHT_WOOD,"wood",Vector3(0,b.rng.randf()*TAU,0))
+
+static func _sawmill(b) -> void:
+	_base(b)
+	# Closed hut on +X; open teal workshop on -X. Serra, logs and timber piles.
+	Core._masonry(b,Vector3(0.78,0.23,-0.50),1.86,2.10,1.16)
+	_plaster_floor(b,Vector3(0.78,1.45,-0.50),1.88,2.12,0.86,true)
+	_roof(b,Vector3(0.78,2.38,-0.50),2.38,2.56,1.06,true)
+	Core._door(b,Vector3(0.78,0.34,0.70),0.66,1.78)
+	Core._steps(b,Vector3(0.78,0.17,0.94),0.88,3)
+	Core._small_window(b,Vector3(1.81,1.74,-0.38),0.46,0.54,PI*0.5,true)
+	_dormer(b,Vector3(0.88,2.74,0.20),0.48)
+	Core._chimney(b,Vector3(1.08,3.02,-0.96),0.98,0.43)
+	for x in [-1.92,-0.26]:
+		for z in [-1.28,0.86]:
+			Core._masonry(b,Vector3(x,0.20,z),0.26,0.26,0.40)
+			_box(b,Vector3(x,1.48,z),Vector3(0.16,1.78,0.16),WOOD)
+	Core._lean_roof(b,Vector3(-1.10,2.32,-0.22),2.10,1.72,0.38,true)
+	Core._gable(b,Vector3(-1.10,2.28,0.96),1.72,0.82)
+	_circular_saw(b,Vector3(-1.10,0.78,0.08),0.46)
+	Base._workbench(b,Vector3(-1.10,0.21,0.92),1.18)
+	_saw(b,Vector3(-1.10,1.10,0.94),0.82)
+	for row in range(3):
+		for col in range(3-row):
+			Base._log(b,Vector3(-1.58+col*0.36+row*0.18,0.42+row*0.30,-0.62),0.18,1.48)
+	for layer in range(4):
+		for board in range(3):
+			_box(b,Vector3(-0.72+board*0.20,0.26+layer*0.075,1.78),Vector3(0.18,0.07,0.62),b.shade(WOOD,0.10))
+	Core._banner(b,Vector3(-1.10,3.12,1.02),0.46,0.82)
+	_beam(b,Vector3(-1.78,2.28,-0.22),Vector3(-0.42,2.28,-0.22),0.08,WOOD)
+
+static func _circular_saw(b, at: Vector3, radius: float) -> void:
+	# Disc faces +Z so the blade is readable from the front of the lot.
+	Base._cylinder(b,at,radius,0.036,Color("b4b7b0"),"metal",Vector3(PI*0.5,0,0))
+	Base._cylinder(b,at,0.08,0.09,DARK,"metal",Vector3(PI*0.5,0,0))
+	for i in range(16):
+		var angle := float(i)*TAU/16.0
+		_box(b,at+Vector3(cos(angle)*radius,sin(angle)*radius,0),Vector3(0.07,0.08,0.04),Color("a5aba1"),"metal",Vector3(0,0,angle))
+	for side in [-1.0,1.0]:
+		_box(b,at+Vector3(side*0.52,0.02,0),Vector3(0.10,1.18,0.10),WOOD)
+	_box(b,at+Vector3(0,0.62,0),Vector3(1.14,0.10,0.10),DARK_WOOD)
+	_box(b,at+Vector3(0,-0.02,0),Vector3(0.16,0.16,0.16),DARK,"metal")
 
 static func _saw(b, at: Vector3, length: float) -> void:
 	b.quad(at+Vector3(-length*0.5,0,0),at+Vector3(length*0.5,0,0),at+Vector3(length*0.5,0.17,0),at+Vector3(-length*0.5,0.17,0),"metal",Color("afb2aa"))

@@ -4,6 +4,7 @@ const Models=preload("res://presentation/approved_environment.gd")
 const Broadleaf=preload("res://presentation/approved_broadleaf.gd")
 const RiverRocks=preload("res://presentation/approved_river_rocks.gd")
 const Architecture=preload("res://presentation/approved_primitives.gd")
+const HarvestMap=preload("res://simulation/harvest_map.gd")
 const CELL:=2.5
 const GROUND_ORIGIN:=-27.0
 const GROUND_STRIDE:=1.2
@@ -34,6 +35,10 @@ var tufts: Array[Vector3]=[]
 var last_land_signature:=""
 var bank_cluster_sites:Array[Dictionary]=[]
 var bank_rock_bounds:Array[AABB]=[]
+var harvest_map:RefCounted
+var grove_nodes:={}
+var grove_forest:Node3D
+var last_harvest_revision:=-1
 
 func height_at(x:float,z:float)->float:
  var border:=maxf(maxf(-x,x-88.0),maxf(-z,z-68.0))
@@ -77,7 +82,7 @@ func support_height(x:float,z:float)->float:
  return ground
 
 func setup(village:RefCounted)->void:
- sim=village;rng.seed=913760
+ sim=village;harvest_map=_bind_harvest();rng.seed=913760
  terrain_noise.seed=32;terrain_noise.frequency=0.032
  _ground();_water();_forest();_meadow();_bridge()
  add_child(preload("res://presentation/approved_bank_ambience.gd").create(self))
@@ -183,8 +188,37 @@ func _compose_bank_rocks(banks:Node3D)->void:
   bank_rock_bounds.append(_bank_bounds(rock))
  banks.set_meta("clusters",bank_cluster_sites.size())
 
+func _bind_harvest()->RefCounted:
+ var existing:Variant=sim.get("harvest_map") if sim!=null else null
+ if existing!=null:return existing
+ var map:=HarvestMap.new()
+ if sim!=null:map.setup_from_natural_cells(sim.natural_cells)
+ return map
+
+func _grove_visual(cell:Vector2i)->Node3D:
+ var seed:=cell.x*71+cell.y*97
+ if harvest_map!=null and harvest_map.is_harvested(cell):return Models.stump(seed)
+ return Broadleaf.tree(seed)
+
+func _sync_grove_harvest()->void:
+ if grove_forest==null:return
+ var existing:Variant=sim.get("harvest_map") if sim!=null else null
+ if existing!=null and existing!=harvest_map:
+  harvest_map=existing;last_harvest_revision=-1
+ if harvest_map==null:return
+ if harvest_map.revision==last_harvest_revision:return
+ last_harvest_revision=harvest_map.revision
+ for cell:Vector2i in grove_nodes:
+  var node:Node3D=grove_nodes[cell]
+  var harvested:bool=harvest_map.is_harvested(cell)
+  if harvested==(node.get_meta("environment_kind","")=="stump"):continue
+  var replacement:Node3D=_grove_visual(cell)
+  replacement.position=node.position;replacement.rotation=node.rotation;replacement.scale=node.scale
+  grove_forest.add_child(replacement);node.free();grove_nodes[cell]=replacement
+
 func _forest()->void:
  var forest:=Node3D.new();forest.name="OakAndPineForest";add_child(forest)
+ grove_forest=forest;grove_nodes.clear();last_harvest_revision=-1
  for i in range(175):
   var x:=rng.randf_range(-19,107);var z:=rng.randf_range(-18,88)
   var outside:bool=x<1 or x>88 or z<0 or z>68
@@ -192,10 +226,12 @@ func _forest()->void:
   if absf(x-57.5)<5.1:continue
   var tree:Node3D=Broadleaf.tree(i);forest.add_child(tree);tree.position=Vector3(x,height_at(x,z),z);tree.rotation.y=rng.randf()*TAU;tree.scale=Vector3.ONE*rng.randf_range(0.8,1.4)
  for cell:Vector2i in sim.natural_cells:
-  var tree:Node3D=Broadleaf.tree(cell.x*71+cell.y*97)
+  var tree:Node3D=_grove_visual(cell)
   forest.add_child(tree)
   tree.position=Vector3(cell.x*CELL+rng.randf_range(-0.24,0.24),height_at(cell.x*CELL,cell.y*CELL),cell.y*CELL+rng.randf_range(-0.24,0.24))
   tree.rotation.y=rng.randf()*TAU;tree.scale=Vector3.ONE*rng.randf_range(0.78,1.12)
+  grove_nodes[cell]=tree
+ last_harvest_revision=harvest_map.revision if harvest_map!=null else 0
  for i in range(36):
   var x:=rng.randf_range(-10,96);var z:=rng.randf_range(-9,80)
   if x>1 and x<88 and z>1 and z<68:continue
@@ -378,6 +414,7 @@ func _build_road_visual(node:Node3D,road:Dictionary,neighbors:Vector4)->void:
   Basic.bake(markers)
 
 func sync()->void:
+ _sync_grove_harvest()
  var sig:=str(sim.buildings.size())+str(sim.roads.size())
  for building:Dictionary in sim.buildings:sig+=str(building.stage=="cancelled")
  var alive:={}

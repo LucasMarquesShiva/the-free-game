@@ -197,6 +197,7 @@ func _construction(phase:int,b:Dictionary) -> Node3D:
    Basic.beam(scaffold,Vector3(-half,0.35,z),Vector3(half,level-0.15,z),0.075,oak)
  if phase<0:
   for x in [-half,half]:Basic.beam(scaffold,Vector3(x,0.43,-half),Vector3(x,0.43,half),0.028,Color("c8ae79"))
+  _add_site_palisade(root,b)
  if phase>=0:
   for x in [-half,half]:
    for h in [0.8,1.8]:
@@ -208,6 +209,47 @@ func _construction(phase:int,b:Dictionary) -> Node3D:
    Basic.beam(scaffold,Vector3(ladder_x-0.17,t*minf(3.0,level),lerpf(half+0.2,half-0.35,t)),Vector3(ladder_x+0.17,t*minf(3.0,level),lerpf(half+0.2,half-0.35,t)),0.05,Color("ba9868"))
  Basic.bake(scaffold)
  return root
+
+func _entrance_local(b:Dictionary)->Vector3:
+ var origin:=_building_center(b.cell,b.kind)
+ return Vector3(b.entrance.x*CELL-origin.x,0.0,b.entrance.y*CELL-origin.z)
+
+func _add_site_palisade(root:Node3D,b:Dictionary)->void:
+ var palisade:=Node3D.new();palisade.name="SitePalisade"
+ var size:Vector2i=sim.footprint_size(b.kind)
+ var hx:float=size.x*CELL*0.5-0.10
+ var hz:float=size.y*CELL*0.5-0.10
+ var gap:Vector3=_entrance_local(b)
+ var oak:=Color("7d582f");var pale:=Color("a07a45")
+ var spacing:=0.28
+ var x:=-hx
+ while x<=hx+0.001:
+  _site_stake(palisade,Vector3(x,0,-hz),gap,oak,pale)
+  _site_stake(palisade,Vector3(x,0,hz),gap,oak,pale)
+  x+=spacing
+ var z:=-hz+spacing
+ while z<hz-0.001:
+  _site_stake(palisade,Vector3(-hx,0,z),gap,oak,pale)
+  _site_stake(palisade,Vector3(hx,0,z),gap,oak,pale)
+  z+=spacing
+ Basic.beam(palisade,Vector3(-hx,0.48,-hz),Vector3(hx,0.48,-hz),0.05,pale)
+ Basic.beam(palisade,Vector3(-hx,0.48,-hz),Vector3(-hx,0.48,hz),0.05,pale)
+ Basic.beam(palisade,Vector3(hx,0.48,-hz),Vector3(hx,0.48,hz),0.05,pale)
+ var opening:float=0.88
+ if gap.x+opening<hx:Basic.beam(palisade,Vector3(gap.x+opening,0.48,hz),Vector3(hx,0.48,hz),0.05,pale)
+ if gap.x-opening>-hx:Basic.beam(palisade,Vector3(-hx,0.48,hz),Vector3(gap.x-opening,0.48,hz),0.05,pale)
+ Basic.bake(palisade);root.add_child(palisade)
+ var flag:=Node3D.new();flag.name="EntranceFlag"
+ var pole:=oak
+ Basic.cylinder(flag,0.032,1.12,gap+Vector3(0,0.56,0.06),pole,-1,7)
+ Basic.box(flag,Vector3(0.40,0.26,0.03),gap+Vector3(0.22,1.00,0.06),Color("2a6a5c"))
+ Basic.box(flag,Vector3(0.04,0.20,0.04),gap+Vector3(0.20,1.00,0.06),Color("c19741"))
+ Basic.bake(flag);root.add_child(flag)
+
+func _site_stake(palisade:Node3D,at:Vector3,gap:Vector3,oak:Color,pale:Color)->void:
+ if Vector2(at.x-gap.x,at.z-gap.z).length()<0.85:return
+ var h:=0.70+fmod(absf(at.x*7.1+at.z*3.3),0.16)
+ Basic.box(palisade,Vector3(0.07,h,0.09),Vector3(at.x,h*0.5,at.z),oak if int((at.x+at.z)*10.0)%2==0 else pale)
 
 func _update_supplies(building:Node3D,state:Dictionary)->void:
  var wood:=mini(8,int(state.delivered.get("wood",0)))

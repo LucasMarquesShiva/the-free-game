@@ -19,12 +19,12 @@ const BRONZE := Color("c59a50")
 const WINE := Color("e1bd71")
 const DANGER := Color("eeaa89")
 const SUCCESS := Color("b8d292")
-const BUILD_ORDER := ["lumber", "quarry", "farm", "house", "vineyard", "winery", "store", "training"]
-const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Horticultor", "vintner":"Vinhateiro"}
-const ROLE_DETAILS := {"builder":"Ergue as obras da vila", "servant":"Leva materiais e produção", "instructor":"Forma novos profissionais", "lumberjack":"Produz madeira", "stonecutter":"Extrai pedra", "farmer":"Cultiva alimentos na horta", "vintner":"Cultiva uvas e produz vinho"}
-const ITEM_NAMES := {"wood":"Madeira", "stone":"Pedra", "food":"Alimentos", "grapes":"Uvas", "wine":"Vinho", "population":"Moradores"}
-const SHORT_NAMES := {"house":"Casa", "farm":"Horta", "vineyard":"Parreiral", "winery":"Vinícola", "store":"Armazém", "lumber":"Lenhador", "quarry":"Pedreira", "training":"Escola de instrutores"}
-const BUILD_HINTS := {"house":"Mais espaço para morar", "farm":"Alimento para crescer", "vineyard":"O começo de cada vinho", "winery":"Uvas viram vinho", "store":"Espaço para os recursos", "lumber":"Madeira para construir", "quarry":"Pedra para a vila", "training":"Novos profissionais"}
+const BUILD_ORDER := ["lumber", "sawmill", "quarry", "farm", "mill", "bakery", "inn", "house", "vineyard", "winery", "store", "workshop", "barracks", "training"]
+const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Horticultor", "vintner":"Vinhateiro", "miller":"Moleiro", "baker":"Padeiro", "recruit":"Recruta"}
+const ROLE_DETAILS := {"builder":"Ergue as obras da vila", "servant":"Leva materiais e produção", "instructor":"Forma novos profissionais", "lumberjack":"Corta árvores e serra troncos", "stonecutter":"Extrai pedra", "farmer":"Cultiva alimentos e cereal", "vintner":"Cultiva uvas e produz vinho", "miller":"Moí cereal", "baker":"Asse pães", "recruit":"Caminha até o quartel"}
+const ITEM_NAMES := {"wood":"Madeira", "stone":"Pedra", "food":"Alimentos", "grapes":"Uvas", "wine":"Vinho", "gold":"Ouro", "trunks":"Troncos", "loaves":"Pães", "population":"Moradores"}
+const SHORT_NAMES := {"house":"Casa", "farm":"Horta", "vineyard":"Parreiral", "winery":"Vinícola", "store":"Armazém", "lumber":"Lenhador", "quarry":"Pedreira", "training":"Escola", "inn":"Taverna", "sawmill":"Serraria", "mill":"Moinho", "bakery":"Padaria", "workshop":"Armas", "barracks":"Quartel"}
+const BUILD_HINTS := {"house":"Abrigo", "farm":"Alimento e cereal", "vineyard":"O começo de cada vinho", "winery":"Uvas viram vinho", "store":"Depósito físico", "lumber":"Corta árvores", "quarry":"Pedra na jazida", "training":"Forma civis com ouro", "inn":"Os trabalhadores comem aqui", "sawmill":"Troncos viram madeira", "mill":"Cereal vira farinha", "bakery":"Farinha vira pão", "workshop":"Machados e arcos", "barracks":"Recrutas recebem armas"}
 
 class Glyph extends Control:
 
@@ -351,7 +351,7 @@ func _make_top_bar() -> void:
 	_brand_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_brand = _label(_brand_box,"The Free Game",24)
 	_credit_label = _label(_brand_box,"Lucas Marques, from Shiva",12,MUTED)
-	for item in ["wood","stone","food","grapes","wine","population"]:
+	for item in ["wood","stone","food","gold","trunks","loaves","population"]:
 		var button := _button(row,"",_resource_info.bind(item),86)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.tooltip_text = tr("{item}: toque para detalhes").format({"item":tr(ITEM_NAMES[item])})
@@ -527,14 +527,14 @@ func _populate_training() -> void:
 		btn.name = "Quantity%d" % qty
 		if qty == _quantity:
 			_accent(btn)
-	_training_cost_label = _label(_drawer_content,tr("Cada pessoa: 2 alimentos · 50 s de formação em 1×"),14,MUTED)
+	_training_cost_label = _label(_drawer_content,tr("Cada pessoa: 1 ouro · 50 s de formação em 1×"),14,MUTED)
 	_role_grid = GridContainer.new()
 	_role_grid.columns = 4
 	_role_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_role_grid.add_theme_constant_override("h_separation",8)
 	_role_grid.add_theme_constant_override("v_separation",8)
 	_drawer_content.add_child(_role_grid)
-	for role in ["builder","servant","farmer","vintner","lumberjack","stonecutter","instructor"]:
+	for role in ["builder","servant","farmer","vintner","lumberjack","stonecutter","miller","baker","recruit","instructor"]:
 		var button := _button(_role_grid,"",_train_role.bind(role))
 		button.custom_minimum_size.y = 96
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL

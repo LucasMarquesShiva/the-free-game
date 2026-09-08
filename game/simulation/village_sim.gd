@@ -4,21 +4,26 @@ const Battle = preload("res://simulation/battle_sim.gd")
 const WIDTH := 36
 const HEIGHT := 28
 const SAVE_VERSION := 1
-const ITEMS := ["wood", "stone", "food", "grapes", "wine"]
-const ROLES := ["resident", "builder", "servant", "instructor", "lumberjack", "stonecutter", "farmer", "vintner"]
-const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Agricultor", "vintner":"Vinhateiro"}
-const ITEM_NAMES := {"wood":"madeira", "stone":"pedra", "food":"alimentos", "grapes":"uvas", "wine":"vinho"}
+const ITEMS := ["wood", "stone", "food", "grapes", "wine", "gold", "trunks", "corn", "flour", "loaves", "axe", "bow"]
+const ROLES := ["resident", "builder", "servant", "instructor", "lumberjack", "stonecutter", "farmer", "vintner", "miller", "baker", "recruit"]
+const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Agricultor", "vintner":"Vinhateiro", "miller":"Moleiro", "baker":"Padeiro", "recruit":"Recruta"}
+const ITEM_NAMES := {"wood":"madeira", "stone":"pedra", "food":"alimentos", "grapes":"uvas", "wine":"vinho", "gold":"ouro", "trunks":"troncos", "corn":"cereal", "flour":"farinha", "loaves":"pães", "axe":"machado", "bow":"arco"}
 var definitions: Dictionary = {
 	"hall": {"name":"Centro da vila", "description":"Administra a vila. Os moradores encontram trabalho sozinhos.", "cost":{}, "profession":"", "duration":12.0, "catalog_id":"bld_01_centro_da_vila"},
-	"house": {"name":"Casa", "description":"Abre 4 vagas. Novos moradores chegam quando há comida e espaço.", "cost":{"wood":4,"stone":2}, "profession":"", "duration":10.0, "catalog_id":"bld_02_casas"},
-	"store": {"name":"Armazém", "description":"Amplia a capacidade do entreposto central em 200 unidades.", "cost":{"wood":8,"stone":4}, "profession":"", "duration":12.0, "catalog_id":"bld_03_armazem"},
-	"training": {"name":"Centro de treinamento", "description":"Forma profissionais automaticamente. Precisa de instrutor.", "cost":{"wood":10,"stone":6}, "profession":"instructor", "duration":14.0, "catalog_id":"bld_04_centro_de_treinamento"},
-	"lumber": {"name":"Cabana do lenhador", "description":"Um lenhador produz 4 madeiras a cada 8 segundos.", "cost":{"wood":6,"stone":2}, "profession":"lumberjack", "duration":10.0, "catalog_id":"bld_06_cabana_do_lenhador"},
-	"quarry": {"name":"Pedreira", "description":"Um canteiro extrai 3 pedras a cada 10 segundos.", "cost":{"wood":6,"stone":2}, "profession":"stonecutter", "duration":10.0, "catalog_id":"bld_08_pedreira"},
-	"farm": {"name":"Horta", "description":"Um agricultor cultiva 8 alimentos a cada 10 segundos.", "cost":{"wood":6,"stone":2}, "profession":"farmer", "duration":10.0, "catalog_id":"bld_12_horta"},
+	"house": {"name":"Casa", "description":"Abrigo civil. A população nova sai da escola, não das casas.", "cost":{"wood":4,"stone":2}, "profession":"", "duration":10.0, "catalog_id":"bld_02_casas"},
+	"store": {"name":"Armazém", "description":"Depósito físico. Serventes buscam e deixam mercadorias na entrada.", "cost":{"wood":8,"stone":4}, "profession":"", "duration":12.0, "catalog_id":"bld_03_armazem"},
+	"training": {"name":"Escola", "description":"Gasta ouro e forma civis novos. Precisa de instrutor.", "cost":{"wood":10,"stone":6}, "profession":"instructor", "duration":14.0, "catalog_id":"bld_04_centro_de_treinamento"},
+	"inn": {"name":"Taverna", "description":"Os trabalhadores vêm comer pão, ração ou vinho.", "cost":{"wood":8,"stone":4}, "profession":"", "duration":12.0, "catalog_id":"bld_19_taverna"},
+	"lumber": {"name":"Cabana do lenhador", "description":"O lenhador corta árvores do mapa e traz troncos.", "cost":{"wood":6,"stone":2}, "profession":"lumberjack", "duration":10.0, "catalog_id":"bld_06_cabana_do_lenhador"},
+	"sawmill": {"name":"Serraria", "description":"Transforma troncos em madeira de construção.", "cost":{"wood":8,"stone":4}, "profession":"lumberjack", "duration":12.0, "catalog_id":"bld_07_serraria"},
+	"quarry": {"name":"Pedreira", "description":"Extrai pedra junto a uma jazida.", "cost":{"wood":6,"stone":2}, "profession":"stonecutter", "duration":10.0, "catalog_id":"bld_08_pedreira"},
+	"farm": {"name":"Horta / cereal", "description":"Cultiva alimentos e cereal para o moinho.", "cost":{"wood":6,"stone":2}, "profession":"farmer", "duration":10.0, "catalog_id":"bld_12_horta"},
+	"mill": {"name":"Moinho", "description":"Transforma cereal em farinha.", "cost":{"wood":8,"stone":4}, "profession":"miller", "duration":12.0, "catalog_id":"bld_14_moinho"},
+	"bakery": {"name":"Padaria", "description":"Transforma farinha em pães para a taverna.", "cost":{"wood":8,"stone":4}, "profession":"baker", "duration":12.0, "catalog_id":"bld_15_padaria"},
 	"vineyard": {"name":"Parreiral", "description":"Um vinhateiro colhe 4 uvas a cada 12 segundos.", "cost":{"wood":8,"stone":2}, "profession":"vintner", "duration":12.0, "catalog_id":"kit_03_lavouras_e_vinhedos"},
 	"winery": {"name":"Vinícola", "description":"Um vinhateiro transforma 3 uvas em 2 vinhos a cada 10 segundos.", "cost":{"wood":12,"stone":6}, "profession":"vintner", "duration":16.0, "catalog_id":"bld_20_vinicola"},
-	"barracks": {"name":"Quartel", "description":"Recrute lanceiros e arqueiros para a companhia. Requer moradores livres.", "cost":{"wood":12,"stone":8}, "profession":"", "duration":16.0, "catalog_id":"bld_25_quartel"}
+	"workshop": {"name":"Oficina de armas", "description":"Faz machados e arcos com madeira.", "cost":{"wood":8,"stone":4}, "profession":"lumberjack", "duration":12.0, "catalog_id":"bld_22_carpintaria"},
+	"barracks": {"name":"Quartel", "description":"Recrutas recebem machado ou arco e entram na companhia.", "cost":{"wood":12,"stone":8}, "profession":"recruit", "duration":16.0, "catalog_id":"bld_26_quartel"}
 }
 var tick := 0
 var buildings: Array[Dictionary] = []
@@ -41,9 +46,13 @@ var initial: Dictionary = {}
 var food_shortage := 0
 var arrival_ticks := 0
 var last_notice := ""
+var mission: RefCounted = null
+var harvest_map: RefCounted = null
+var stone_deposits: Array[Vector2i] = []
 
 func setup(peaceful_mode: bool = false) -> void:
 	peaceful = peaceful_mode
+	mission = null
 	battle = null
 	tick = 0
 	next_id = 1
@@ -54,7 +63,13 @@ func setup(peaceful_mode: bool = false) -> void:
 	won = false
 	lost = false
 	paused = false
-	stock = {"wood":80,"stone":40,"food":100,"grapes":0,"wine":0}
+	stock = _empty_items()
+	stock.wood = 80
+	stock.stone = 40
+	stock.food = 100
+	stock.gold = 20
+	stock.axe = 2
+	stock.bow = 2
 	initial = stock.duplicate(true)
 	reserved = _empty_items()
 	consumed = _empty_items()
@@ -77,7 +92,10 @@ func setup(peaceful_mode: bool = false) -> void:
 	_emit(tr("Bem-vindo ao Vale dos Vinhedos. Construa duas casas e uma horta para começar."))
 
 func _empty_items() -> Dictionary:
-	return {"wood":0,"stone":0,"food":0,"grapes":0,"wine":0}
+	var items := {}
+	for item in ITEMS:
+		items[item] = 0
+	return items
 
 func _id() -> int:
 	var value := next_id
@@ -90,7 +108,7 @@ func _add_building(kind: String, cell: Vector2i, complete: bool = false) -> Dict
 	return b
 
 func _add_worker(role: String, cell: Vector2i) -> Dictionary:
-	var w := {"id":_id(),"role":role,"cell":cell,"previous":cell,"route":[],"state":tr("Disponível"),"task":{},"cargo":{},"work":0.0,"wait":0,"goal":cell,"meal":0,"yield_until":0,"jobs":0}
+	var w := {"id":_id(),"role":role,"cell":cell,"previous":cell,"route":[],"state":tr("Disponível"),"task":{},"cargo":{},"work":0.0,"wait":0,"goal":cell,"meal":200,"yield_until":0,"jobs":0}
 	workers.append(w)
 	return w
 
@@ -165,8 +183,12 @@ func _can_reach(start: Vector2i, goal: Vector2i) -> bool:
 func can_place(kind: String, cell: Vector2i) -> String:
 	if peaceful and kind == "barracks":
 		return tr("O modo pacífico possui apenas construções da vila.")
+	if mission != null and mission.has_method("allows_building") and not mission.allows_building(kind):
+		return tr("Esta construção ainda não está disponível nesta missão.")
 	if not definitions.has(kind) or kind == "hall":
 		return tr("Construção desconhecida.")
+	if kind == "quarry" and not stone_deposits.is_empty() and not _quarry_has_deposit(cell):
+		return tr("A pedreira precisa ficar junto a uma jazida de pedra.")
 	if cell.x < 2 or cell.x > 19 or cell.y < 2 or cell.y > 23:
 		return tr("Construa na margem da vila, deixando espaço para a entrada.")
 	var area := Rect2i(cell,Vector2i(2,2))
@@ -228,6 +250,8 @@ func command(kind: String, payload: Dictionary = {}) -> Dictionary:
 			var role := str(payload.get("role",""))
 			if not ROLES.has(role) or role == "resident":
 				return _result(false,tr("Profissão inválida."))
+			if mission != null and mission.has_method("allows_role") and not mission.allows_role(role):
+				return _result(false,tr("Esta profissão ainda não está disponível nesta missão."))
 			var quantity := clampi(int(payload.get("quantity",1)),1,5)
 			for i in range(quantity):
 				training.append({"id":_id(),"role":role,"worker":-1,"building":-1,"progress":0.0,"reason":tr("Aguardando vaga")})
@@ -242,8 +266,9 @@ func command(kind: String, payload: Dictionary = {}) -> Dictionary:
 					return _result(true,tr("Formação cancelada. O morador está disponível."))
 			return _result(false,tr("Formação não encontrada."))
 		"army":
-			if peaceful:
-				return _result(false,tr("Esta partida é pacífica, sem exército."))
+			_ensure_battle()
+			if battle == null:
+				return _result(false,tr("Não há companhia formada."))
 			if typeof(payload.get("target")) != TYPE_VECTOR2I:
 				return _result(false,tr("Indique um objetivo no terreno."))
 			return battle.issue_order(str(payload.get("order","")),payload.target)
@@ -285,28 +310,59 @@ func _cancel_building(id: int) -> Dictionary:
 	_rebuild_navigation()
 	return _result(true,tr("Obra cancelada. Os serventes recolherão os materiais restantes."))
 
+func footprint_size(_kind: String) -> Vector2i:
+	return Vector2i(2, 2)
+
+
+func _quarry_has_deposit(cell: Vector2i) -> bool:
+	var size := footprint_size("quarry")
+	var dirs := [Vector2i.ZERO, Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]
+	for y in range(size.y):
+		for x in range(size.x):
+			var tile := cell + Vector2i(x, y)
+			for delta in dirs:
+				if stone_deposits.has(tile + delta):
+					return true
+	return false
+
+
+func _ensure_battle() -> void:
+	if battle != null:
+		return
+	battle = Battle.new()
+	battle.setup(_military_walkable, find_path, false)
+
+
 func _recruit(role: String) -> Dictionary:
-	if peaceful:
-		return _result(false,tr("Esta partida é pacífica, sem recrutamento militar."))
 	if role not in ["lancer","archer"]:
 		return _result(false,tr("Tipo de tropa inválido."))
 	if _completed("barracks") == 0:
 		return _result(false,tr("Construa um quartel para recrutar reforços."))
-	var resident: Dictionary = {}
+	var kit := "axe" if role == "lancer" else "bow"
+	if available(kit) < 1:
+		return _result(false,tr("Falta o equipamento no armazém: {item}.").format({"item":tr(ITEM_NAMES[kit])}))
+	var recruit: Dictionary = {}
 	for w in workers:
-		if w.role == "resident" and w.task.is_empty():
-			resident = w
-			break
-	if resident.is_empty():
-		return _result(false,tr("Sem moradores livres. Construa casas e mantenha alimentos."))
-	if available("food") < 6 or available("wood") < 4:
-		return _result(false,tr("Cada soldado precisa de 6 alimentos e 4 madeiras para equipamento."))
-	if not battle.recruit(role):
+		if w.role != "recruit":
+			continue
+		var barracks := _building(int(w.task.get("building",-1)))
+		if barracks.is_empty() or barracks.kind != "barracks":
+			continue
+		if not w.route.is_empty() or w.cell != w.goal:
+			continue
+		recruit = w
+		break
+	if recruit.is_empty():
+		return _result(false,tr("Nenhum recruta chegou ao quartel. Forme recrutas na escola."))
+	_ensure_battle()
+	if battle == null or not battle.recruit(role):
 		return _result(false,tr("Companhia cheia ou ponto de reunião ocupado."))
-	_consume_stock("food",6)
-	_consume_stock("wood",4)
-	workers.erase(resident)
-	return _result(true,tr("Reforço equipado e incorporado à companhia."))
+	_consume_stock(kit,1)
+	var barracks := _building(int(recruit.task.get("building",-1)))
+	if not barracks.is_empty() and int(barracks.worker) == int(recruit.id):
+		barracks.worker = -1
+	workers.erase(recruit)
+	return _result(true,tr("Recruta equipado e incorporado à companhia."))
 
 func _completed(kind: String) -> int:
 	var total := 0
@@ -355,7 +411,9 @@ func step() -> void:
 	_update_training()
 	for w in workers:
 		if w.task.is_empty():
-			if not w.cargo.is_empty():
+			if int(w.get("meal", 0)) <= 0:
+				_seek_inn(w)
+			elif not w.cargo.is_empty():
 				_assign_return(w)
 			elif w.role == "builder":
 				_assign_builder(w)
@@ -363,27 +421,21 @@ func step() -> void:
 				_assign_delivery(w)
 	_update_reasons()
 	if tick % 200 == 0:
-		var meal: int = maxi(1,ceili(float(workers.size())/6.0))
-		var portion := mini(meal,available("food"))
-		_consume_stock("food",portion)
-		if portion < meal:
-			food_shortage += 200
-		else:
-			food_shortage = maxi(0,food_shortage-400)
-	if tick % 300 == 0 and workers.size() < mini(48,population_capacity()) and available("food") >= 12:
-		var free := _free_cell(Vector2i(5,14))
-		if free.x >= 0:
-			_add_worker("resident",free)
-			_emit(tr("Um novo morador chegou. Ele está disponível para formação."))
+		for person in workers:
+			person.meal = maxi(0, int(person.meal) - 1)
+			if int(person.meal) <= 0:
+				food_shortage += 1
+			else:
+				food_shortage = maxi(0, food_shortage - 1)
 	if battle != null:
 		battle.step()
-	var military_objective_done: bool = peaceful or (battle != null and battle.captured)
-	if not won and int(stats.houses_built) >= 2 and _completed("farm") > 0 and int(stats.food_produced) > 0 and int(stats.wine_delivered) >= 12 and military_objective_done:
-		won = true
-		if peaceful:
-			_emit(tr("Sua vila prospera! Casas, alimentos e vinho estão prontos. Você pode continuar construindo."))
-		else:
-			_emit(tr("Vale protegido! Sua vila prospera e o acampamento foi conquistado. Você pode continuar construindo."),"chime")
+	if not won:
+		if mission != null and mission.has_method("objectives_met") and mission.objectives_met(_completed_counts()):
+			won = true
+			_emit(tr("Objetivos da missão cumpridos. A vila pode continuar."))
+		elif mission == null and _completed("training") > 0 and _completed("inn") > 0 and _completed("lumber") > 0 and _completed("quarry") > 0:
+			won = true
+			_emit(tr("Escola, taverna, lenhador e pedreira estão prontos. Você pode continuar construindo."))
 
 func _free_cell(origin: Vector2i) -> Vector2i:
 	for radius in range(1,9):
@@ -560,6 +612,27 @@ func _assign_delivery(w: Dictionary) -> void:
 			var need: int = 6-int(b.input.grapes)-_incoming(b.id,"grapes")
 			if need > 0 and available("grapes") > 0 and _transport(w,0,b.id,"grapes",mini(2,mini(need,available("grapes")))):
 				return
+		if b.kind == "sawmill" and b.stage == "complete":
+			var need: int = 6-int(b.input.get("trunks",0))-_incoming(b.id,"trunks")
+			if need > 0 and available("trunks") > 0 and _transport(w,0,b.id,"trunks",mini(2,mini(need,available("trunks")))):
+				return
+		if b.kind == "mill" and b.stage == "complete":
+			var need: int = 6-int(b.input.get("corn",0))-_incoming(b.id,"corn")
+			if need > 0 and available("corn") > 0 and _transport(w,0,b.id,"corn",mini(2,mini(need,available("corn")))):
+				return
+		if b.kind == "bakery" and b.stage == "complete":
+			var need: int = 6-int(b.input.get("flour",0))-_incoming(b.id,"flour")
+			if need > 0 and available("flour") > 0 and _transport(w,0,b.id,"flour",mini(2,mini(need,available("flour")))):
+				return
+		if b.kind == "inn" and b.stage == "complete":
+			for item in ["loaves", "food", "wine"]:
+				var room: int = 8-int(b.input.get(item,0))-_incoming(b.id,item)
+				if room > 0 and available(item) > 0 and _transport(w,0,b.id,item,mini(2,mini(room,available(item)))):
+					return
+		if b.kind == "workshop" and b.stage == "complete":
+			var wood_need: int = 6-int(b.input.get("wood",0))-_incoming(b.id,"wood")
+			if wood_need > 0 and available("wood") > 0 and _transport(w,0,b.id,"wood",mini(2,mini(wood_need,available("wood")))):
+				return
 	_assign_export(w)
 
 func _assign_export(w: Dictionary) -> bool:
@@ -574,10 +647,10 @@ func _assign_export(w: Dictionary) -> bool:
 		ordered.sort_custom(func(a,b): return a.kind == "farm" and b.kind != "farm")
 	for b in ordered:
 		for item in ITEMS:
-			var target: int = {"wood":100,"stone":60,"food":120,"grapes":24,"wine":32}[item]
-			if int(stock[item])+_incoming(0,item) >= target:
+			var target: int = {"wood":100,"stone":60,"food":120,"grapes":24,"wine":32,"gold":40,"trunks":24,"corn":24,"flour":16,"loaves":24,"axe":8,"bow":8}.get(item, 12)
+			if int(stock.get(item,0))+_incoming(0,item) >= target:
 				continue
-			var free: int = int(b.output[item])-_outgoing(b.id,item)
+			var free: int = int(b.output.get(item,0))-_outgoing(b.id,item)
 			if free > 0 and _transport(w,b.id,0,item,mini(2,free)):
 				return true
 	return false
@@ -613,6 +686,8 @@ func _assign_workplaces() -> void:
 			continue
 		for w in workers:
 			if w.role != profession or not w.task.is_empty() or not w.cargo.is_empty():
+				continue
+			if int(w.get("meal", 0)) <= 0:
 				continue
 			var goal: Vector2i = b.cell+Vector2i(-1,1)
 			if not _go(w,goal):
@@ -667,6 +742,10 @@ func _work(w: Dictionary) -> void:
 			_produce(w,b)
 		"train":
 			w.state = tr("Em formação")
+		"eat":
+			_eat_at_inn(w,b)
+		"harvest":
+			_chop_tree(w,b)
 
 func _delivery_work(w: Dictionary) -> void:
 	var task: Dictionary = w.task
@@ -711,34 +790,154 @@ func _delivery_work(w: Dictionary) -> void:
 	w.jobs = int(w.get("jobs",0))+1
 	_release(w)
 
+func _inn() -> Dictionary:
+	for b in buildings:
+		if b.kind == "inn" and b.stage == "complete":
+			return b
+	return {}
+
+
+func _seek_inn(w: Dictionary) -> void:
+	var inn := _inn()
+	if inn.is_empty():
+		w.state = tr("Faminto: não há taverna")
+		return
+	if not _go(w, inn.entrance):
+		w.state = tr("Faminto: sem caminho até a taverna")
+		return
+	w.task = {"type": "eat", "building": inn.id}
+	w.state = tr("Indo comer na taverna")
+
+
+func _eat_at_inn(w: Dictionary, inn: Dictionary) -> void:
+	if inn.is_empty() or inn.kind != "inn":
+		_release(w)
+		return
+	var eaten := ""
+	for item in ["loaves", "food", "wine"]:
+		if int(inn.input.get(item, 0)) >= 1:
+			inn.input[item] -= 1
+			consumed[item] += 1
+			eaten = item
+			break
+	if eaten.is_empty():
+		w.state = tr("Taverna sem comida")
+		return
+	w.meal = 80
+	w.state = tr("Comeu na taverna")
+	_release(w)
+
+
+func _chop_tree(w: Dictionary, hut: Dictionary) -> void:
+	if harvest_map == null or hut.is_empty():
+		_release(w)
+		return
+	var tree: Vector2i = w.task.get("tree", Vector2i(-1, -1))
+	if not harvest_map.has_tree(tree):
+		_release(w)
+		return
+	harvest_map.harvest(tree)
+	hut.output.trunks = int(hut.output.get("trunks", 0)) + 2
+	produced.trunks += 2
+	w.state = tr("Árvore derrubada")
+	w.task = {"type": "produce", "building": hut.id}
+	w.goal = hut.cell + Vector2i(-1, 1)
+	_go(w, w.goal)
+
+
+func _completed_counts() -> Dictionary:
+	var counts := {}
+	for b in buildings:
+		if b.stage == "complete":
+			counts[b.kind] = int(counts.get(b.kind, 0)) + 1
+	return counts
+
+
 func _produce(w: Dictionary, b: Dictionary) -> void:
 	if b.is_empty() or b.stage != "complete":
 		_release(w)
 		return
+	if int(w.get("meal", 0)) <= 0:
+		_release(w)
+		_seek_inn(w)
+		return
 	if b.kind == "training":
 		w.state = tr("Ensinando no centro")
 		return
-	var recipes := {"lumber":["wood",4,8.0],"quarry":["stone",3,10.0],"farm":["food",8,10.0],"vineyard":["grapes",4,12.0],"winery":["wine",2,10.0]}
+	if b.kind == "barracks":
+		w.state = tr("Aguardando equipamento no quartel")
+		return
+	if b.kind == "lumber" and harvest_map != null:
+		var tree: Vector2i = harvest_map.nearest_standing_tree(w.cell)
+		if tree == Vector2i(-1, -1):
+			w.state = tr("Sem árvores para cortar")
+			return
+		if int(b.output.get("trunks", 0)) >= 20:
+			w.state = tr("Aguardando retirada da produção")
+			return
+		var stand := _tree_stand_cell(tree)
+		if stand.x < 0:
+			w.state = tr("Sem acesso à árvore")
+			return
+		if w.cell != stand:
+			w.task = {"type": "harvest", "building": b.id, "tree": tree}
+			_go(w, stand)
+			w.state = tr("Indo cortar árvore")
+			return
+		w.task = {"type": "harvest", "building": b.id, "tree": tree}
+		_chop_tree(w, b)
+		return
+	if b.kind == "quarry" and not stone_deposits.is_empty() and not _quarry_has_deposit(b.cell):
+		w.state = tr("Pedreira sem jazida")
+		return
+	var recipes := {
+		"lumber": ["wood", 4, 8.0, "", 0],
+		"quarry": ["stone", 3, 10.0, "", 0],
+		"farm": ["food", 8, 10.0, "", 0],
+		"vineyard": ["grapes", 4, 12.0, "", 0],
+		"winery": ["wine", 2, 10.0, "grapes", 3],
+		"sawmill": ["wood", 2, 10.0, "trunks", 1],
+		"mill": ["flour", 2, 10.0, "corn", 3],
+		"bakery": ["loaves", 2, 10.0, "flour", 2],
+		"workshop": ["axe", 1, 12.0, "wood", 2]
+	}
 	if not recipes.has(b.kind):
 		return
 	var recipe: Array = recipes[b.kind]
-	if int(b.output[recipe[0]]) >= 20:
+	if int(b.output.get(recipe[0], 0)) >= 20:
 		w.state = tr("Aguardando retirada da produção")
 		return
-	if b.kind == "winery" and int(b.input.grapes) < 3:
-		w.state = tr("Aguardando uvas")
+	var need_item: String = str(recipe[3])
+	var need_amount: int = int(recipe[4])
+	if not need_item.is_empty() and int(b.input.get(need_item, 0)) < need_amount:
+		w.state = tr("Aguardando {item}").format({"item": tr(str(ITEM_NAMES[need_item] if ITEM_NAMES.has(need_item) else need_item))})
 		return
-	w.state = tr("Produzindo {item}").format({"item":tr(ITEM_NAMES[recipe[0]])})
-	b.production += 0.1/float(recipe[2])
+	w.state = tr("Produzindo {item}").format({"item": tr(ITEM_NAMES[recipe[0]])})
+	b.production += 0.1 / float(recipe[2])
 	if b.production >= 1.0:
 		b.production = 0.0
-		if b.kind == "winery":
-			b.input.grapes -= 3
-			consumed.grapes += 3
+		if not need_item.is_empty():
+			b.input[need_item] -= need_amount
+			consumed[need_item] += need_amount
 		b.output[recipe[0]] += int(recipe[1])
 		produced[recipe[0]] += int(recipe[1])
 		if b.kind == "farm":
 			stats.food_produced += int(recipe[1])
+			b.output.corn = int(b.output.get("corn", 0)) + 8
+			produced.corn += 8
+		if b.kind == "workshop" and int(b.output.get("bow", 0)) < int(b.output.get("axe", 0)):
+			b.output.axe -= 1
+			produced.axe -= 1
+			b.output.bow = int(b.output.get("bow", 0)) + 1
+			produced.bow += 1
+
+
+func _tree_stand_cell(tree: Vector2i) -> Vector2i:
+	for delta in [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]:
+		var cell: Vector2i = tree + delta
+		if is_walkable(cell):
+			return cell
+	return Vector2i(-1, -1)
 
 func _update_training() -> void:
 	var completed: Array[Dictionary] = []
@@ -761,22 +960,22 @@ func _update_training() -> void:
 			if center.is_empty():
 				t.reason = tr("Centro ocupado ou sem instrutor")
 				continue
-			if available("food") < 2:
-				t.reason = tr("Faltam 2 alimentos para a formação")
+			if available("gold") < 1:
+				t.reason = tr("Falta ouro na escola")
 				continue
-			var candidate: Dictionary = {}
-			for w in workers:
-				if w.role == "resident" and w.task.is_empty() and _go(w,center.cell+Vector2i(1,2)):
-					candidate = w
-					break
-			if candidate.is_empty():
-				t.reason = tr("Sem moradores livres para formação")
+			var spawn: Vector2i = center.cell+Vector2i(1,2)
+			if not is_walkable(spawn):
+				spawn = center.entrance
+			if not is_walkable(spawn) or _occupied(spawn):
+				t.reason = tr("Entrada da escola ocupada")
 				continue
+			var candidate: Dictionary = _add_worker("resident", spawn)
 			t.worker = candidate.id
 			t.building = center.id
 			candidate.task = {"type":"train","building":center.id,"training":t.id}
-			candidate.state = tr("Indo estudar")
-			_consume_stock("food",2)
+			candidate.goal = spawn
+			candidate.state = tr("Novo civil em formação")
+			_consume_stock("gold",1)
 		var student := _worker(t.worker)
 		if student.is_empty():
 			t.worker = -1
@@ -836,14 +1035,20 @@ func notice() -> String:
 	return tr("Os habitantes trabalham sozinhos. Toque em um prédio para acompanhar.")
 
 func objective_rows() -> Array[Dictionary]:
-	var rows: Array[Dictionary] = [
-		{"text":tr("Construir 2 casas  ({count}/2)").format({"count":mini(2,int(stats.houses_built))}),"done":int(stats.houses_built)>=2},
-		{"text":tr("Cultivar alimentos em uma horta"),"done":_completed("farm")>0 and int(stats.food_produced)>0},
-		{"text":tr("Entregar 12 vinhos  ({count}/12)").format({"count":mini(12,int(stats.wine_delivered))}),"done":int(stats.wine_delivered)>=12}
+	if mission != null:
+		var rows: Array[Dictionary] = []
+		for row in mission.objectives:
+			var kind := str(row.get("kind", ""))
+			var need := int(row.get("count", 1))
+			var have := _completed(kind)
+			rows.append({"text": tr(str(row.get("text", kind))), "done": have >= need})
+		return rows
+	return [
+		{"text":tr("Construir a escola"),"done":_completed("training")>0},
+		{"text":tr("Construir a taverna"),"done":_completed("inn")>0},
+		{"text":tr("Construir o lenhador"),"done":_completed("lumber")>0},
+		{"text":tr("Construir a pedreira"),"done":_completed("quarry")>0}
 	]
-	if not peaceful:
-		rows.append({"text":tr("Conquistar o acampamento além do rio"),"done":battle != null and battle.captured})
-	return rows
 
 func conservation_errors() -> Array[String]:
 	var errors: Array[String] = []
@@ -972,8 +1177,6 @@ func _valid_save(s: Dictionary) -> bool:
 	for b in s.buildings:
 		if not b is Dictionary or not _safe_int(b.get("id")) or ids.has(b.id) or not definitions.has(b.get("kind")) or not _valid_cell(b.get("cell")) or not _valid_cell(b.get("entrance")):
 			return false
-		if peaceful and b.kind == "barracks":
-			return false
 		ids[b.id] = true
 		for key in ["stage","reason"]:
 			if not b.get(key) is String:
@@ -1029,11 +1232,13 @@ func _valid_save(s: Dictionary) -> bool:
 func _valid_task(task: Dictionary) -> bool:
 	if task.is_empty():
 		return true
-	if task.get("type") not in ["prepare","build","delivery","produce","train"] or typeof(task.get("building")) not in [TYPE_INT,TYPE_FLOAT]:
+	if task.get("type") not in ["prepare","build","delivery","produce","train","eat","harvest"] or typeof(task.get("building")) not in [TYPE_INT,TYPE_FLOAT]:
 		return false
 	if task.type == "delivery":
 		if task.get("phase") not in ["pickup","deliver"] or not ITEMS.has(task.get("item")) or not _safe_int(task.get("amount")) or typeof(task.get("source")) not in [TYPE_INT,TYPE_FLOAT] or not _valid_cell(task.get("dest_cell")):
 			return false
 		if task.phase == "pickup" and not _valid_cell(task.get("source_cell")):
 			return false
+	if task.type == "harvest" and not _valid_cell(task.get("tree")):
+		return false
 	return true

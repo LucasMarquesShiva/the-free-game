@@ -21,6 +21,7 @@ var _plaza: Array[Vector2i] = []
 
 func setup(_peaceful_mode: bool = true) -> void:
 	peaceful = true
+	mission = null
 	battle = null
 	tick = 0
 	next_id = 1
@@ -32,7 +33,13 @@ func setup(_peaceful_mode: bool = true) -> void:
 	won = false
 	lost = false
 	paused = false
-	stock = {"wood":140,"stone":160,"food":280,"grapes":0,"wine":0}
+	stock = _empty_items()
+	stock.wood = 140
+	stock.stone = 160
+	stock.food = 280
+	stock.gold = 50
+	stock.axe = 2
+	stock.bow = 2
 	initial = stock.duplicate(true)
 	reserved = _empty_items()
 	consumed = _empty_items()
@@ -42,10 +49,12 @@ func setup(_peaceful_mode: bool = true) -> void:
 	arrival_ticks = 0
 	last_notice = ""
 	definitions = definitions.duplicate(true)
-	definitions.erase("barracks")
+	harvest_map = load("res://simulation/harvest_map.gd").new()
+	harvest_map.setup_from_natural_cells(natural_cells)
+	stone_deposits = [Vector2i(12, 19), Vector2i(12, 20), Vector2i(11, 19), Vector2i(13, 19), Vector2i(10, 19)]
 	definitions.hall.name = "Edifício principal"
 	definitions.hall.description = "Abriga os primeiros moradores e o estoque inicial. Sua entrada inicia a rede de estradas."
-	definitions.store.description = "Amplia em 200 unidades a capacidade do depósito principal, com acesso pela rede."
+	definitions.store.description = "Depósito físico. Serventes buscam e deixam mercadorias na entrada."
 	definitions.farm.description = "O horticultor semeia, cultiva e colhe 8 alimentos por ciclo, em cerca de 25 s na velocidade 1×."
 	_add_building("hall",Vector2i(7,10),true)
 	_add_building("training",Vector2i(12,10),true)
@@ -309,8 +318,12 @@ func _is_access(cell: Vector2i) -> bool:
 
 
 func can_place(kind: String, cell: Vector2i) -> String:
+	if mission != null and mission.has_method("allows_building") and not mission.allows_building(kind):
+		return tr("Esta construção ainda não está disponível nesta missão.")
 	if not definitions.has(kind) or kind == "hall":
 		return tr("Construção desconhecida ou não disponível nesta vila.")
+	if kind == "quarry" and not _quarry_has_deposit(cell):
+		return tr("A pedreira precisa ficar junto a uma jazida de pedra.")
 	var size := footprint_size(kind)
 	if cell.x < 2 or cell.x > WIDTH-1-size.x or cell.y < 2 or cell.y > 23:
 		return tr("Deixe espaço para toda a construção e sua entrada dentro do vale.")
@@ -362,6 +375,9 @@ func can_place(kind: String, cell: Vector2i) -> String:
 
 
 func _store_for(_cell: Vector2i) -> Dictionary:
+	for building in buildings:
+		if building.kind == "store" and building.stage == "complete" and is_building_connected(building):
+			return building
 	for building in buildings:
 		if building.kind == "hall" and building.stage == "complete":
 			return building
@@ -441,7 +457,7 @@ func _has_pending_road_delivery() -> bool:
 	# A producer existing does not imply work: its output may be empty, reserved,
 	# or already stocked to its target. Idle servants should keep access clear.
 	var can_export := _storage_used()+_incoming(0,"food") < storage_capacity()
-	var export_targets := {"wood":100,"stone":60,"food":_food_stock_target(),"grapes":24,"wine":32}
+	var export_targets := {"wood":100,"stone":60,"food":_food_stock_target(),"grapes":24,"wine":32,"gold":40,"trunks":24,"corn":24,"flour":16,"loaves":24,"axe":8,"bow":8}
 	for building in buildings:
 		if not _connected_roads.has(building.entrance):
 			continue
@@ -453,12 +469,24 @@ func _has_pending_road_delivery() -> bool:
 		if building.kind == "winery" and building.stage == "complete":
 			if 6-int(building.input.grapes)-_incoming(building.id,"grapes") > 0 and available("grapes") > 0:
 				return true
+		if building.kind == "sawmill" and building.stage == "complete" and 6-int(building.input.get("trunks",0))-_incoming(building.id,"trunks") > 0 and available("trunks") > 0:
+			return true
+		if building.kind == "mill" and building.stage == "complete" and 6-int(building.input.get("corn",0))-_incoming(building.id,"corn") > 0 and available("corn") > 0:
+			return true
+		if building.kind == "bakery" and building.stage == "complete" and 6-int(building.input.get("flour",0))-_incoming(building.id,"flour") > 0 and available("flour") > 0:
+			return true
+		if building.kind == "inn" and building.stage == "complete":
+			for item in ["loaves", "food", "wine"]:
+				if 8-int(building.input.get(item,0))-_incoming(building.id,item) > 0 and available(item) > 0:
+					return true
+		if building.kind == "workshop" and building.stage == "complete" and 6-int(building.input.get("wood",0))-_incoming(building.id,"wood") > 0 and available("wood") > 0:
+			return true
 		for item in ITEMS:
 			if int(building.output[item])-_outgoing(building.id,item) <= 0:
 				continue
 			if building.stage == "cancelled" and _storage_used()+2 <= storage_capacity():
 				return true
-			if can_export and int(stock[item])+_incoming(0,item) < int(export_targets[item]):
+			if can_export and int(stock[item])+_incoming(0,item) < int(export_targets.get(item, 12)):
 				return true
 	return false
 
@@ -595,6 +623,8 @@ func _assign_workplaces() -> void:
 		for person in workers:
 			if person.role != profession or not person.task.is_empty() or not person.cargo.is_empty():
 				continue
+			if int(person.get("meal", 0)) <= 0:
+				continue
 			if not _go(person,_professional_work_cell(building)) and not _go(person,_builder_work_cell(building)):
 				continue
 			building.worker = person.id
@@ -640,6 +670,10 @@ func _produce(person: Dictionary, building: Dictionary) -> void:
 	if building.is_empty() or building.get("kind","") != "farm":
 		super._produce(person,building)
 		return
+	if int(person.get("meal", 0)) <= 0:
+		_release(person)
+		_seek_inn(person)
+		return
 	if building.stage != "complete":
 		_release(person)
 		return
@@ -657,6 +691,8 @@ func _produce(person: Dictionary, building: Dictionary) -> void:
 		building.output.food += CROP_OUTPUT_AMOUNT
 		produced.food += CROP_OUTPUT_AMOUNT
 		stats.food_produced += CROP_OUTPUT_AMOUNT
+		building.output.corn = int(building.output.get("corn", 0)) + CROP_OUTPUT_AMOUNT
+		produced.corn += CROP_OUTPUT_AMOUNT
 		person.state = tr("Colheita recolhida: iniciando novo plantio")
 
 
@@ -681,22 +717,23 @@ func _update_training() -> void:
 			if center.is_empty():
 				t.reason = tr("Conecte a escola ou aguarde um instrutor e uma vaga")
 				continue
-			if available("food") < 2:
-				t.reason = tr("Faltam 2 alimentos para a formação")
+			if available("gold") < 1:
+				t.reason = tr("Falta ouro na escola")
 				continue
-			var candidate: Dictionary = {}
-			for w in workers:
-				if w.role == "resident" and w.task.is_empty() and _go(w,_builder_work_cell(center)):
-					candidate = w
-					break
-			if candidate.is_empty():
-				t.reason = tr("Sem moradores livres para formação")
+			var spawn: Vector2i = _builder_work_cell(center)
+			if not is_walkable(spawn) or _occupied(spawn):
+				spawn = center.entrance
+			if not is_walkable(spawn) or _occupied(spawn):
+				t.reason = tr("Entrada da escola ocupada")
 				continue
+			var candidate: Dictionary = _add_worker("resident", spawn)
 			t.worker = candidate.id
 			t.building = center.id
 			candidate.task = {"type":"train","building":center.id,"training":t.id}
-			candidate.state = tr("Indo estudar")
-			_consume_stock("food",2)
+			candidate.goal = spawn
+			candidate.previous = spawn
+			candidate.state = tr("Novo civil em formação")
+			_consume_stock("gold",1)
 		if not is_building_connected(_building(int(t.building))):
 			t.reason = tr("Conecte a escola ao edifício principal")
 			continue
