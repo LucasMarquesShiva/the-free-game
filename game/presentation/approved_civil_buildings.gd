@@ -4,8 +4,8 @@ extends RefCounted
 const Core = preload("res://presentation/approved_buildings.gd")
 const Base = preload("res://presentation/approved_primitives.gd")
 const EarthYard = preload("res://presentation/approved_earth_yard.gd")
-const KINDS := ["house","store","lumber","sawmill","quarry","farm","vineyard","winery"]
-const IDS := {"house":"bld_02_casas","store":"bld_03_armazem","lumber":"bld_06_cabana_do_lenhador","sawmill":"bld_07_serraria","quarry":"bld_08_pedreira","farm":"bld_12_horta","vineyard":"kit_03_lavouras_e_vinhedos","winery":"bld_20_vinicola"}
+const KINDS := ["house","store","lumber","sawmill","quarry","farm","vineyard","winery","inn","mill","bakery","workshop","barracks"]
+const IDS := {"house":"bld_02_casas","store":"bld_03_armazem","lumber":"bld_06_cabana_do_lenhador","sawmill":"bld_07_serraria","quarry":"bld_08_pedreira","farm":"bld_12_horta","vineyard":"kit_03_lavouras_e_vinhedos","winery":"bld_20_vinicola","inn":"bld_19_taverna","mill":"bld_14_moinho","bakery":"bld_15_padaria","workshop":"bld_22_carpintaria","barracks":"bld_26_quartel"}
 const WOOD := Color("81582f")
 const DARK_WOOD := Color("4d3521")
 const LIGHT_WOOD := Color("ae8248")
@@ -32,6 +32,11 @@ static func building(kind: String) -> Node3D:
 			"quarry": _quarry(b)
 			"farm": _farm(b)
 			"vineyard": _vineyard(b)
+			"inn": _house(b)
+			"mill": _lumber(b)
+			"bakery": _house(b)
+			"workshop": _quarry(b)
+			"barracks": _house(b)
 		for key in Base.MATERIAL_KEYS:
 			if not _materials.has(key):
 				_materials[key] = Base._material(key).duplicate()

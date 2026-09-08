@@ -21,6 +21,7 @@ TEST_SCRIPTS = (
     "tests/test_approved.gd",
     "tests/test_approved_harvest_delivery.gd",
     "tests/test_parked_servants.gd",
+    "tests/test_kam_gaps.gd",
 )
 
 

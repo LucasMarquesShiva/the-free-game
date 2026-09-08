@@ -280,7 +280,29 @@ func command(kind: String, payload: Dictionary = {}) -> Dictionary:
 		"new_game":
 			setup(peaceful)
 			return _result(true,tr("Uma nova vila está pronta."))
+		"load_mission":
+			return _load_mission(str(payload.get("id","tsk-01")))
 	return _result(false,tr("Comando não permitido. Civis trabalham de forma autônoma."))
+
+func _load_mission(mission_id: String) -> Dictionary:
+	var spec: RefCounted = load("res://simulation/mission_spec.gd").load_id(mission_id)
+	if spec == null:
+		return _result(false, tr("Missão não encontrada."))
+	setup(peaceful)
+	mission = spec
+	if spec.start is Dictionary and spec.start.get("stock") is Dictionary:
+		stock = _empty_items()
+		for item in spec.start.stock:
+			if ITEMS.has(str(item)):
+				stock[str(item)] = int(spec.start.stock[item])
+		initial = stock.duplicate(true)
+		reserved = _empty_items()
+		consumed = _empty_items()
+		produced = _empty_items()
+	for line in spec.briefing:
+		_emit(tr(str(line)))
+	return _result(true, tr("Missão {id} iniciada.").format({"id": spec.id}))
+
 
 func _result(ok: bool, message: String) -> Dictionary:
 	return {"ok":ok,"message":message}
@@ -429,6 +451,9 @@ func step() -> void:
 				food_shortage = maxi(0, food_shortage - 1)
 	if battle != null:
 		battle.step()
+		if bool(battle.defeated) and not lost:
+			lost = true
+			_emit(tr("A companhia foi derrotada."), "chime")
 	if not won:
 		if mission != null and mission.has_method("objectives_met") and mission.objectives_met(_completed_counts()):
 			won = true
@@ -612,6 +637,10 @@ func _assign_delivery(w: Dictionary) -> void:
 			var need: int = 6-int(b.input.grapes)-_incoming(b.id,"grapes")
 			if need > 0 and available("grapes") > 0 and _transport(w,0,b.id,"grapes",mini(2,mini(need,available("grapes")))):
 				return
+		if b.kind == "training" and b.stage == "complete":
+			var gold_need: int = _school_gold_need(b)
+			if gold_need > 0 and available("gold") > 0 and _transport(w,0,b.id,"gold",mini(2,mini(gold_need,available("gold")))):
+				return
 		if b.kind == "sawmill" and b.stage == "complete":
 			var need: int = 6-int(b.input.get("trunks",0))-_incoming(b.id,"trunks")
 			if need > 0 and available("trunks") > 0 and _transport(w,0,b.id,"trunks",mini(2,mini(need,available("trunks")))):
@@ -790,6 +819,14 @@ func _delivery_work(w: Dictionary) -> void:
 	w.jobs = int(w.get("jobs",0))+1
 	_release(w)
 
+func _school_gold_need(school: Dictionary) -> int:
+	var queued := 0
+	for t in training:
+		if int(t.get("worker", -1)) < 0:
+			queued += 1
+	return maxi(0, queued - int(school.input.get("gold", 0)) - _incoming(school.id, "gold"))
+
+
 func _inn() -> Dictionary:
 	for b in buildings:
 		if b.kind == "inn" and b.stage == "complete":
@@ -960,8 +997,8 @@ func _update_training() -> void:
 			if center.is_empty():
 				t.reason = tr("Centro ocupado ou sem instrutor")
 				continue
-			if available("gold") < 1:
-				t.reason = tr("Falta ouro na escola")
+			if int(center.input.get("gold",0)) < 1:
+				t.reason = tr("Aguardando ouro na escola")
 				continue
 			var spawn: Vector2i = center.cell+Vector2i(1,2)
 			if not is_walkable(spawn):
@@ -975,7 +1012,8 @@ func _update_training() -> void:
 			candidate.task = {"type":"train","building":center.id,"training":t.id}
 			candidate.goal = spawn
 			candidate.state = tr("Novo civil em formação")
-			_consume_stock("gold",1)
+			center.input.gold -= 1
+			consumed.gold += 1
 		var student := _worker(t.worker)
 		if student.is_empty():
 			t.worker = -1

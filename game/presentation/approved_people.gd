@@ -121,7 +121,11 @@ static func animate(person: Node3D,phase: float,walking: bool,working: bool,load
 			hand_mesh.mesh=_cached(role+"_hand_"+suffix+("_grip" if gripping else ""),func():return Sculpt.hand(role,side,gripping))
 		person.set_meta("grip_state",grip_state)
 	if loaded:
-		var kind: String=cargo_kind if cargo_kind in ["wood","stone","food","grapes","wine"] else "food"
+		var kind: String=cargo_kind
+		if kind=="trunks":kind="wood"
+		elif kind in ["gold","axe","bow"]:kind="stone"
+		elif kind in ["loaves","corn","flour"]:kind="food"
+		elif kind not in ["wood","stone","food","grapes","wine"]:kind="food"
 		if person.get_meta("cargo_kind")!=kind:
 			rig.cargo_mesh.mesh=_cached("cargo_"+kind,func():return _cargo(kind));person.set_meta("cargo_kind",kind)
 		cargo.rotation.z=wave*0.009 if walking else 0.0

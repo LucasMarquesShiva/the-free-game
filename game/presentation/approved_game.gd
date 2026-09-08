@@ -134,6 +134,9 @@ func _world_click(point: Vector2) -> void:
 		_command("remove_road",{"cell":cell})
 		world.set_road_removal_preview(cell)
 		return
+	if build_kind == "army":
+		_command("army",{"order":"attack","target":cell})
+		return
 	if not build_kind.is_empty():
 		var result: Dictionary = sim.command("build",{"kind":build_kind,"cell":cell})
 		hud.show_message(result.message)
@@ -147,6 +150,8 @@ func _world_click(point: Vector2) -> void:
 		hud.open_training(b)
 	else:
 		hud.inspect(b)
+		if b.get("kind","") == "barracks" and b.get("stage","") == "complete":
+			hud.set_mode(tr("Quartel · recrute lanceiros e arqueiros"))
 
 func _reset_pointer() -> void:
 	pointer_down = false

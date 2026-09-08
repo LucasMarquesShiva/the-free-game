@@ -469,6 +469,8 @@ func _has_pending_road_delivery() -> bool:
 		if building.kind == "winery" and building.stage == "complete":
 			if 6-int(building.input.grapes)-_incoming(building.id,"grapes") > 0 and available("grapes") > 0:
 				return true
+		if building.kind == "training" and building.stage == "complete" and _school_gold_need(building) > 0 and available("gold") > 0:
+			return true
 		if building.kind == "sawmill" and building.stage == "complete" and 6-int(building.input.get("trunks",0))-_incoming(building.id,"trunks") > 0 and available("trunks") > 0:
 			return true
 		if building.kind == "mill" and building.stage == "complete" and 6-int(building.input.get("corn",0))-_incoming(building.id,"corn") > 0 and available("corn") > 0:
@@ -717,8 +719,8 @@ func _update_training() -> void:
 			if center.is_empty():
 				t.reason = tr("Conecte a escola ou aguarde um instrutor e uma vaga")
 				continue
-			if available("gold") < 1:
-				t.reason = tr("Falta ouro na escola")
+			if int(center.input.get("gold",0)) < 1:
+				t.reason = tr("Aguardando ouro na escola")
 				continue
 			var spawn: Vector2i = _builder_work_cell(center)
 			if not is_walkable(spawn) or _occupied(spawn):
@@ -733,7 +735,8 @@ func _update_training() -> void:
 			candidate.goal = spawn
 			candidate.previous = spawn
 			candidate.state = tr("Novo civil em formação")
-			_consume_stock("gold",1)
+			center.input.gold -= 1
+			consumed.gold += 1
 		if not is_building_connected(_building(int(t.building))):
 			t.reason = tr("Conecte a escola ao edifício principal")
 			continue

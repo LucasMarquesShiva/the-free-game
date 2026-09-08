@@ -248,3 +248,24 @@ func _test_mission_lock() -> void:
 	var sandbox := Approved.new()
 	sandbox.setup()
 	expect(sandbox.mission == null and sandbox.command("build", {"kind": "farm", "cell": Vector2i(16, 19)}).ok, "default sandbox start is unchanged")
+	var lesson := Approved.new()
+	var loaded: Dictionary = lesson.command("load_mission", {"id": "tsk-01"})
+	expect(loaded.ok, "first lesson starts from a sim command: " + str(loaded.message))
+	expect(lesson.mission != null and not lesson.command("build", {"kind": "farm", "cell": Vector2i(16, 19)}).ok, "loaded lesson still hides farm")
+	var gold_school := Approved.new()
+	gold_school.setup()
+	connect_school(gold_school)
+	gold_school.command("train", {"role": "builder"})
+	var school_gold := 0
+	for i in range(400):
+		gold_school.step()
+		var school: Dictionary = gold_school.buildings[1]
+		school_gold = int(school.input.get("gold", 0))
+		if school_gold > 0 or int(gold_school.consumed.get("gold", 0)) > 0:
+			break
+	expect(school_gold > 0 or int(gold_school.consumed.gold) > 0, "servants deliver gold to the school before training spends it")
+	var defeat := Approved.new()
+	defeat.setup()
+	defeat._ensure_battle()
+	advance(defeat, 8)
+	expect(defeat.lost and defeat.battle.defeated, "empty company defeat sets lost")

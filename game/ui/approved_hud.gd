@@ -157,6 +157,8 @@ var _inspection_connection: Label
 var _inspection_progress: ProgressBar
 var _inspection_details: Label
 var _inspection_cancel: Button
+var _recruit_melee: Button
+var _recruit_ranged: Button
 var _mode_panel: PanelContainer
 var _mode_label: Label
 var _road_toggle: Button
@@ -182,6 +184,7 @@ var _inspect_map: Button
 var _menu_title: Label
 var _save_button: Button
 var _load_button: Button
+var _lesson_button: Button
 var _menu_help_button: Button
 var _code_button: Button
 var _restart_button: Button
@@ -424,6 +427,8 @@ func _make_dock() -> void:
 	_tabs["road"].tooltip_text = tr("Traçar ou apagar estradas · R · 1 pedra por trecho novo")
 	_tabs["training"] = _button(row,tr("Ofícios"),_toggle_drawer.bind("training"),122)
 	_tabs["training"].tooltip_text = tr("Formar profissionais · também disponível ao clicar em uma escola concluída")
+	_tabs["army"] = _button(row,tr("Exército"),_choose_army,110)
+	_tabs["army"].tooltip_text = tr("Clique no mapa para dar um objetivo à companhia")
 	_tabs["objectives"] = _button(row,tr("Objetivos"),_toggle_objectives,122)
 	_accent(_tabs["build"])
 	_accent(_tabs["road"])
@@ -492,7 +497,7 @@ func _populate_build() -> void:
 	_build_grid.add_theme_constant_override("h_separation",9)
 	_build_grid.add_theme_constant_override("v_separation",9)
 	_drawer_content.add_child(_build_grid)
-	for kind in BUILD_ORDER:
+	for kind in _available_build_kinds():
 		var definition := _definition(kind)
 		var button := _button(_build_grid,"",_choose_build.bind(kind))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -640,6 +645,22 @@ func _choose_road() -> void:
 	set_mode(tr("Estradas · arraste ou clique · 1 pedra/trecho · Esc para sair"))
 	build_selected.emit("road")
 
+func _choose_army() -> void:
+	_dismiss_tutorial()
+	close_panels()
+	_mode_type = "army"
+	set_mode(tr("Exército · clique no mapa para conquistar · Esc para sair"))
+	build_selected.emit("army")
+
+func _available_build_kinds() -> Array[String]:
+	var kinds: Array[String] = []
+	var spec: Variant = _sim.get("mission") if _sim != null else null
+	for kind in BUILD_ORDER:
+		if spec != null and spec.has_method("allows_building") and not spec.allows_building(kind):
+			continue
+		kinds.append(kind)
+	return kinds
+
 func _choose_build(kind: String) -> void:
 	_dismiss_tutorial()
 	close_panels()
@@ -678,6 +699,8 @@ func _make_inspector() -> void:
 	_inspection_cancel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_inspection_cancel.add_theme_color_override("font_color",DANGER)
 	_inspection_cancel.tooltip_text = tr("Interromper esta obra e liberar os materiais que ainda não foram usados")
+	_recruit_melee = _button(box, tr("Recrutar lanceiro (machado)"), func(): command_requested.emit("recruit", {"role": "lancer"}))
+	_recruit_ranged = _button(box, tr("Recrutar arqueiro (arco)"), func(): command_requested.emit("recruit", {"role": "archer"}))
 
 func inspect(building: Dictionary) -> void:
 	if not is_instance_valid(_root):
@@ -728,6 +751,10 @@ func _make_menu() -> void:
 	_save_button = _button(content,tr("Salvar partida"),func(): save_requested.emit())
 	_accent(_save_button)
 	_load_button = _button(content,tr("Carregar partida"),func(): load_requested.emit())
+	_lesson_button = _button(content,tr("Missão: primeira lição"),func():
+		close_panels()
+		command_requested.emit("load_mission", {"id": "tsk-01"})
+	)
 	_menu_help_button = _button(content,tr("Como jogar"),_show_help)
 	_code_button = _button(content,tr("Código e artes do jogo ↗"),func(): OS.shell_open("https://github.com/LucasMarquesShiva/the-free-game"))
 	_restart_button = _button(content,tr("Reiniciar partida"),_toggle_restart_confirmation)
@@ -785,8 +812,10 @@ func _help_entries() -> Array:
 	return [
 		[tr("1. Ligue as entradas"),tr("A vila começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas (R), arraste ou clique a partir de uma borda da praça até a entrada da escola. Cada trecho novo custa 1 pedra. Na barra, Apagar trecho remove um por clique; a pedra reservada é liberada se a obra ainda não começou.")],
 		[tr("2. Garanta os recursos"),tr("Construa lenhador, pedreira e horta e ligue suas entradas. Obras aguardam a estrada antes de receber materiais. Os serventes transportam apenas por caminhos concluídos; uma interrupção preserva a carga até a reconexão.")],
-		[tr("3. Forme a equipe"),tr("Clique na escola concluída ou abra Ofícios para formar lenhador, canteiro e horticultor. A escola precisa de estrada até o principal e de um instrutor. Construtores erguem os prédios; serventes levam os materiais. Você nunca precisa direcionar pessoas.")],
-		[tr("Do parreiral à vinícola"),tr("Construa ambos. Cada um precisa de um vinhateiro. Serventes levam as uvas para a vinícola e retiram o vinho. Entregue 12 vinhos ao depósito do principal.")],
+		[tr("3. Forme a equipe"),tr("Clique na escola concluída ou abra Ofícios. A escola gasta ouro entregue pelos serventes e forma civis novos. Construtores e serventes trabalham sozinhos.")],
+		[tr("Taverna e comida"),tr("Os trabalhadores comem na taverna. Construa horta, moinho e padaria para pão; o vinho também serve de bebida.")],
+		[tr("Exército"),tr("Construa o quartel, forme recrutas e entregue machados ou arcos. Em Exército, clique no mapa para dar um objetivo à companhia.")],
+		[tr("Primeira lição"),tr("Menu → Missão: primeira lição trava a vinha e a horta até você ter escola, taverna, lenhador e pedreira.")],
 		[tr("Câmera e atalhos"),tr("Arraste o terreno para mover a câmera; a roda do mouse aproxima. Q/E giram a visão. R inicia estradas; Esc encerra a colocação. Vila retorna ao principal. Pausar permite planejar; 1×, 2× e 4× ajustam o ritmo.")],
 		[tr("Guarde sua partida"),tr("Menu → Salvar preserva sua vila. Use Carregar para retomar. Reiniciar pede confirmação antes de começar de novo.")]
 	]
@@ -843,6 +872,9 @@ func _retranslate() -> void:
 		_tabs["road"].tooltip_text = tr("Traçar ou apagar estradas · R · 1 pedra por trecho novo")
 		_tabs["training"].text = tr("Ofícios")
 		_tabs["training"].tooltip_text = tr("Formar profissionais · também disponível ao clicar em uma escola concluída")
+		if _tabs.has("army"):
+			_tabs["army"].text = tr("Exército")
+			_tabs["army"].tooltip_text = tr("Clique no mapa para dar um objetivo à companhia")
 		_tabs["objectives"].text = tr("Objetivos")
 	if is_instance_valid(_village_focus):
 		_village_focus.text = tr("Vila")
@@ -860,11 +892,17 @@ func _retranslate() -> void:
 	if is_instance_valid(_inspection_cancel):
 		_inspection_cancel.text = tr("Cancelar obra")
 		_inspection_cancel.tooltip_text = tr("Interromper esta obra e liberar os materiais que ainda não foram usados")
+	if is_instance_valid(_recruit_melee):
+		_recruit_melee.text = tr("Recrutar lanceiro (machado)")
+	if is_instance_valid(_recruit_ranged):
+		_recruit_ranged.text = tr("Recrutar arqueiro (arco)")
 	if is_instance_valid(_menu_title):
 		_menu_title.text = tr("Sua partida")
 		_language_label.text = tr("Idioma")
 		_save_button.text = tr("Salvar partida")
 		_load_button.text = tr("Carregar partida")
+		if is_instance_valid(_lesson_button):
+			_lesson_button.text = tr("Missão: primeira lição")
 		_menu_help_button.text = tr("Como jogar")
 		_code_button.text = tr("Código e artes do jogo ↗")
 		_restart_button.text = tr("Reiniciar partida")
@@ -1121,7 +1159,7 @@ func _refresh_inspection() -> void:
 				if int(inventory[item]) > 0:
 					details.append(tr("{kind}: {amount} {item}").format({"kind":tr("Entrada") if key == "input" else tr("Para retirar"),"amount":int(inventory[item]),"item":tr(str(ITEM_NAMES.get(item,item))).to_lower()}))
 		if str(building.get("kind","")) == "house":
-			details.append(tr("4 vagas de moradia · chegada automática de moradores"))
+			details.append(tr("Abrigo civil. Novos habitantes saem da escola."))
 		elif str(building.get("kind","")) == "farm" and _sim.has_method("crop_status"):
 			var crop := _dictionary(_sim.call("crop_status",building))
 			if not crop.is_empty():
@@ -1133,6 +1171,11 @@ func _refresh_inspection() -> void:
 					details.append(tr("Cultivo pausado: {reason}").format({"reason":str(crop.reason)}))
 	_inspection_details.text = _profession_text("\n".join(details))
 	_inspection_cancel.visible = not complete and not bool(building.get("initial",false))
+	var barracks := complete and str(building.get("kind","")) == "barracks"
+	if is_instance_valid(_recruit_melee):
+		_recruit_melee.visible = barracks
+	if is_instance_valid(_recruit_ranged):
+		_recruit_ranged.visible = barracks
 	var content := _inspection_details.get_parent()
 	content.move_child(_inspection_details,0 if _compact_layout() and not complete else content.get_child_count()-1)
 
@@ -1295,6 +1338,9 @@ func _layout() -> void:
 	_tabs["build"].custom_minimum_size.x = 116.0 if compact else 160.0
 	_tabs["road"].custom_minimum_size.x = 116.0 if compact else 160.0
 	_tabs["training"].custom_minimum_size.x = 91.0 if compact else 122.0
+	if _tabs.has("army"):
+		_tabs["army"].custom_minimum_size.x = 88.0 if compact else 110.0
+		_tabs["army"].visible = width >= 980.0
 	_tabs["objectives"].custom_minimum_size.x = 102.0 if compact else 122.0
 	_tabs["objectives"].visible = width >= 960.0
 	_village_focus.visible = width >= 860.0
