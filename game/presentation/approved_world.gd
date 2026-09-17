@@ -29,9 +29,11 @@ var terrain_elapsed := 0.0
 var elapsed := 0.0
 var performance_elapsed := 0.0
 var detail_cursor:=0
+var gl_compatibility := false
 
 func setup(village: RefCounted) -> void:
  sim = village
+ gl_compatibility = RenderingServer.get_current_rendering_method()=="gl_compatibility"
  _light()
  terrain = Terrain.new();add_child(terrain);terrain.setup(sim)
  camera = Camera3D.new();camera.projection = Camera3D.PROJECTION_ORTHOGONAL;camera.size = view_size;camera.near = 0.5;camera.far = 280.0;add_child(camera);camera.make_current()
@@ -42,7 +44,7 @@ func setup(village: RefCounted) -> void:
  sync(0.0)
 
 func _light() -> void:
- var sun := DirectionalLight3D.new();sun.rotation_degrees = Vector3(-48,-38,0);sun.light_color = Color("fff0d7");sun.light_energy = 0.85 if RenderingServer.get_current_rendering_method()=="gl_compatibility" else 1.06;sun.shadow_enabled = true
+ var sun := DirectionalLight3D.new();sun.rotation_degrees = Vector3(-48,-38,0);sun.light_color = Color("fff0d7");sun.light_energy = 0.85 if gl_compatibility else 1.06;sun.shadow_enabled = not gl_compatibility
  sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL;sun.directional_shadow_max_distance = 150;sun.shadow_bias = 0.035;sun.shadow_normal_bias = 0.22;sun.directional_shadow_blend_splits = false;sun.light_angular_distance = 0.0;sun.shadow_blur=1.0;add_child(sun)
  var environment := WorldEnvironment.new();var env := Environment.new();environment.environment = env
  env.background_mode = Environment.BG_COLOR;env.background_color = Color("b5cbbb")
@@ -52,8 +54,13 @@ func _light() -> void:
  if RenderingServer.get_current_rendering_method() != "gl_compatibility":
   env.ssao_enabled = true;env.ssao_radius = 1.3;env.ssao_intensity = 1.45;env.ssao_power = 1.2;env.ssao_light_affect = 0.12
  add_child(environment)
- get_viewport().msaa_3d = Viewport.MSAA_2X
- if RenderingServer.get_current_rendering_method()!="gl_compatibility":get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
+ get_viewport().msaa_3d = Viewport.MSAA_DISABLED if gl_compatibility else Viewport.MSAA_2X
+ # Dynamic 3D render scale: renders at 80% resolution and upscales, cutting
+ # fragment-shader cost (terrain, grass, character shaders) by ~35% on weak
+ # integrated GPUs at a cost too small to notice on a stylized isometric view.
+ if gl_compatibility:
+  get_viewport().scaling_3d_scale = 0.8
+ if not gl_compatibility:get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
 
 func _camera_update(delta: float) -> void:
  var blend := 1.0-exp(-delta*12.0)
@@ -100,7 +107,11 @@ func sync(delta: float) -> void:
  terrain_elapsed += delta
  if terrain_elapsed>=0.2:
   terrain_elapsed = 0.0;terrain.sync()
- var detail_tier:=0 if view_size<20 else (2 if view_size>48 else 1)
+ # gl_compatibility targets weak/integrated GPUs: the ~60k-triangle QUALITY_HIGH
+ # rig (used when zoomed in close) is skipped in favor of the ~18k-triangle
+ # medium tier, since several close-up workers at once are too heavy there.
+ var min_tier:=1 if RenderingServer.get_current_rendering_method()=="gl_compatibility" else 0
+ var detail_tier:=maxi(min_tier,0 if view_size<20 else (2 if view_size>48 else 1))
  var detail_index:=0
  var alive := {}
  for b: Dictionary in sim.buildings:
@@ -273,15 +284,19 @@ func _update_supplies(building:Node3D,state:Dictionary)->void:
   rock.rotation.y=i*1.73
  Basic.bake(piles)
 
+static var _clearing_material:ShaderMaterial
+static func _clearing_material_shared()->ShaderMaterial:
+ if _clearing_material==null:
+  _clearing_material=ShaderMaterial.new();_clearing_material.shader=load("res://assets/approved/clearing.gdshader")
+  _clearing_material.set_shader_parameter("earth_tex",load("res://assets/approved/earth-albedo.png"))
+ return _clearing_material
 func _add_clearing(node:Node3D,kind:String)->void:
  var ground:=MeshInstance3D.new();var plane:=PlaneMesh.new()
  var size:Vector2i=sim.footprint_size(kind)
  plane.size=Vector2(size.x*CELL+1.65,size.y*CELL+1.65)
  ground.mesh=plane;ground.position.y=0.007
  ground.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
- var material:=ShaderMaterial.new();material.shader=load("res://assets/approved/clearing.gdshader")
- material.set_shader_parameter("earth_tex",load("res://assets/approved/earth-albedo.png"))
- ground.material_override=material;node.add_child(ground)
+ ground.material_override=_clearing_material_shared();node.add_child(ground)
 
 func _clear(node:Node) -> void:
  for child in node.get_children():child.free()

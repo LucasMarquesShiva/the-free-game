@@ -18,6 +18,25 @@ const BRIDGE_DECK:=Rect2(52.65,31.80,9.70,6.40)
 const BRIDGE_ROAD_LEFT:=52.54
 const BRIDGE_ROAD_RIGHT:=62.46
 const ROAD_OFFSET:=0.015
+## Road tiles used to load the shader/textures and allocate a fresh
+## ShaderMaterial on every rebuild (each time a segment's paving progress or
+## neighbor connections changed). Connections only have 16 possible on/off
+## combinations, so materials are cached by that key instead of reallocated.
+static var _road_shader:Shader
+static var _road_stones_tex:Texture2D
+static var _road_earth_tex:Texture2D
+static var _road_materials:Dictionary={}
+static func _road_material(connections:Vector4)->ShaderMaterial:
+ var key:int=(1 if connections.x>0.5 else 0)|(2 if connections.y>0.5 else 0)|(4 if connections.z>0.5 else 0)|(8 if connections.w>0.5 else 0)
+ if _road_materials.has(key):return _road_materials[key]
+ if _road_shader==null:
+  _road_shader=load("res://assets/approved/road.gdshader")
+  _road_stones_tex=load("res://assets/illustrated/road.png")
+  _road_earth_tex=load("res://assets/approved/earth-albedo.png")
+ var mat:=ShaderMaterial.new();mat.shader=_road_shader
+ mat.set_shader_parameter("stones",_road_stones_tex);mat.set_shader_parameter("earth_tex",_road_earth_tex);mat.set_shader_parameter("connections",connections)
+ _road_materials[key]=mat
+ return mat
 var _ground_heights:=PackedFloat32Array()
 var sim: RefCounted
 var plaza: Node3D
@@ -250,14 +269,21 @@ func _meadow()->void:
   for point:Vector3 in points:
    st.set_color(Color(0.86,0.91,0.75).lerp(Color(1.04,1.02,0.95),point.y/0.19));st.set_normal(Vector3.UP);st.add_vertex(point)
  mesh=st.commit()
+ var gl_compatibility:=RenderingServer.get_current_rendering_method()=="gl_compatibility"
  var mat:=StandardMaterial3D.new();mat.albedo_color=Color("749048");mat.vertex_color_use_as_albedo=true;mat.cull_mode=BaseMaterial3D.CULL_DISABLED;mat.roughness=1.0
  var shader:=Shader.new();shader.code="shader_type spatial; render_mode cull_disabled; varying vec4 tint; void vertex(){tint=COLOR; vec3 w=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; VERTEX.x+=sin(TIME*1.5+w.x*0.9+w.z*0.7)*VERTEX.y*0.12;} void fragment(){vec3 c=tint.rgb*vec3(0.31,0.43,0.18); ALBEDO=OUTPUT_IS_SRGB ? c : pow(c,vec3(2.2));ROUGHNESS=1.0;}"
  var grass_mat:=ShaderMaterial.new();grass_mat.shader=shader
  # Small spatial batches can be culled independently. Positions, scale,
  # color, animation and random-number order match the original 24k meadow.
+ # gl_compatibility targets weak/integrated GPUs: the per-vertex wind sway
+ # (sin(TIME...) every vertex, every frame, regardless of camera motion) is
+ # dropped in favor of the plain static material, and the tuft count is cut
+ # to a third to keep vertex throughput manageable.
+ var meadow_material:Material=mat if gl_compatibility else grass_mat
+ var tuft_count:=8000 if gl_compatibility else 24000
  details=Node3D.new();details.name="MeadowChunks";add_child(details)
- var buckets:Dictionary={};grass_slots.resize(24000)
- for i in range(24000):
+ var buckets:Dictionary={};grass_slots.resize(tuft_count)
+ for i in range(tuft_count):
   var p:=Vector3(rng.randf_range(-9,98),0,rng.randf_range(-8,78));p.y=height_at(p.x,p.z)+0.005;tufts.append(p)
   var s:=rng.randf_range(0.65,1.5)
   var t:=Transform3D(Basis(Vector3.UP,rng.randf()*TAU).scaled(Vector3.ONE*s),p)
@@ -267,7 +293,7 @@ func _meadow()->void:
  for key:Vector2i in buckets:
   var records:Array=buckets[key]
   var multi:=MultiMesh.new();multi.transform_format=MultiMesh.TRANSFORM_3D;multi.use_colors=true;multi.mesh=mesh;multi.instance_count=records.size()
-  var chunk:=MultiMeshInstance3D.new();chunk.name="Grass_%d_%d" % [key.x,key.y];chunk.multimesh=multi;chunk.material_override=grass_mat;chunk.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;details.add_child(chunk)
+  var chunk:=MultiMeshInstance3D.new();chunk.name="Grass_%d_%d" % [key.x,key.y];chunk.multimesh=multi;chunk.material_override=meadow_material;chunk.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;details.add_child(chunk)
   # A fixed tight AABB excludes the buried hidden instances without making
   # the renderer recompute bounds after every road-construction update.
   var bounds:=AABB(Vector3(key.x*GRASS_CHUNK_SIZE,-3,key.y*GRASS_CHUNK_SIZE),Vector3(GRASS_CHUNK_SIZE,12,GRASS_CHUNK_SIZE)).grow(0.25)
@@ -376,7 +402,7 @@ func _build_road_visual(node:Node3D,road:Dictionary,neighbors:Vector4)->void:
  if road.stage=="complete":
   if bridge_only:return # Existing timber is the visible completed crossing.
   var tile:=MeshInstance3D.new();tile.name="StoneSurface";tile.mesh=_road_mesh(road.cell,rect)
-  var mat:=ShaderMaterial.new();mat.shader=load("res://assets/approved/road.gdshader");mat.set_shader_parameter("stones",load("res://assets/illustrated/road.png"));mat.set_shader_parameter("earth_tex",load("res://assets/approved/earth-albedo.png"));mat.set_shader_parameter("connections",neighbors);tile.material_override=mat
+  tile.material_override=_road_material(neighbors)
   tile.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;node.add_child(tile)
   var edging:=Node3D.new();node.add_child(edging)
   for i in range(4):
@@ -401,9 +427,7 @@ func _build_road_visual(node:Node3D,road:Dictionary,neighbors:Vector4)->void:
    var laid:=MeshInstance3D.new();laid.name="PavingInProgress"
    var patch:=rect;patch.size.x*=maxf(0.18,ceilf(progress*4.0)/4.0)
    laid.mesh=_road_mesh(road.cell,patch)
-   var mat:=ShaderMaterial.new();mat.shader=load("res://assets/approved/road.gdshader")
-   mat.set_shader_parameter("stones",load("res://assets/illustrated/road.png"));mat.set_shader_parameter("earth_tex",load("res://assets/approved/earth-albedo.png"));mat.set_shader_parameter("connections",Vector4.ONE)
-   laid.material_override=mat;laid.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;node.add_child(laid)
+   laid.material_override=_road_material(Vector4.ONE);laid.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;node.add_child(laid)
   var markers:=Node3D.new();markers.name="RoadSurveyMarkers";node.add_child(markers)
   for x in [-0.85,0.85]:
    for z in [-0.85,0.85]:

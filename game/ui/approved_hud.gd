@@ -134,6 +134,7 @@ class Glyph extends Control:
 		return _rounded(Color("7c405a"))
 
 var _serif: Font
+var _texture_cache: Dictionary = {}
 var _tutorial: PanelContainer
 var _tutorial_dismissed := false
 var _sim: RefCounted
@@ -255,6 +256,7 @@ func setup(sim: RefCounted) -> void:
 	_make_menu()
 	_make_help()
 	_make_mode_and_toast()
+	_prewarm_texture_cache()
 	get_viewport().size_changed.connect(_layout)
 	_layout()
 	refresh()
@@ -440,11 +442,23 @@ func _dismiss_tutorial() -> void:
 	if is_instance_valid(_tutorial):
 		_tutorial.hide()
 
+func _cached_texture(path: String) -> Texture2D:
+	if not _texture_cache.has(path):
+		_texture_cache[path] = load(path) if ResourceLoader.exists(path,"Texture2D") else null
+	return _texture_cache[path]
+
+func _prewarm_texture_cache() -> void:
+	for kind in _available_build_kinds():
+		_cached_texture("res://assets/approved/previews/%s.png" % kind)
+	for role in ["builder","servant","farmer","vintner","lumberjack","stonecutter","miller","baker","recruit","instructor"]:
+		_cached_texture("res://assets/approved/people-previews/%s.png" % role)
+
 func _thumbnail(parent: Node, kind: String, height: float = 56.0) -> void:
 	var path := "res://assets/approved/previews/%s.png" % kind
-	if ResourceLoader.exists(path,"Texture2D"):
+	var texture := _cached_texture(path)
+	if texture != null:
 		var image := TextureRect.new()
-		image.texture = load(path)
+		image.texture = texture
 		image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		image.custom_minimum_size = Vector2(100,height)
@@ -588,9 +602,10 @@ func _populate_training() -> void:
 		row.offset_top = 5
 		row.offset_bottom = -5
 		var portrait_path := "res://assets/approved/people-previews/%s.png" % role
-		if ResourceLoader.exists(portrait_path,"Texture2D"):
+		var portrait_texture := _cached_texture(portrait_path)
+		if portrait_texture != null:
 			var portrait := TextureRect.new()
-			portrait.texture = load(portrait_path)
+			portrait.texture = portrait_texture
 			portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			portrait.custom_minimum_size = Vector2(54,80)

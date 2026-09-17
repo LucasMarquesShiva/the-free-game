@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://iiyqvog5g7yr"
-path="res://.godot/imported/surface-atlas.png-3949d17edd7eadba248dd1d4978f69b2.ctex"
+path.s3tc="res://.godot/imported/surface-atlas.png-3949d17edd7eadba248dd1d4978f69b2.s3tc.ctex"
+path.etc2="res://.godot/imported/surface-atlas.png-3949d17edd7eadba248dd1d4978f69b2.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/humans/surface-atlas.png"
-dest_files=["res://.godot/imported/surface-atlas.png-3949d17edd7eadba248dd1d4978f69b2.ctex"]
+dest_files=["res://.godot/imported/surface-atlas.png-3949d17edd7eadba248dd1d4978f69b2.s3tc.ctex", "res://.godot/imported/surface-atlas.png-3949d17edd7eadba248dd1d4978f69b2.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

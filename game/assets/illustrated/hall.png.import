@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dp46ryvegdmj6"
-path="res://.godot/imported/hall.png-f3b9bd3297a82f8a2dd8484cb2c3aaba.ctex"
+path.s3tc="res://.godot/imported/hall.png-f3b9bd3297a82f8a2dd8484cb2c3aaba.s3tc.ctex"
+path.etc2="res://.godot/imported/hall.png-f3b9bd3297a82f8a2dd8484cb2c3aaba.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/illustrated/hall.png"
-dest_files=["res://.godot/imported/hall.png-f3b9bd3297a82f8a2dd8484cb2c3aaba.ctex"]
+dest_files=["res://.godot/imported/hall.png-f3b9bd3297a82f8a2dd8484cb2c3aaba.s3tc.ctex", "res://.godot/imported/hall.png-f3b9bd3297a82f8a2dd8484cb2c3aaba.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

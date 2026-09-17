@@ -16,6 +16,7 @@ const DARK := Color("272d27")
 static var _cache: Dictionary = {}
 static var _materials: Dictionary = {}
 
+
 static func building(kind: String) -> Node3D:
 	if kind not in ["hall","training"]:
 		# Runtime evita ciclo de preload: os civis reutilizam auxiliares deste script.
@@ -28,7 +29,7 @@ static func building(kind: String) -> Node3D:
 			if not _materials.has(key):
 				_materials[key] = Base._material(key).duplicate()
 				_materials[key].resource_name = "Approved_"+key
-		var asset: Dictionary = b.finish(_materials,Base._roof_tile())
+		var asset: Dictionary = b.finish(_materials,Base._roof_tile(),Base._stone_unit_mesh())
 		var index := 0
 		for key in Base.MATERIAL_KEYS:
 			if b.surfaces.has(key) and not b.surfaces[key].vertices.is_empty():
@@ -41,6 +42,8 @@ static func building(kind: String) -> Node3D:
 	root.set_meta("reference","01-centro_da_vila.png" if kind == "hall" else "04-centro_de_treinamento.png")
 	if root.has_node("IndividualCurvedRoofTiles"):
 		root.get_node("IndividualCurvedRoofTiles").material_override = _materials["roof"]
+	if root.has_node("InstancedStoneBlocks"):
+		root.get_node("InstancedStoneBlocks").material_override = _materials["stone"]
 	return root
 
 static func _box(b, at: Vector3, size: Vector3, color: Color, key: String = "wood", rotation: Vector3 = Vector3.ZERO) -> void:
@@ -97,13 +100,17 @@ static func _stone_face(b, at: Vector3, width: float, height: float, rotation: f
 	var basis := Basis(Vector3.UP,rotation)
 	var rows := maxi(1,ceili(height/0.32))
 	var cols := maxi(1,ceili(width/0.47))
+	var unit:Vector3=Base.STONE_UNIT_SIZE
 	for row in range(rows):
 		var shift := 0.5 if row%2 else 0.0
 		for col in range(cols+(1 if row%2 else 0)):
 			var left := maxf(-width*0.5,-width*0.5+(col-shift)*width/cols)
 			var right := minf(width*0.5,-width*0.5+(col+1-shift)*width/cols)
 			var p := at+basis*Vector3((left+right)*0.5,(row+0.5)*height/rows,b.rng.randf_range(0.025,0.065))
-			_box(b,p,Vector3(right-left-0.025,height/rows-0.028,0.16),b.shade(STONE,0.11),"stone",Vector3(0,rotation,0))
+			var size:=Vector3(right-left-0.025,height/rows-0.028,0.16)
+			var stone_basis:=Basis.from_euler(Vector3(0,rotation,0)).scaled_local(Vector3(size.x/unit.x,size.y/unit.y,size.z/unit.z))
+			b.stones.append(Transform3D(stone_basis,p))
+			b.stone_colors.append(b.shade(STONE,0.11))
 
 static func _masonry(b, at: Vector3, width: float, depth: float, height: float) -> void:
 	_box(b,at+Vector3.UP*height*0.5,Vector3(width,height,depth),MORTAR,"stone")

@@ -434,7 +434,9 @@ func _refresh_placement_banner() -> void:
 			hud.set_mode(tr("Estradas · {tiles} trechos · {stone} pedra · solte para construir · Esc termina").format({"tiles":road_path.size(),"stone":cost}))
 	elif build_kind == "remove_road":
 		hud.set_mode(tr("Estradas · toque em um trecho para apagar · Esc termina"))
+	elif build_kind == "army":
+		hud.set_mode(tr("Exército · clique no mapa para dar um objetivo à companhia · Esc para sair"))
 	elif not build_kind.is_empty():
-		hud.set_mode(tr("Construir {name}: toque no terreno. Esc cancela.").format({"name":sim.definition(build_kind).name}))
+		hud.set_mode(tr("Construir {name}: toque no terreno. Esc cancela.").format({"name":sim.definition(build_kind).get("name","")}))
 	else:
 		hud.set_mode("")

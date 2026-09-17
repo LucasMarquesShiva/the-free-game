@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b68y0a5bc2pjl"
-path="res://.godot/imported/decor.png-1a56b6360ac508949d7d1c2197d2be3f.ctex"
+path.s3tc="res://.godot/imported/decor.png-1a56b6360ac508949d7d1c2197d2be3f.s3tc.ctex"
+path.etc2="res://.godot/imported/decor.png-1a56b6360ac508949d7d1c2197d2be3f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/illustrated/decor.png"
-dest_files=["res://.godot/imported/decor.png-1a56b6360ac508949d7d1c2197d2be3f.ctex"]
+dest_files=["res://.godot/imported/decor.png-1a56b6360ac508949d7d1c2197d2be3f.s3tc.ctex", "res://.godot/imported/decor.png-1a56b6360ac508949d7d1c2197d2be3f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

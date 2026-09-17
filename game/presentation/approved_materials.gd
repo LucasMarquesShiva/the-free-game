@@ -46,4 +46,6 @@ static func apply(root:Node,cutoff:float=1000.0) -> void:
   root.mesh=_meshes[id]
  if root is MultiMeshInstance3D and str(root.name).contains("RoofTiles"):
   root.material_override=material("roof",cutoff)
+ if root is MultiMeshInstance3D and str(root.name).contains("StoneBlocks"):
+  root.material_override=material("stone",cutoff)
  for child in root.get_children():apply(child,cutoff)
