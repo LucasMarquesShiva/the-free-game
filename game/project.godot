@@ -12,11 +12,11 @@ config_version=5
 
 config/name="The Free Game"
 config/version="0.4.4"
-run/main_scene="res://scenes/approved.tscn"
+run/main_scene="res://scenes/loading.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="godot/app_userdata/Vale dos Vinhedos - Vila Viva"
 config/features=PackedStringArray("4.7", "Forward Plus")
-boot_splash/bg_color=Color(0.16, 0.23, 0.21, 1)
+boot_splash/bg_color=Color(0.05, 0.04, 0.03, 1)
 boot_splash/show_image=false
 config/icon="res://assets/icon.svg"
 config/custom_user_dir_name.macos="Godot/app_userdata/Vale dos Vinhedos - Vila Viva"
