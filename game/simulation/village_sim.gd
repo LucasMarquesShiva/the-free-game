@@ -913,17 +913,14 @@ func _produce(w: Dictionary, b: Dictionary) -> void:
 		w.state = tr("Aguardando equipamento no quartel")
 		return
 	if b.kind == "lumber" and harvest_map != null:
-		var tree: Vector2i = harvest_map.nearest_standing_tree(w.cell)
+		var tree: Vector2i = harvest_map.nearest_standing_tree(w.cell,func(cell:Vector2i)->bool:return _tree_stand_cell(cell).x>=0)
 		if tree == Vector2i(-1, -1):
-			w.state = tr("Sem árvores para cortar")
+			w.state = tr("Sem árvores acessíveis para cortar")
 			return
 		if int(b.output.get("trunks", 0)) >= 20:
 			w.state = tr("Aguardando retirada da produção")
 			return
 		var stand := _tree_stand_cell(tree)
-		if stand.x < 0:
-			w.state = tr("Sem acesso à árvore")
-			return
 		if w.cell != stand:
 			w.task = {"type": "harvest", "building": b.id, "tree": tree}
 			_go(w, stand)
