@@ -474,9 +474,7 @@ func _make_objectives() -> void:
 	var box := _vbox(_objectives_panel,7)
 	_objectives_toggle = _button(box,tr("Objetivos  {done}/{total}  {mark}").format({"done":0,"total":3,"mark":"+"}),_toggle_objectives)
 	_objectives_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	var transparent_style := _style(Color.TRANSPARENT,Color.TRANSPARENT,8,4)
-	for state in ["normal","hover","pressed","focus"]:
-		_objectives_toggle.add_theme_stylebox_override(state,transparent_style)
+	_objectives_toggle.add_theme_stylebox_override("normal",_style(Color.TRANSPARENT,Color.TRANSPARENT,8,4))
 	_objective_details = _vbox(box,9)
 	_outcome = _label(_objective_details,tr("Um vale para chamar de seu"),19,WINE,true)
 	for i in range(3):
