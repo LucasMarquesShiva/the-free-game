@@ -401,13 +401,14 @@ func _paper_button_style(tint: Color = Color.WHITE) -> StyleBoxTexture:
 	return box
 
 func _accent(button: Button, color: Color = Color("08664e")) -> void:
-	var tint := Color(0.72,0.98,0.82)
+	var tint := color.lightened(0.75)
+	var ink := color.darkened(0.35)
 	button.add_theme_stylebox_override("normal", _paper_button_style(tint))
-	button.add_theme_stylebox_override("hover", _paper_button_style(tint*Color(1.08,1.06,1.0)))
-	button.add_theme_stylebox_override("pressed", _paper_button_style(tint*Color(0.85,0.85,0.8)))
-	button.add_theme_color_override("font_color", SUCCESS_DARK)
-	button.add_theme_color_override("font_hover_color", SUCCESS_DARK)
-	button.add_theme_color_override("font_pressed_color", SUCCESS_DARK)
+	button.add_theme_stylebox_override("hover", _paper_button_style(tint.lightened(0.08)))
+	button.add_theme_stylebox_override("pressed", _paper_button_style(tint.darkened(0.12)))
+	button.add_theme_color_override("font_color", ink)
+	button.add_theme_color_override("font_hover_color", ink)
+	button.add_theme_color_override("font_pressed_color", ink)
 
 func _spacer(parent: Node) -> Control:
 	var spacer := Control.new()
@@ -829,7 +830,7 @@ func _make_inspector() -> void:
 	_inspect_map.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_inspection_cancel = _button(actions,tr("Cancelar obra"),_cancel_inspected)
 	_inspection_cancel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_inspection_cancel.add_theme_color_override("font_color",DANGER)
+	_inspection_cancel.add_theme_color_override("font_color",DANGER_DARK)
 	_inspection_cancel.tooltip_text = tr("Interromper esta obra e liberar os materiais que ainda não foram usados")
 	_recruit_melee = _button(box, tr("Recrutar lanceiro (machado)"), func(): command_requested.emit("recruit", {"role": "lancer"}))
 	_recruit_ranged = _button(box, tr("Recrutar arqueiro (arco)"), func(): command_requested.emit("recruit", {"role": "archer"}))
@@ -1290,7 +1291,7 @@ func refresh() -> void:
 				if _available(item) < int(cost[item]):
 					enough = false
 			var cost_label: Label = _build_costs[kind]
-			cost_label.add_theme_color_override("font_color",INK if enough else DANGER)
+			cost_label.add_theme_color_override("font_color",INK_DARK if enough else DANGER_DARK)
 		if _drawer_kind == "training":
 			_refresh_school_context()
 			_resident_label.text = tr("{count} moradores disponíveis").format({"count":int(counts.get("resident",0))})
