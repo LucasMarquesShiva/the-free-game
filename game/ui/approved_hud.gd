@@ -296,15 +296,15 @@ func _make_theme() -> Theme:
 	theme.set_color("font_color", "Label", INK)
 	theme.set_constant("separation", "HBoxContainer", 8)
 	theme.set_constant("separation", "VBoxContainer", 8)
-	theme.set_stylebox("normal", "Button", _style(Color("14383c"), Color("94713a"), 9))
-	theme.set_stylebox("hover", "Button", _style(Color("205057"), BRONZE, 9))
-	theme.set_stylebox("pressed", "Button", _style(Color("155d55"), BRONZE, 9))
+	theme.set_stylebox("normal", "Button", _paper_button_style())
+	theme.set_stylebox("hover", "Button", _paper_button_style(Color(1.12,1.08,0.96)))
+	theme.set_stylebox("pressed", "Button", _paper_button_style(Color(0.82,0.78,0.68)))
 	theme.set_stylebox("focus", "Button", _focus_style())
-	theme.set_stylebox("disabled", "Button", _style(Color("1a3336"), Color("47605c"), 9))
-	theme.set_color("font_color", "Button", INK)
-	theme.set_color("font_hover_color", "Button", INK)
-	theme.set_color("font_pressed_color", "Button", INK)
-	theme.set_color("font_disabled_color", "Button", MUTED)
+	theme.set_stylebox("disabled", "Button", _paper_button_style(Color(0.7,0.7,0.68)))
+	theme.set_color("font_color", "Button", INK_DARK)
+	theme.set_color("font_hover_color", "Button", INK_DARK)
+	theme.set_color("font_pressed_color", "Button", INK_DARK)
+	theme.set_color("font_disabled_color", "Button", Color("8a7a5c"))
 	theme.set_font_size("font_size", "Button", 17)
 	theme.set_stylebox("background", "ProgressBar", _style(Color("1a4143"), Color.TRANSPARENT, 4, 0))
 	theme.set_stylebox("fill", "ProgressBar", _style(SUCCESS, Color.TRANSPARENT, 4, 0))
@@ -384,13 +384,30 @@ func _button(parent: Node, text: String, action: Callable, min_width: float = 0)
 	parent.add_child(button)
 	return button
 
+## Torn-parchment banner (assets/approved/ui/paper_banner.png) 9-sliced for
+## every button; `tint` multiplies it so hover/pressed/accent states reuse
+## the one asset instead of needing separate art per state/color.
+static var _paper_banner_texture: Texture2D
+func _paper_button_style(tint: Color = Color.WHITE) -> StyleBoxTexture:
+	if _paper_banner_texture == null:
+		_paper_banner_texture = load("res://assets/approved/ui/paper_banner.png")
+	var box := StyleBoxTexture.new()
+	box.texture = _paper_banner_texture
+	box.texture_margin_left = 44;box.texture_margin_right = 44
+	box.texture_margin_top = 16;box.texture_margin_bottom = 16
+	box.content_margin_left = 12;box.content_margin_right = 12
+	box.content_margin_top = 6;box.content_margin_bottom = 6
+	box.modulate_color = tint
+	return box
+
 func _accent(button: Button, color: Color = Color("08664e")) -> void:
-	button.add_theme_stylebox_override("normal", _style(color, color.lightened(0.12), 9))
-	button.add_theme_stylebox_override("hover", _style(color.lightened(0.1), BRONZE, 9))
-	button.add_theme_stylebox_override("pressed", _style(color.darkened(0.1), BRONZE, 9))
-	button.add_theme_color_override("font_color", PAPER)
-	button.add_theme_color_override("font_hover_color", Color.WHITE)
-	button.add_theme_color_override("font_pressed_color", PAPER)
+	var tint := Color(0.72,0.98,0.82)
+	button.add_theme_stylebox_override("normal", _paper_button_style(tint))
+	button.add_theme_stylebox_override("hover", _paper_button_style(tint*Color(1.08,1.06,1.0)))
+	button.add_theme_stylebox_override("pressed", _paper_button_style(tint*Color(0.85,0.85,0.8)))
+	button.add_theme_color_override("font_color", SUCCESS_DARK)
+	button.add_theme_color_override("font_hover_color", SUCCESS_DARK)
+	button.add_theme_color_override("font_pressed_color", SUCCESS_DARK)
 
 func _spacer(parent: Node) -> Control:
 	var spacer := Control.new()
