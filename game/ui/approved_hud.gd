@@ -230,6 +230,8 @@ var _restart_yes: Button
 var _restart_back: Button
 var _language_label: Label
 var _language_buttons: Dictionary = {}
+var _graphics_label: Label
+var _graphics_buttons: Dictionary = {}
 var _help_title: Label
 var _help_close: Button
 var _help_body: VBoxContainer
@@ -799,6 +801,14 @@ func _make_menu() -> void:
 		language_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_language_buttons[code] = language_button
 	_refresh_language_buttons()
+	_graphics_label = _label(content,tr("Gráficos"),15,MUTED)
+	var graphics_row := _hbox(content,6)
+	_graphics_buttons.clear()
+	_graphics_buttons[false] = _button(graphics_row,tr("Desempenho"),_choose_graphics.bind(false))
+	_graphics_buttons[true] = _button(graphics_row,tr("Qualidade"),_choose_graphics.bind(true))
+	for key in _graphics_buttons:
+		_graphics_buttons[key].size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_refresh_graphics_buttons()
 	_save_button = _button(content,tr("Salvar partida"),func(): save_requested.emit())
 	_accent(_save_button)
 	_load_button = _button(content,tr("Carregar partida"),func(): load_requested.emit())
@@ -891,6 +901,20 @@ func _refresh_language_buttons() -> void:
 		var button: Button = _language_buttons[code]
 		button.text = Locale.display_name(code)
 		if code == selected:
+			_accent(button)
+
+func _choose_graphics(high_quality: bool) -> void:
+	if GraphicsSettings.high_quality() == high_quality:
+		return
+	GraphicsSettings.set_high_quality(high_quality)
+	_refresh_graphics_buttons()
+	show_message(tr("Gráficos em {mode}. Carregue a vila novamente para aplicar por completo.").format({"mode":tr("Qualidade") if high_quality else tr("Desempenho")}))
+
+func _refresh_graphics_buttons() -> void:
+	var selected := GraphicsSettings.high_quality()
+	for key in _graphics_buttons:
+		var button: Button = _graphics_buttons[key]
+		if key == selected:
 			_accent(button)
 		else:
 			button.remove_theme_stylebox_override("normal")

@@ -5,6 +5,7 @@ const Broadleaf=preload("res://presentation/approved_broadleaf.gd")
 const RiverRocks=preload("res://presentation/approved_river_rocks.gd")
 const Architecture=preload("res://presentation/approved_primitives.gd")
 const HarvestMap=preload("res://simulation/harvest_map.gd")
+const Settings=preload("res://core/graphics_settings.gd")
 const CELL:=2.5
 const GROUND_ORIGIN:=-27.0
 const GROUND_STRIDE:=1.2
@@ -269,7 +270,7 @@ func _meadow()->void:
   for point:Vector3 in points:
    st.set_color(Color(0.86,0.91,0.75).lerp(Color(1.04,1.02,0.95),point.y/0.19));st.set_normal(Vector3.UP);st.add_vertex(point)
  mesh=st.commit()
- var gl_compatibility:=RenderingServer.get_current_rendering_method()=="gl_compatibility"
+ var gl_compatibility:=not Settings.high_quality()
  var mat:=StandardMaterial3D.new();mat.albedo_color=Color("749048");mat.vertex_color_use_as_albedo=true;mat.cull_mode=BaseMaterial3D.CULL_DISABLED;mat.roughness=1.0
  var shader:=Shader.new();shader.code="shader_type spatial; render_mode cull_disabled; varying vec4 tint; void vertex(){tint=COLOR; vec3 w=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; VERTEX.x+=sin(TIME*1.5+w.x*0.9+w.z*0.7)*VERTEX.y*0.12;} void fragment(){vec3 c=tint.rgb*vec3(0.31,0.43,0.18); ALBEDO=OUTPUT_IS_SRGB ? c : pow(c,vec3(2.2));ROUGHNESS=1.0;}"
  var grass_mat:=ShaderMaterial.new();grass_mat.shader=shader

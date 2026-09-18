@@ -6,6 +6,7 @@ const Terrain = preload("res://presentation/approved_terrain.gd")
 const Basic = preload("res://presentation/model_factory.gd")
 const Materials=preload("res://presentation/approved_materials.gd")
 const CropGrowth=preload("res://presentation/approved_crop_growth.gd")
+const Settings=preload("res://core/graphics_settings.gd")
 const CELL := 2.5
 var sim: RefCounted
 var camera: Camera3D
@@ -33,7 +34,7 @@ var gl_compatibility := false
 
 func setup(village: RefCounted) -> void:
  sim = village
- gl_compatibility = RenderingServer.get_current_rendering_method()=="gl_compatibility"
+ gl_compatibility = not Settings.high_quality()
  _light()
  terrain = Terrain.new();add_child(terrain);terrain.setup(sim)
  camera = Camera3D.new();camera.projection = Camera3D.PROJECTION_ORTHOGONAL;camera.size = view_size;camera.near = 0.5;camera.far = 280.0;add_child(camera);camera.make_current()
@@ -110,7 +111,7 @@ func sync(delta: float) -> void:
  # gl_compatibility targets weak/integrated GPUs: the ~60k-triangle QUALITY_HIGH
  # rig (used when zoomed in close) is skipped in favor of the ~18k-triangle
  # medium tier, since several close-up workers at once are too heavy there.
- var min_tier:=1 if RenderingServer.get_current_rendering_method()=="gl_compatibility" else 0
+ var min_tier:=1 if gl_compatibility else 0
  var detail_tier:=maxi(min_tier,0 if view_size<20 else (2 if view_size>48 else 1))
  var detail_index:=0
  var alive := {}
