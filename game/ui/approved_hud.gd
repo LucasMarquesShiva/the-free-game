@@ -227,10 +227,11 @@ const SAVE_SLOTS := 3
 const SAVE_PATH := "user://vale-approved-save-v1.json"
 var _save_button: Button
 var _load_button: Button
-var _save_panel: VBoxContainer
-var _load_panel: VBoxContainer
-var _slot_save_buttons: Dictionary = {}
-var _slot_load_buttons: Dictionary = {}
+var _save_dialog_dim: ColorRect
+var _save_dialog: PanelContainer
+var _save_dialog_title: Label
+var _save_dialog_mode: String = "save"
+var _slot_buttons: Dictionary = {}
 var _lesson_button: Button
 var _menu_help_button: Button
 var _code_button: Button
@@ -268,6 +269,7 @@ func setup(sim: RefCounted) -> void:
 	_make_menu()
 	_make_help()
 	_make_mode_and_toast()
+	_make_save_dialog()
 	_prewarm_texture_cache()
 	get_viewport().size_changed.connect(_layout)
 	_layout()
@@ -853,18 +855,9 @@ func _make_menu() -> void:
 	for key in _graphics_buttons:
 		_graphics_buttons[key].size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_refresh_graphics_buttons()
-	_save_button = _button(content,tr("Salvar partida"),_toggle_save_panel)
+	_save_button = _button(content,tr("Salvar partida"),_open_save_dialog.bind("save"))
 	_accent(_save_button)
-	_save_panel = _vbox(content,6)
-	_save_panel.visible = false
-	_load_button = _button(content,tr("Carregar partida"),_toggle_load_panel)
-	_load_panel = _vbox(content,6)
-	_load_panel.visible = false
-	_slot_save_buttons.clear();_slot_load_buttons.clear()
-	for slot in range(1,SAVE_SLOTS+1):
-		_slot_save_buttons[slot] = _button(_save_panel,"",_pick_save_slot.bind(slot))
-		_slot_load_buttons[slot] = _button(_load_panel,"",_pick_load_slot.bind(slot))
-	_refresh_save_slots()
+	_load_button = _button(content,tr("Carregar partida"),_open_save_dialog.bind("load"))
 	_lesson_button = _button(content,tr("Missão: primeira lição"),func():
 		close_panels()
 		command_requested.emit("load_mission", {"id": "tsk-01"})
@@ -898,9 +891,7 @@ func _toggle_menu() -> void:
 	close_panels()
 	_menu.visible = opening
 	if opening:
-		_refresh_save_slots()
-		_save_panel.visible = false
-		_load_panel.visible = false
+		_close_save_dialog()
 	_menu_scroll.scroll_vertical = 0
 	_layout()
 
@@ -977,33 +968,53 @@ func _slot_text(slot: int) -> String:
 		return tr("Slot {slot} · salvo em {date}").format({"slot":slot,"date":stamp})
 	return tr("Slot {slot} · vazio").format({"slot":slot})
 
-func _refresh_save_slots() -> void:
-	for slot in _slot_save_buttons:
-		var text := _slot_text(slot)
-		_slot_save_buttons[slot].text = text
-		_slot_load_buttons[slot].text = text
+func _make_save_dialog() -> void:
+	_save_dialog_dim = ColorRect.new()
+	_save_dialog_dim.name = "SaveDialogDim"
+	_save_dialog_dim.color = Color(0,0,0,0.55)
+	_save_dialog_dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_save_dialog_dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	_save_dialog_dim.visible = false
+	_save_dialog_dim.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed:
+			_close_save_dialog()
+	)
+	_root.add_child(_save_dialog_dim)
+	_regions.append(_save_dialog_dim)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_save_dialog_dim.add_child(center)
+	_save_dialog = _panel(center,false,18)
+	_save_dialog.custom_minimum_size = Vector2(360,0)
+	var box := _vbox(_save_dialog,10)
+	var header := _hbox(box)
+	_save_dialog_title = _label(header,"",22)
+	_spacer(header)
+	_button(header,"×",_close_save_dialog,44)
+	_slot_buttons.clear()
+	for slot in range(1,SAVE_SLOTS+1):
+		_slot_buttons[slot] = _button(box,"",_pick_slot.bind(slot))
 
-func _pick_save_slot(slot: int) -> void:
-	save_requested.emit(slot)
-	_save_panel.visible = false
-	_layout()
+func _slot_dialog_title() -> String:
+	return tr("Salvar em qual slot?") if _save_dialog_mode == "save" else tr("Carregar qual slot?")
 
-func _pick_load_slot(slot: int) -> void:
-	load_requested.emit(slot)
-	_load_panel.visible = false
-	_layout()
+func _open_save_dialog(mode: String) -> void:
+	_save_dialog_mode = mode
+	_save_dialog_title.text = _slot_dialog_title()
+	for slot in _slot_buttons:
+		_slot_buttons[slot].text = _slot_text(slot)
+	_save_dialog_dim.visible = true
 
-func _toggle_save_panel() -> void:
-	_refresh_save_slots()
-	_save_panel.visible = not _save_panel.visible
-	_load_panel.visible = false
-	_layout()
+func _close_save_dialog() -> void:
+	_save_dialog_dim.visible = false
 
-func _toggle_load_panel() -> void:
-	_refresh_save_slots()
-	_load_panel.visible = not _load_panel.visible
-	_save_panel.visible = false
-	_layout()
+func _pick_slot(slot: int) -> void:
+	if _save_dialog_mode == "save":
+		save_requested.emit(slot)
+	else:
+		load_requested.emit(slot)
+	_close_save_dialog()
 
 func _refresh_graphics_buttons() -> void:
 	var selected := GraphicsSettings.high_quality()
@@ -1071,7 +1082,10 @@ func _retranslate() -> void:
 		_language_label.text = tr("Idioma")
 		_save_button.text = tr("Salvar partida")
 		_load_button.text = tr("Carregar partida")
-		_refresh_save_slots()
+		if is_instance_valid(_save_dialog_title):
+			_save_dialog_title.text = _slot_dialog_title()
+			for slot in _slot_buttons:
+				_slot_buttons[slot].text = _slot_text(slot)
 		if is_instance_valid(_lesson_button):
 			_lesson_button.text = tr("Missão: primeira lição")
 		_menu_help_button.text = tr("Como jogar")
@@ -1159,6 +1173,8 @@ func close_panels() -> void:
 	for panel in [_drawer,_menu,_help,_inspector]:
 		if is_instance_valid(panel):
 			panel.hide()
+	if is_instance_valid(_save_dialog_dim):
+		_save_dialog_dim.hide()
 	if is_instance_valid(_restart_confirm):
 		_restart_confirm.hide()
 	_drawer_kind = ""
