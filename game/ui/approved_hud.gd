@@ -169,6 +169,8 @@ var _drawer_scroll: ScrollContainer
 var _drawer_content: VBoxContainer
 var _drawer_kind := ""
 var _build_grid: GridContainer
+var _build_filter: LineEdit
+var _build_cards: Dictionary = {}
 var _role_grid: GridContainer
 var _build_costs: Dictionary = {}
 var _role_count_labels: Dictionary = {}
@@ -523,6 +525,7 @@ func _toggle_drawer(kind: String) -> void:
 	_drawer_kind = kind
 	_clear_children(_drawer_content)
 	_build_costs.clear()
+	_build_cards.clear()
 	_role_count_labels.clear()
 	_queue_labels.clear()
 	_queue_bars.clear()
@@ -543,6 +546,15 @@ func _toggle_drawer(kind: String) -> void:
 func _populate_build() -> void:
 	_drawer_title.text = tr("Dê espaço à sua vila")
 	_drawer_subtitle.text = tr("Construa ao lado da estrada. Ligue a entrada marcada para liberar as entregas automáticas.")
+	_build_filter = LineEdit.new()
+	_build_filter.placeholder_text = tr("Filtrar construções…")
+	_build_filter.clear_button_enabled = true
+	_build_filter.add_theme_stylebox_override("normal",_style(PANEL.lightened(0.06),BRONZE.darkened(0.2),9,10))
+	_build_filter.add_theme_stylebox_override("focus",_style(PANEL.lightened(0.06),BRONZE,9,10))
+	_build_filter.add_theme_color_override("font_color",INK)
+	_build_filter.add_theme_color_override("font_placeholder_color",MUTED)
+	_build_filter.text_changed.connect(_filter_build_cards)
+	_drawer_content.add_child(_build_filter)
 	_build_grid = GridContainer.new()
 	_build_grid.columns = 4
 	_build_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -569,6 +581,13 @@ func _populate_build() -> void:
 		var cost_label := _label(card,_cost_text(definition.get("cost",{})),14,INK)
 		cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_build_costs[kind] = cost_label
+		_build_cards[kind] = button
+
+func _filter_build_cards(query: String) -> void:
+	var needle := query.strip_edges().to_lower()
+	for kind in _build_cards:
+		var button: Button = _build_cards[kind]
+		button.visible = needle.is_empty() or tr(SHORT_NAMES[kind]).to_lower().contains(needle)
 
 func _populate_training() -> void:
 	_drawer_title.text = tr("Mais mãos para a vila")
