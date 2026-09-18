@@ -297,10 +297,10 @@ func _make_theme() -> Theme:
 	theme.set_constant("separation", "HBoxContainer", 8)
 	theme.set_constant("separation", "VBoxContainer", 8)
 	theme.set_stylebox("normal", "Button", _paper_button_style())
-	theme.set_stylebox("hover", "Button", _paper_button_style(Color(1.12,1.08,0.96)))
-	theme.set_stylebox("pressed", "Button", _paper_button_style(Color(0.82,0.78,0.68)))
+	theme.set_stylebox("hover", "Button", _paper_button_style(Color(1.08,1.05,0.98)))
+	theme.set_stylebox("pressed", "Button", _paper_button_style(Color.WHITE,"buttonLong_brown_pressed"))
 	theme.set_stylebox("focus", "Button", _focus_style())
-	theme.set_stylebox("disabled", "Button", _paper_button_style(Color(0.7,0.7,0.68)))
+	theme.set_stylebox("disabled", "Button", _paper_button_style(Color(0.72,0.72,0.7)))
 	theme.set_color("font_color", "Button", INK_DARK)
 	theme.set_color("font_hover_color", "Button", INK_DARK)
 	theme.set_color("font_pressed_color", "Button", INK_DARK)
@@ -387,16 +387,16 @@ func _button(parent: Node, text: String, action: Callable, min_width: float = 0)
 ## Torn-parchment banner (assets/approved/ui/paper_banner.png) 9-sliced for
 ## every button; `tint` multiplies it so hover/pressed/accent states reuse
 ## the one asset instead of needing separate art per state/color.
-static var _paper_banner_texture: Texture2D
-func _paper_button_style(tint: Color = Color.WHITE) -> StyleBoxTexture:
-	if _paper_banner_texture == null:
-		_paper_banner_texture = load("res://assets/approved/ui/paper_banner.png")
+static var _kenney_textures: Dictionary = {}
+func _paper_button_style(tint: Color = Color.WHITE, kind: String = "buttonLong_brown") -> StyleBoxTexture:
+	if not _kenney_textures.has(kind):
+		_kenney_textures[kind] = load("res://assets/approved/ui/kenney/%s.png" % kind)
 	var box := StyleBoxTexture.new()
-	box.texture = _paper_banner_texture
-	box.texture_margin_left = 34;box.texture_margin_right = 34
-	box.texture_margin_top = 14;box.texture_margin_bottom = 14
-	box.content_margin_left = 22;box.content_margin_right = 22
-	box.content_margin_top = 14;box.content_margin_bottom = 14
+	box.texture = _kenney_textures[kind]
+	box.texture_margin_left = 13;box.texture_margin_right = 13
+	box.texture_margin_top = 13;box.texture_margin_bottom = 13
+	box.content_margin_left = 16;box.content_margin_right = 16
+	box.content_margin_top = 10;box.content_margin_bottom = 10
 	box.modulate_color = tint
 	return box
 
@@ -405,7 +405,7 @@ func _accent(button: Button, color: Color = Color("08664e")) -> void:
 	var ink := color.darkened(0.35)
 	button.add_theme_stylebox_override("normal", _paper_button_style(tint))
 	button.add_theme_stylebox_override("hover", _paper_button_style(tint.lightened(0.08)))
-	button.add_theme_stylebox_override("pressed", _paper_button_style(tint.darkened(0.12)))
+	button.add_theme_stylebox_override("pressed", _paper_button_style(tint,"buttonLong_brown_pressed"))
 	button.add_theme_color_override("font_color", ink)
 	button.add_theme_color_override("font_hover_color", ink)
 	button.add_theme_color_override("font_pressed_color", ink)
