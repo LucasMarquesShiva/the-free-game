@@ -440,11 +440,14 @@ func _make_top_bar() -> void:
 		var button := _button(row,"",_resource_info.bind(item),86)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.tooltip_text = tr("{item}: toque para detalhes").format({"item":tr(ITEM_NAMES[item])})
-		button.add_theme_stylebox_override("normal",_style(Color("102f34"),Color.TRANSPARENT,8,4))
-		var content := _hbox(button,5)
+		var pill_color := Color("2c2013")
+		button.add_theme_stylebox_override("normal",_style(pill_color,BRONZE.darkened(0.35),8,8))
+		button.add_theme_stylebox_override("hover",_style(pill_color.lightened(0.08),BRONZE,8,8))
+		button.add_theme_stylebox_override("pressed",_style(pill_color.darkened(0.1),BRONZE,8,8))
+		var content := _hbox(button,6)
 		content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		content.offset_left = 6
-		content.offset_right = -6
+		content.offset_left = 10
+		content.offset_right = -10
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_resource_glyphs[item] = _glyph(content,item,27)
 		var values := _vbox(content,0)
