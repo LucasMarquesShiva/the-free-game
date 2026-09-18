@@ -352,5 +352,8 @@
   "{role} · {count}": "{role} · {count}",
   "{role} · {reason}": "{role} · {reason}",
   "{role} · {state}": "{role} · {state}",
-  "{state} · fila compartilhada · {count} por pedido": "{state} · 共享队列 · 每单 {count} 人"
+  "{state} · fila compartilhada · {count} por pedido": "{state} · 共享队列 · 每单 {count} 人",
+  "Situação da vila": "村庄状况",
+  "Formação: {role}": "培训：{role}",
+  "Clique para localizar; clique novamente para ver o próximo local.": "点击定位；再次点击查看下一个地点。"
 }

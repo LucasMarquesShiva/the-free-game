@@ -21,6 +21,7 @@ var dragging := false
 var pointer_ui := false
 var pan_pointer_down := false
 var pan_pointer_ui := false
+var frame_metrics := preload("res://core/frame_metrics.gd").new()
 var since_refresh := 0.0
 var since_autosave := 0.0
 var application_paused := false
@@ -68,24 +69,33 @@ func _configure_display() -> void:
 func _process(delta: float) -> void:
 	if sim == null:
 		return
+	var frame_start := Time.get_ticks_usec()
 	clock.paused = sim.paused or application_paused
 	var due: int = clock.advance_usec(roundi(minf(delta,0.25)*1000000.0*speed*CIVIL_PACE))
 	for i in range(due):
+		var step_start := Time.get_ticks_usec()
 		sim.step()
+		frame_metrics.record("sim_step",step_start)
 	world.visual_speed = float(speed)*CIVIL_PACE
+	var world_start := Time.get_ticks_usec()
 	world.sync(delta)
+	frame_metrics.record("world",world_start)
 	since_refresh += delta
 	since_autosave += delta
 	if since_refresh > 0.2:
 		since_refresh = 0.0
+		var hud_start := Time.get_ticks_usec()
 		hud.refresh()
+		frame_metrics.record("hud",hud_start)
 		if build_kind == "remove_road" and hover_cell.x >= 0:
 			world.set_road_removal_preview(hover_cell)
 		elif not build_kind.is_empty() and build_kind != "road" and hover_cell.x >= 0:
 			world.set_preview(build_kind,hover_cell,sim.can_place(build_kind,hover_cell).is_empty())
 	if since_autosave >= 60.0 and not application_paused:
 		since_autosave = 0.0
+		var save_start := Time.get_ticks_usec()
 		_write_save("user://vale-approved-autosave-v1.json")
+		frame_metrics.record("autosave",save_start)
 	if not sim.events.is_empty():
 		var latest: String = str(sim.events.back().tick)+str(sim.events.back().text)
 		if latest != event_signature:
@@ -95,6 +105,9 @@ func _process(delta: float) -> void:
 			hud.show_message(message)
 			if str(event.get("tone","")) == "chime":
 				_chime()
+
+	frame_metrics.record("game",frame_start)
+	frame_metrics.finish(delta,sim,speed)
 
 func _select_build(kind: String) -> void:
 	_reset_pointer()

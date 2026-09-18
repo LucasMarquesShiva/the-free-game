@@ -352,5 +352,8 @@
   "{role} · {count}": "{role} · {count}",
   "{role} · {reason}": "{role} · {reason}",
   "{role} · {state}": "{role} · {state}",
-  "{state} · fila compartilhada · {count} por pedido": "{state} · shared queue · {count} per order"
+  "{state} · fila compartilhada · {count} por pedido": "{state} · shared queue · {count} per order",
+  "Situação da vila": "Village status",
+  "Formação: {role}": "Training: {role}",
+  "Clique para localizar; clique novamente para ver o próximo local.": "Click to locate; click again for the next location."
 }

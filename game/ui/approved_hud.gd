@@ -224,6 +224,14 @@ class Glyph extends Control:
 	func _bottle_style() -> StyleBoxFlat:
 		return _rounded(Color("7c405a"))
 
+const VillageStatus = preload("res://ui/village_status.gd")
+var _status_panel: PanelContainer
+var _status_list: VBoxContainer
+var _status_scroll: ScrollContainer
+var _status_title: Label
+var _status_signature := ""
+var _status_groups: Array[Dictionary] = []
+
 var _serif: Font
 var _texture_cache: Dictionary = {}
 var _tutorial: PanelContainer
@@ -361,6 +369,7 @@ func setup(sim: RefCounted) -> void:
 	_make_help()
 	_make_mode_and_toast()
 	_make_save_dialog()
+	_make_village_status()
 	_prewarm_texture_cache()
 	get_viewport().size_changed.connect(_layout)
 	_layout()
@@ -1412,6 +1421,64 @@ func refresh() -> void:
 			_refresh_training()
 	_refresh_inspection()
 	_refresh_speed()
+	_refresh_village_status()
+
+func _make_village_status() -> void:
+	_status_panel = _panel(_root, true, 12)
+	_status_panel.name = "VillageStatus"
+	var box := _vbox(_status_panel, 6)
+	_status_title = _label(box, tr("Situação da vila"), 19, WINE_DARK)
+	_status_scroll = ScrollContainer.new()
+	_status_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_status_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	box.add_child(_status_scroll)
+	_status_list = _vbox(_status_scroll, 6)
+	_status_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+func _refresh_village_status() -> void:
+	_status_groups = VillageStatus.collect(_sim)
+	var signature := str(_status_groups)
+	if signature != _status_signature:
+		_status_signature = signature
+		_clear_children(_status_list)
+		for group: Dictionary in _status_groups:
+			var button := _button(_status_list, "", _focus_status.bind(group))
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.custom_minimum_size.y = 78
+			button.tooltip_text = _profession_text(group.reason) + "\n" + "\n".join(group.sources) + "\n" + tr("Clique para localizar; clique novamente para ver o próximo local.")
+			var margin := MarginContainer.new()
+			margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			for edge in ["left", "right", "top", "bottom"]:
+				margin.add_theme_constant_override("margin_" + edge, 8)
+			button.add_child(margin)
+			var label := _label(margin, _profession_text(group.reason), 14, INK_DARK, true)
+			label.max_lines_visible = 3
+			if group.cells.size() > 1:
+				label.text = "%d× · %s" % [group.cells.size(), label.text]
+			else:
+				label.text = str(group.sources[0]) + " · " + label.text
+	_status_title.text = tr("Situação da vila") + " · " + str(_status_groups.size())
+	_layout_village_status()
+
+func _focus_status(group: Dictionary) -> void:
+	var index: int = int(group.get("next", 0)) % group.cells.size()
+	focus_requested.emit(group.cells[index])
+	group["next"] = index + 1
+
+func _layout_village_status() -> void:
+	if not is_instance_valid(_status_panel): return
+	var viewport_size := get_viewport().get_visible_rect().size
+	var compact := _compact_layout()
+	var margin := 12.0 if compact else 18.0
+	var panel_width := 308.0 if compact else 338.0
+	var top := _top.position.y + _top.size.y + 12.0
+	var bottom := _dock.position.y - 12.0
+	if _drawer.visible: bottom = minf(bottom, _drawer.position.y - 12.0)
+	if _mode_panel.visible: bottom = minf(bottom, _mode_panel.position.y - 12.0)
+	_status_panel.position = Vector2(viewport_size.x - margin - panel_width, top)
+	_status_panel.size = Vector2(panel_width, minf(284.0, maxf(100.0, bottom - top)))
+	_status_panel.visible = not _status_groups.is_empty() and bottom - top >= 100.0 and not _inspector.visible and not _menu.visible and not _help.visible and not _save_dialog_dim.visible
 
 func _refresh_training() -> void:
 	if not is_instance_valid(_training_queue):
@@ -1728,3 +1795,4 @@ func _layout() -> void:
 	var toast_width := minf(500.0,width-margin*2)
 	_toast.position = Vector2((width-toast_width)*0.5,margin+top_height+12)
 	_toast.size = Vector2(toast_width,0)
+	_layout_village_status()

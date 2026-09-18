@@ -117,6 +117,7 @@ func sync(delta: float) -> void:
  # medium tier, since several close-up workers at once are too heavy there.
  var min_tier:=1 if gl_compatibility else 0
  var detail_tier:=maxi(min_tier,0 if view_size<20 else (2 if view_size>48 else 1))
+ var pose_bounds:=get_viewport().get_visible_rect().grow(80.0)
  var detail_index:=0
  var alive := {}
  for b: Dictionary in sim.buildings:
@@ -171,7 +172,20 @@ func sync(delta: float) -> void:
   var gait_phase:float=actor.get_meta("gait_phase",worker.id*0.83)
   if walking:gait_phase+=Vector2(actor.position.x-old_position.x,actor.position.z-old_position.z).length()*(6.8 if not worker.cargo.is_empty() else 5.6)
   actor.set_meta("gait_phase",gait_phase)
-  People.animate(actor,gait_phase if walking else elapsed*8.0+worker.id*0.83,walking,working,not worker.cargo.is_empty(),worker.cargo.get("item","wood"))
+  # Keep movement interpolated every frame. Offscreen rigs need no pose work;
+  # quiet breathing at rest only needs 10 updates/s, not full per-foot IK each frame.
+  var pose_center:=actor.position+Vector3(0,0.9,0)
+  var visible_pose:bool=not camera.is_position_behind(pose_center) and pose_bounds.has_point(camera.unproject_position(pose_center))
+  var pose_key:String=str(walking)+str(working)+str(worker.cargo)+str(actor.get_meta("quality"))
+  var pose_due:bool=not actor.has_meta("pose_key") or actor.get_meta("pose_key")!=pose_key
+  var pose_elapsed:float=float(actor.get_meta("pose_elapsed",0.0))+delta
+  var was_visible:bool=actor.get_meta("pose_visible",false)
+  actor.set_meta("pose_visible",visible_pose)
+  if visible_pose and (pose_due or not was_visible or (not sim.paused and (walking or working or pose_elapsed>=0.1))):
+   People.animate(actor,gait_phase if walking else elapsed*8.0+worker.id*0.83,walking,working,not worker.cargo.is_empty(),worker.cargo.get("item","wood"))
+   actor.set_meta("pose_key",pose_key)
+   pose_elapsed=0.0
+  actor.set_meta("pose_elapsed",minf(pose_elapsed,0.1))
  detail_cursor=(detail_cursor+1)%maxi(1,sim.workers.size())
  for id in people.keys():
   if not alive.has(id):people[id].free();people.erase(id)
