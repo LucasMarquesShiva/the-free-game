@@ -14,7 +14,10 @@ signal language_changed
 const PAPER := Color("f5e4bd")
 const PANEL := Color("0b2429")
 const INK := Color("f1dfb4")
-const MUTED := Color("b4b69e")
+## Body text color for labels sitting on the new paper-textured panel
+## background (light), as opposed to INK (light text for dark buttons/docks).
+const INK_DARK := Color("3a2a18")
+const MUTED := Color("6b5f47")
 const BRONZE := Color("c59a50")
 const WINE := Color("e1bd71")
 const DANGER := Color("eeaa89")
@@ -319,13 +322,17 @@ func _focus_style() -> StyleBoxFlat:
 	style.set_border_width_all(3)
 	return style
 
+static var _paper_texture: Texture2D
 func _panel(parent: Node, register_region: bool = true, padding: int = 14) -> PanelContainer:
 	var panel := PanelContainer.new()
-	var style := _style(PANEL, BRONZE.darkened(0.2), 7, padding)
-	style.set_border_width_all(2)
-	style.shadow_color = Color(0.08,0.12,0.09,0.23)
-	style.shadow_size = 5
-	style.shadow_offset = Vector2(0,3)
+	if _paper_texture == null:
+		_paper_texture = load("res://assets/approved/ui/paper_panel.png")
+	var style := StyleBoxTexture.new()
+	style.texture = _paper_texture
+	style.texture_margin_left = 64;style.texture_margin_right = 64
+	style.texture_margin_top = 44;style.texture_margin_bottom = 44
+	style.content_margin_left = padding;style.content_margin_right = padding
+	style.content_margin_top = padding;style.content_margin_bottom = padding
 	panel.add_theme_stylebox_override("panel", style)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	parent.add_child(panel)
@@ -348,7 +355,7 @@ func _hbox(parent: Node, spacing: int = 8) -> HBoxContainer:
 	parent.add_child(box)
 	return box
 
-func _label(parent: Node, text: String = "", size: int = 17, color: Color = INK, wrap: bool = false) -> Label:
+func _label(parent: Node, text: String = "", size: int = 17, color: Color = INK_DARK, wrap: bool = false) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -432,10 +439,14 @@ func _make_objectives() -> void:
 	_objectives_toggle = _button(box,tr("Objetivos  {done}/{total}  {mark}").format({"done":0,"total":3,"mark":"+"}),_toggle_objectives)
 	_objectives_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_objectives_toggle.add_theme_stylebox_override("normal",_style(Color.TRANSPARENT,Color.TRANSPARENT,8,4))
+	_objectives_toggle.add_theme_stylebox_override("hover",_style(Color.TRANSPARENT,Color.TRANSPARENT,8,4))
+	_objectives_toggle.add_theme_stylebox_override("pressed",_style(Color.TRANSPARENT,Color.TRANSPARENT,8,4))
+	for state in ["font_color","font_hover_color","font_pressed_color"]:
+		_objectives_toggle.add_theme_color_override(state,INK_DARK)
 	_objective_details = _vbox(box,9)
 	_outcome = _label(_objective_details,tr("Um vale para chamar de seu"),19,WINE,true)
 	for i in range(3):
-		_objective_labels.append(_label(_objective_details,"",15,INK,true))
+		_objective_labels.append(_label(_objective_details,"",15,INK_DARK,true))
 	_notice_label = _label(_objective_details,"",14,MUTED,true)
 	_notice_label.add_theme_constant_override("line_spacing",2)
 	_objective_details.hide()
@@ -445,7 +456,7 @@ func _make_tutorial() -> void:
 	_tutorial.name = "FirstDayHint"
 	var box := _vbox(_tutorial,8)
 	_tutorial_title = _label(box,tr("Primeiro, ligue a escola"),21,WINE)
-	_tutorial_intro = _label(box,tr("Você começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas, parta de uma borda da praça até a entrada da escola: 1 pedra por trecho."),15,INK,true)
+	_tutorial_intro = _label(box,tr("Você começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas, parta de uma borda da praça até a entrada da escola: 1 pedra por trecho."),15,INK_DARK,true)
 	_tutorial_intro.max_lines_visible = 7
 	_tutorial_more = _label(box,tr("Depois, construa lenhador, pedreira e horta. Clique na escola concluída para formar os profissionais."),14,MUTED,true)
 	_tutorial_button = _button(box,tr("Entendi, vamos começar"),_dismiss_tutorial)
@@ -562,7 +573,7 @@ func _populate_build() -> void:
 	_build_filter.clear_button_enabled = true
 	_build_filter.add_theme_stylebox_override("normal",_style(PANEL.lightened(0.06),BRONZE.darkened(0.2),9,10))
 	_build_filter.add_theme_stylebox_override("focus",_style(PANEL.lightened(0.06),BRONZE,9,10))
-	_build_filter.add_theme_color_override("font_color",INK)
+	_build_filter.add_theme_color_override("font_color",INK_DARK)
 	_build_filter.add_theme_color_override("font_placeholder_color",MUTED)
 	_build_filter.text_changed.connect(_filter_build_cards)
 	_drawer_content.add_child(_build_filter)
@@ -586,10 +597,10 @@ func _populate_build() -> void:
 		button.add_child(margin)
 		var card := _vbox(margin,4)
 		_thumbnail(card,kind,76)
-		var title := _label(card,tr(SHORT_NAMES[kind]),16 if kind == "training" else 19,WINE if kind == "winery" else INK,true)
+		var title := _label(card,tr(SHORT_NAMES[kind]),16 if kind == "training" else 19,WINE if kind == "winery" else INK_DARK,true)
 		title.max_lines_visible = 2
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		var cost_label := _label(card,_cost_text(definition.get("cost",{})),14,INK)
+		var cost_label := _label(card,_cost_text(definition.get("cost",{})),14,INK_DARK)
 		cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_build_costs[kind] = cost_label
 		_build_cards[kind] = button
@@ -614,14 +625,14 @@ func _populate_training() -> void:
 	_role_filter.clear_button_enabled = true
 	_role_filter.add_theme_stylebox_override("normal",_style(PANEL.lightened(0.06),BRONZE.darkened(0.2),9,10))
 	_role_filter.add_theme_stylebox_override("focus",_style(PANEL.lightened(0.06),BRONZE,9,10))
-	_role_filter.add_theme_color_override("font_color",INK)
+	_role_filter.add_theme_color_override("font_color",INK_DARK)
 	_role_filter.add_theme_color_override("font_placeholder_color",MUTED)
 	_role_filter.text_changed.connect(_filter_role_cards)
 	_drawer_content.add_child(_role_filter)
 	_training_context = _label(_drawer_content,"",15,MUTED,true)
 	_training_context.hide()
 	var settings := _hbox(_drawer_content)
-	_resident_label = _label(settings,"",16,INK)
+	_resident_label = _label(settings,"",16,INK_DARK)
 	_spacer(settings)
 	_quantity_caption = _label(settings,tr("Quantidade"),15,MUTED)
 	for qty in [1,3,5]:
@@ -773,7 +784,7 @@ func _make_inspector() -> void:
 	_inspector.visible = false
 	var box := _vbox(_inspector,9)
 	var row := _hbox(box)
-	_inspection_title = _label(row,"",21,INK,true)
+	_inspection_title = _label(row,"",21,INK_DARK,true)
 	_inspect_close = _button(row,"×",close_panels,44)
 	_inspect_close.tooltip_text = tr("Fechar inspeção")
 	_inspector_scroll = ScrollContainer.new()
@@ -790,7 +801,7 @@ func _make_inspector() -> void:
 	_inspection_progress.show_percentage = false
 	_inspection_progress.custom_minimum_size.y = 8
 	content.add_child(_inspection_progress)
-	_inspection_details = _label(content,"",15,INK,true)
+	_inspection_details = _label(content,"",15,INK_DARK,true)
 	var actions := _hbox(box)
 	_inspect_map = _button(actions,tr("Ver no mapa"),_focus_inspected)
 	_inspect_map.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -932,7 +943,7 @@ func _help_entries() -> Array:
 func _fill_help(content: VBoxContainer) -> void:
 	_clear_children(content)
 	for entry in _help_entries():
-		_label(content,entry[0],19,INK,true)
+		_label(content,entry[0],19,INK_DARK,true)
 		_label(content,entry[1],17,MUTED,true)
 
 func _choose_language(code: String) -> void:
@@ -1121,7 +1132,7 @@ func _make_mode_and_toast() -> void:
 	_mode_panel.name = "PlacementInstructions"
 	_mode_panel.visible = false
 	var mode_row := _hbox(_mode_panel)
-	_mode_label = _label(mode_row,"",17,INK,true)
+	_mode_label = _label(mode_row,"",17,INK_DARK,true)
 	_mode_label.max_lines_visible = 2
 	_road_toggle = _button(mode_row,tr("Apagar trecho"),_toggle_road_tool,132)
 	_road_toggle.visible = false
@@ -1130,7 +1141,7 @@ func _make_mode_and_toast() -> void:
 	_toast.name = "FeedbackToast"
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.visible = false
-	_toast_label = _label(_toast,"",17,INK,true)
+	_toast_label = _label(_toast,"",17,INK_DARK,true)
 	_toast_timer = Timer.new()
 	_toast_timer.one_shot = true
 	_toast_timer.wait_time = 5.0
@@ -1287,7 +1298,7 @@ func _refresh_training() -> void:
 			var line := _hbox(_training_queue)
 			var info := _vbox(line,3)
 			info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			_queue_labels[id] = _label(info,"",15,INK,true)
+			_queue_labels[id] = _label(info,"",15,INK_DARK,true)
 			var progress := ProgressBar.new()
 			progress.show_percentage = false
 			progress.custom_minimum_size.y = 5
