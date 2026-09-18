@@ -378,7 +378,7 @@ func _label(parent: Node, text: String = "", size: int = 17, color: Color = INK_
 func _button(parent: Node, text: String, action: Callable, min_width: float = 0) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.custom_minimum_size = Vector2(min_width,44)
+	button.custom_minimum_size = Vector2(min_width,54)
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	button.pressed.connect(action)
 	parent.add_child(button)
@@ -393,10 +393,10 @@ func _paper_button_style(tint: Color = Color.WHITE) -> StyleBoxTexture:
 		_paper_banner_texture = load("res://assets/approved/ui/paper_banner.png")
 	var box := StyleBoxTexture.new()
 	box.texture = _paper_banner_texture
-	box.texture_margin_left = 44;box.texture_margin_right = 44
-	box.texture_margin_top = 16;box.texture_margin_bottom = 16
-	box.content_margin_left = 12;box.content_margin_right = 12
-	box.content_margin_top = 6;box.content_margin_bottom = 6
+	box.texture_margin_left = 34;box.texture_margin_right = 34
+	box.texture_margin_top = 14;box.texture_margin_bottom = 14
+	box.content_margin_left = 22;box.content_margin_right = 22
+	box.content_margin_top = 14;box.content_margin_bottom = 14
 	box.modulate_color = tint
 	return box
 
