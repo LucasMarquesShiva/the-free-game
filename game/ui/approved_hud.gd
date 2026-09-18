@@ -22,11 +22,11 @@ const BRONZE := Color("c59a50")
 const WINE := Color("e1bd71")
 ## Same accent role as WINE but for headings on the light paper panels
 ## (WINE itself stays light for the build/training cards' dark buttons).
-const WINE_DARK := Color("7a2418")
+const WINE_DARK := Color("5c1710")
 const DANGER := Color("eeaa89")
 const SUCCESS := Color("b8d292")
-const DANGER_DARK := Color("8a2f1a")
-const SUCCESS_DARK := Color("2f5a1a")
+const DANGER_DARK := Color("6e2210")
+const SUCCESS_DARK := Color("223d10")
 const BUILD_ORDER := ["lumber", "sawmill", "quarry", "farm", "mill", "bakery", "inn", "house", "vineyard", "winery", "store", "workshop", "barracks", "training"]
 const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Horticultor", "vintner":"Vinhateiro", "miller":"Moleiro", "baker":"Padeiro", "recruit":"Recruta"}
 const ROLE_DETAILS := {"builder":"Ergue as obras da vila", "servant":"Leva materiais e produção", "instructor":"Forma novos profissionais", "lumberjack":"Corta árvores e serra troncos", "stonecutter":"Extrai pedra", "farmer":"Cultiva alimentos e cereal", "vintner":"Cultiva uvas e produz vinho", "miller":"Moí cereal", "baker":"Asse pães", "recruit":"Caminha até o quartel"}
