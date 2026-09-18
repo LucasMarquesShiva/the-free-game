@@ -172,6 +172,8 @@ var _build_grid: GridContainer
 var _build_filter: LineEdit
 var _build_cards: Dictionary = {}
 var _role_grid: GridContainer
+var _role_filter: LineEdit
+var _role_cards: Dictionary = {}
 var _build_costs: Dictionary = {}
 var _role_count_labels: Dictionary = {}
 var _quantity := 1
@@ -526,6 +528,7 @@ func _toggle_drawer(kind: String) -> void:
 	_clear_children(_drawer_content)
 	_build_costs.clear()
 	_build_cards.clear()
+	_role_cards.clear()
 	_role_count_labels.clear()
 	_queue_labels.clear()
 	_queue_bars.clear()
@@ -589,6 +592,12 @@ func _filter_build_cards(query: String) -> void:
 		var button: Button = _build_cards[kind]
 		button.visible = needle.is_empty() or tr(SHORT_NAMES[kind]).to_lower().contains(needle)
 
+func _filter_role_cards(query: String) -> void:
+	var needle := query.strip_edges().to_lower()
+	for role in _role_cards:
+		var button: Button = _role_cards[role]
+		button.visible = needle.is_empty() or tr(ROLE_NAMES[role]).to_lower().contains(needle)
+
 func _populate_training() -> void:
 	_drawer_title.text = tr("Mais mãos para a vila")
 	_drawer_subtitle.text = tr("Escolha profissão e quantidade. A escola conectada à estrada forma a equipe automaticamente.")
@@ -604,6 +613,15 @@ func _populate_training() -> void:
 		if qty == _quantity:
 			_accent(btn)
 	_training_cost_label = _label(_drawer_content,tr("Cada pessoa: 1 ouro · 50 s de formação em 1×"),14,MUTED)
+	_role_filter = LineEdit.new()
+	_role_filter.placeholder_text = tr("Filtrar profissões…")
+	_role_filter.clear_button_enabled = true
+	_role_filter.add_theme_stylebox_override("normal",_style(PANEL.lightened(0.06),BRONZE.darkened(0.2),9,10))
+	_role_filter.add_theme_stylebox_override("focus",_style(PANEL.lightened(0.06),BRONZE,9,10))
+	_role_filter.add_theme_color_override("font_color",INK)
+	_role_filter.add_theme_color_override("font_placeholder_color",MUTED)
+	_role_filter.text_changed.connect(_filter_role_cards)
+	_drawer_content.add_child(_role_filter)
 	_role_grid = GridContainer.new()
 	_role_grid.columns = 4
 	_role_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -612,6 +630,7 @@ func _populate_training() -> void:
 	_drawer_content.add_child(_role_grid)
 	for role in ["builder","servant","farmer","vintner","lumberjack","stonecutter","miller","baker","recruit","instructor"]:
 		var button := _button(_role_grid,"",_train_role.bind(role))
+		_role_cards[role] = button
 		button.custom_minimum_size.y = 96
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.tooltip_text = tr("{detail}. Formação e trabalho automáticos.").format({"detail":tr(ROLE_DETAILS[role])})
