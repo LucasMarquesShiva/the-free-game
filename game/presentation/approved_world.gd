@@ -61,7 +61,11 @@ func _light() -> void:
  # integrated GPUs at a cost too small to notice on a stylized isometric view.
  if gl_compatibility:
   get_viewport().scaling_3d_scale = 0.8
- if not gl_compatibility:get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
+ # FXAA is a Forward+/Mobile-only post-process; it warns and no-ops under
+ # gl_compatibility regardless of the player's quality preference, so this
+ # stays keyed to the actual renderer rather than the Settings toggle.
+ if RenderingServer.get_current_rendering_method() != "gl_compatibility":
+  get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
 
 func _camera_update(delta: float) -> void:
  var blend := 1.0-exp(-delta*12.0)
