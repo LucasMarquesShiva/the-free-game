@@ -20,8 +20,8 @@ const INK_DARK := Color("3a2a18")
 const MUTED := Color("6b5f47")
 const BRONZE := Color("c59a50")
 const WINE := Color("e1bd71")
-## Same accent role as WINE but for headings on the light paper panels
-## (WINE itself stays light for the build/training cards' dark buttons).
+## Dark counterpart of WINE for headings on the light paper backgrounds
+## used everywhere now (WINE itself is kept for any future dark surface).
 const WINE_DARK := Color("5c1710")
 const DANGER := Color("eeaa89")
 const SUCCESS := Color("b8d292")
@@ -620,7 +620,7 @@ func _populate_build() -> void:
 		button.add_child(margin)
 		var card := _vbox(margin,4)
 		_thumbnail(card,kind,76)
-		var title := _label(card,tr(SHORT_NAMES[kind]),16 if kind == "training" else 19,WINE if kind == "winery" else INK_DARK,true)
+		var title := _label(card,tr(SHORT_NAMES[kind]),16 if kind == "training" else 19,WINE_DARK if kind == "winery" else INK_DARK,true)
 		title.max_lines_visible = 2
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		var cost_label := _label(card,_cost_text(definition.get("cost",{})),14,INK_DARK)
@@ -698,7 +698,7 @@ func _populate_training() -> void:
 		content.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		_role_count_labels[role] = _label(content,tr(ROLE_NAMES[role]),17)
 		_label(content,tr(ROLE_DETAILS[role]),12,MUTED,true)
-		_label(content,tr("+ Formar"),13,WINE)
+		_label(content,tr("+ Formar"),13,WINE_DARK)
 	_training_queue_title = _label(_drawer_content,tr("Fila de formação"),18)
 	_training_queue = _vbox(_drawer_content,6)
 
