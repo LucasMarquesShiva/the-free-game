@@ -288,11 +288,11 @@ func _make_theme() -> Theme:
 	theme.set_color("font_color", "Label", INK)
 	theme.set_constant("separation", "HBoxContainer", 8)
 	theme.set_constant("separation", "VBoxContainer", 8)
-	theme.set_stylebox("normal", "Button", _ornate_style("button_normal"))
-	theme.set_stylebox("hover", "Button", _ornate_style("button_hover"))
-	theme.set_stylebox("pressed", "Button", _ornate_style("button_pressed"))
+	theme.set_stylebox("normal", "Button", _style(Color("14383c"), Color("94713a"), 9))
+	theme.set_stylebox("hover", "Button", _style(Color("205057"), BRONZE, 9))
+	theme.set_stylebox("pressed", "Button", _style(Color("155d55"), BRONZE, 9))
 	theme.set_stylebox("focus", "Button", _focus_style())
-	theme.set_stylebox("disabled", "Button", _ornate_style("button_disabled"))
+	theme.set_stylebox("disabled", "Button", _style(Color("1a3336"), Color("47605c"), 9))
 	theme.set_color("font_color", "Button", INK)
 	theme.set_color("font_hover_color", "Button", INK)
 	theme.set_color("font_pressed_color", "Button", INK)
@@ -372,27 +372,10 @@ func _button(parent: Node, text: String, action: Callable, min_width: float = 0)
 	parent.add_child(button)
 	return button
 
-## Gold beveled 9-slice frame (assets/approved/ui/button_*.png) matching a
-## classic settlement-builder look, reused for every button via the theme;
-## `tint` recolors the leather panel while keeping the same gold border.
-static var _ornate_textures: Dictionary = {}
-func _ornate_style(kind: String, tint: Color = Color.WHITE, margin: int = 13) -> StyleBoxTexture:
-	if not _ornate_textures.has(kind):
-		_ornate_textures[kind] = load("res://assets/approved/ui/%s.png" % kind)
-	var box := StyleBoxTexture.new()
-	box.texture = _ornate_textures[kind]
-	box.texture_margin_left = margin;box.texture_margin_right = margin
-	box.texture_margin_top = margin;box.texture_margin_bottom = margin
-	box.content_margin_left = 12;box.content_margin_right = 12
-	box.content_margin_top = 8;box.content_margin_bottom = 8
-	box.modulate_color = tint
-	return box
-
 func _accent(button: Button, color: Color = Color("08664e")) -> void:
-	var tint := color.lightened(0.55)
-	button.add_theme_stylebox_override("normal", _ornate_style("button_normal",tint))
-	button.add_theme_stylebox_override("hover", _ornate_style("button_hover",tint))
-	button.add_theme_stylebox_override("pressed", _ornate_style("button_pressed",tint))
+	button.add_theme_stylebox_override("normal", _style(color, color.lightened(0.12), 9))
+	button.add_theme_stylebox_override("hover", _style(color.lightened(0.1), BRONZE, 9))
+	button.add_theme_stylebox_override("pressed", _style(color.darkened(0.1), BRONZE, 9))
 	button.add_theme_color_override("font_color", PAPER)
 	button.add_theme_color_override("font_hover_color", Color.WHITE)
 	button.add_theme_color_override("font_pressed_color", PAPER)
@@ -403,27 +386,6 @@ func _spacer(parent: Node) -> Control:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(spacer)
 	return spacer
-
-static var _medallion_texture: Texture2D
-func _medallion_glyph(parent: Node, kind: String, side: float = 34) -> Glyph:
-	if _medallion_texture == null:
-		_medallion_texture = load("res://assets/approved/ui/medallion.png")
-	var wrap := Control.new()
-	wrap.custom_minimum_size = Vector2(side,side)
-	wrap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	parent.add_child(wrap)
-	var badge := TextureRect.new()
-	badge.texture = _medallion_texture
-	badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	badge.stretch_mode = TextureRect.STRETCH_SCALE
-	badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	wrap.add_child(badge)
-	var glyph := _glyph(wrap,kind,side*0.62)
-	glyph.set_anchors_preset(Control.PRESET_CENTER)
-	glyph.position = Vector2(side,side)*0.19
-	return glyph
 
 func _glyph(parent: Node, kind: String, side: float = 34) -> Glyph:
 	var glyph := Glyph.new()
@@ -438,7 +400,7 @@ func _make_top_bar() -> void:
 	_top = _panel(_root, true, 10)
 	_top.name = "ResourcesBar"
 	var row := _hbox(_top, 9)
-	_medallion_glyph(row,"grapes",42)
+	_glyph(row,"grapes",38)
 	_brand_box = _vbox(row,0)
 	_brand_box.custom_minimum_size.x = 182
 	_brand_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -454,7 +416,7 @@ func _make_top_bar() -> void:
 		content.offset_left = 6
 		content.offset_right = -6
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_resource_glyphs[item] = _medallion_glyph(content,item,34)
+		_resource_glyphs[item] = _glyph(content,item,27)
 		var values := _vbox(content,0)
 		values.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		_resource_values[item] = _label(values,"0",20)
