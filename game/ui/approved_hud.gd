@@ -12,13 +12,14 @@ signal entrance_highlighted(cell: Vector2i)
 signal language_changed
 
 const PAPER := Color("f5e4bd")
-const PANEL := Color("0b2429")
+const PANEL := Color("2c2013")
 const INK := Color("f1dfb4")
 ## Body text color for labels sitting on the new paper-textured panel
 ## background (light), as opposed to INK (light text for dark buttons/docks).
 const INK_DARK := Color("3a2a18")
 const MUTED := Color("6b5f47")
-const BRONZE := Color("c59a50")
+const BRONZE := Color("b58a48")
+const MUTED_LIGHT := Color("cbb995")
 const WINE := Color("e1bd71")
 ## Dark counterpart of WINE for headings on the light paper backgrounds
 ## used everywhere now (WINE itself is kept for any future dark surface).
@@ -44,6 +45,8 @@ class Glyph extends Control:
 	func _draw() -> void:
 		var s := minf(size.x, size.y) / 40.0
 		draw_set_transform(Vector2((size.x - 40.0*s)*0.5, (size.y - 40.0*s)*0.5), 0.0, Vector2(s,s))
+		if _draw_resource():
+			return
 		var dark := Color("293b35")
 		var gold := Color("bb843e")
 		var purple := Color("7c405a")
@@ -128,6 +131,86 @@ class Glyph extends Control:
 				elif kind == "training":
 					draw_rect(Rect2(16,10,10,7),dark)
 					draw_line(Vector2(21,10),Vector2(21,17),gold,1.0,true)
+
+	## Silhuetas distintas e contornos largos continuam legíveis em 24 px.
+	func _shape(points: Array, fill: String) -> void:
+		var polygon := PackedVector2Array(points)
+		draw_colored_polygon(polygon, Color(fill))
+		polygon.append(polygon[0])
+		draw_polyline(polygon, Color("38291e"), 1.4, true)
+
+	func _stroke(a: Vector2, b: Vector2, color: String, width: float = 1.5) -> void:
+		draw_line(a, b, Color(color), width, true)
+
+	func _coin(center: Vector2, radius: float) -> void:
+		draw_circle(center, radius + 1.0, Color("67411d"))
+		draw_circle(center, radius, Color("e8b548"))
+		draw_arc(center, radius - 2.0, 0, TAU, 20, Color("ffe49a"), 1.2, true)
+		_stroke(center + Vector2(-1,-3), center + Vector2(-1,3), "fff0b5", 2.0)
+
+	func _draw_resource() -> bool:
+		match kind:
+			"wood":
+				# Tábuas serradas, distintas dos troncos de casca escura.
+				for y in [10, 19, 28]:
+					_shape([Vector2(4,y),Vector2(27,y-6),Vector2(36,y-1),Vector2(13,y+6)], "d4a15e")
+					_shape([Vector2(13,y+6),Vector2(36,y-1),Vector2(36,y+4),Vector2(13,y+11)], "956239")
+					_shape([Vector2(4,y),Vector2(13,y+6),Vector2(13,y+11),Vector2(4,y+5)], "e7be7b")
+					_stroke(Vector2(12,y+1),Vector2(28,y-3),"f5d399")
+			"stone":
+				_shape([Vector2(3,26),Vector2(9,14),Vector2(23,9),Vector2(34,17),Vector2(37,30),Vector2(23,37),Vector2(8,34)], "87949a")
+				_shape([Vector2(9,14),Vector2(23,9),Vector2(27,21),Vector2(16,26),Vector2(3,26)], "d0d7ce")
+				_shape([Vector2(27,21),Vector2(34,17),Vector2(37,30),Vector2(23,37)], "63737e")
+				_stroke(Vector2(10,16),Vector2(21,12),"f3edda",2.0)
+			"food":
+				# Cesto com legumes: alimentos não se confundem com os pães.
+				draw_arc(Vector2(20,18),12,PI,TAU,20,Color("d5ab66"),3.0,true)
+				draw_circle(Vector2(13,20),7,Color("743b28"))
+				draw_circle(Vector2(13,18),6,Color("c75b40"))
+				draw_circle(Vector2(25,18),7,Color("81954f"))
+				_stroke(Vector2(23,16),Vector2(27,13),"c3cd7b",2.5)
+				_shape([Vector2(26,23),Vector2(31,10),Vector2(36,12),Vector2(33,25)],"e2a052")
+				_stroke(Vector2(32,11),Vector2(32,5),"8ca85e",3.0)
+				_shape([Vector2(4,23),Vector2(36,23),Vector2(32,36),Vector2(9,36)],"b17b43")
+				for y in [27,32]: _stroke(Vector2(9,y),Vector2(32,y),"e3b877",2.0)
+				for x in [13,21,29]: _stroke(Vector2(x,24),Vector2(x-1,35),"805532")
+			"gold":
+				for y in [31,27,23]:
+					_shape([Vector2(4,y-3),Vector2(18,y-3),Vector2(18,y+3),Vector2(4,y+3)],"c48b29")
+					_stroke(Vector2(5,y-2),Vector2(17,y-2),"f7d878",2.0)
+				_coin(Vector2(12,18),8.0)
+				_coin(Vector2(27,27),9.0)
+				_stroke(Vector2(28,5),Vector2(28,13),"fff0b5",2.0)
+				_stroke(Vector2(24,9),Vector2(32,9),"fff0b5",2.0)
+			"trunks":
+				for origin in [Vector2(10,18),Vector2(12,30)]:
+					var end: Vector2 = origin + Vector2(19,-10)
+					draw_line(origin,end,Color("38291e"),14.0,true)
+					draw_line(origin,end,Color("95613b"),11.0,true)
+					_stroke(origin+Vector2(1,-3),end+Vector2(1,-3),"c29157",2.0)
+					draw_circle(origin,6.5,Color("38291e"))
+					draw_circle(origin,5.3,Color("e2bc7f"))
+					draw_arc(origin,3.0,0.3,5.6,18,Color("a67643"),1.4,true)
+					draw_circle(origin,1.0,Color("a67643"))
+			"loaves":
+				_shape([Vector2(3,24),Vector2(5,17),Vector2(13,11),Vector2(20,12),Vector2(24,17),Vector2(24,25),Vector2(17,30),Vector2(7,30)],"b87837")
+				_shape([Vector2(14,29),Vector2(16,20),Vector2(25,14),Vector2(32,15),Vector2(37,22),Vector2(35,30),Vector2(26,35),Vector2(18,35)],"e4af62")
+				for offset in [Vector2(7,18),Vector2(14,14),Vector2(20,23),Vector2(27,19)]:
+					_stroke(offset,offset+Vector2(4,5),"fff0b7",2.6)
+				_stroke(Vector2(20,32),Vector2(32,28),"b97b3c",2.0)
+			"population":
+				_shape([Vector2(23,21),Vector2(33,21),Vector2(38,28),Vector2(38,36),Vector2(21,36)],"9aa36b")
+				draw_circle(Vector2(28,14),6.5,Color("38291e"))
+				draw_circle(Vector2(28,14),5.2,Color("edc99a"))
+				draw_arc(Vector2(28,14),5.0,PI,TAU,16,Color("856141"),3.0,true)
+				_shape([Vector2(9,22),Vector2(19,22),Vector2(25,29),Vector2(25,37),Vector2(3,37),Vector2(3,29)],"789b9d")
+				_shape([Vector2(9,23),Vector2(14,28),Vector2(19,23),Vector2(17,32),Vector2(12,32)],"eee0b9")
+				draw_circle(Vector2(14,14),7.5,Color("38291e"))
+				draw_circle(Vector2(14,14),6.2,Color("dcb180"))
+				draw_arc(Vector2(14,13),6.0,PI,TAU,16,Color("67472f"),3.5,true)
+			_:
+				return false
+		return true
 
 	func draw_ellipse_leaf(p: Vector2, color: Color) -> void:
 		draw_colored_polygon(PackedVector2Array([p,p+Vector2(9,-3),p+Vector2(7,4),p+Vector2(1,5)]),color)
@@ -296,18 +379,18 @@ func _make_theme() -> Theme:
 	theme.set_color("font_color", "Label", INK)
 	theme.set_constant("separation", "HBoxContainer", 8)
 	theme.set_constant("separation", "VBoxContainer", 8)
-	theme.set_stylebox("normal", "Button", _paper_button_style())
-	theme.set_stylebox("hover", "Button", _paper_button_style(Color(1.08,1.05,0.98)))
-	theme.set_stylebox("pressed", "Button", _paper_button_style(Color.WHITE,"buttonLong_brown_pressed"))
+	theme.set_stylebox("normal", "Button", _medieval_button_style())
+	theme.set_stylebox("hover", "Button", _medieval_button_style("hover"))
+	theme.set_stylebox("pressed", "Button", _medieval_button_style("pressed"))
 	theme.set_stylebox("focus", "Button", _focus_style())
-	theme.set_stylebox("disabled", "Button", _paper_button_style(Color(0.72,0.72,0.7)))
+	theme.set_stylebox("disabled", "Button", _medieval_button_style("disabled"))
 	theme.set_color("font_color", "Button", INK_DARK)
 	theme.set_color("font_hover_color", "Button", INK_DARK)
 	theme.set_color("font_pressed_color", "Button", INK_DARK)
-	theme.set_color("font_disabled_color", "Button", Color("8a7a5c"))
+	theme.set_color("font_disabled_color", "Button", Color("766650"))
 	theme.set_font_size("font_size", "Button", 17)
-	theme.set_stylebox("background", "ProgressBar", _style(Color("1a4143"), Color.TRANSPARENT, 4, 0))
-	theme.set_stylebox("fill", "ProgressBar", _style(SUCCESS, Color.TRANSPARENT, 4, 0))
+	theme.set_stylebox("background", "ProgressBar", _style(PANEL, BRONZE.darkened(0.3), 3, 0))
+	theme.set_stylebox("fill", "ProgressBar", _style(Color("71814b"), Color.TRANSPARENT, 3, 0))
 	return theme
 
 func _style(bg: Color, border: Color = Color("94713a"), radius: int = 12, padding: int = 12) -> StyleBoxFlat:
@@ -331,20 +414,32 @@ static var _paper_texture: Texture2D
 func _panel(parent: Node, register_region: bool = true, padding: int = 14) -> PanelContainer:
 	var panel := PanelContainer.new()
 	if _paper_texture == null:
-		_paper_texture = load("res://assets/approved/ui/paper_panel.png")
+		_paper_texture = load("res://assets/approved/ui/papiro.png")
 	var style := StyleBoxTexture.new()
 	style.texture = _paper_texture
-	style.texture_margin_left = 64;style.texture_margin_right = 64
-	style.texture_margin_top = 44;style.texture_margin_bottom = 44
+	style.texture_margin_left = 28;style.texture_margin_right = 28
+	style.texture_margin_top = 28;style.texture_margin_bottom = 28
 	style.content_margin_left = padding;style.content_margin_right = padding
 	style.content_margin_top = padding;style.content_margin_bottom = padding
 	panel.add_theme_stylebox_override("panel", style)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	parent.add_child(panel)
 	panel.minimum_size_changed.connect(_queue_layout)
+	panel.draw.connect(_draw_panel_frame.bind(panel))
+	panel.resized.connect(panel.queue_redraw)
 	if register_region:
 		_regions.append(panel)
 	return panel
+
+## A moldura é desenhada sem alterar as margens nem interceptar o mouse.
+func _draw_panel_frame(panel: PanelContainer) -> void:
+	var bounds := Rect2(Vector2.ONE, panel.size - Vector2(2, 2))
+	panel.draw_rect(bounds, Color("62462d"), false, 2.0)
+	panel.draw_rect(bounds.grow(-3.0), BRONZE, false, 1.0)
+	for corner in [Vector2(7, 7), Vector2(panel.size.x - 7, 7),
+			Vector2(7, panel.size.y - 7), panel.size - Vector2(7, 7)]:
+		panel.draw_circle(corner, 2.0, Color("62462d"))
+		panel.draw_circle(corner - Vector2(0.5, 0.5), 0.8, BRONZE.lightened(0.3))
 
 func _vbox(parent: Node, spacing: int = 8) -> VBoxContainer:
 	var box := VBoxContainer.new()
@@ -384,31 +479,39 @@ func _button(parent: Node, text: String, action: Callable, min_width: float = 0)
 	parent.add_child(button)
 	return button
 
-## Torn-parchment banner (assets/approved/ui/paper_banner.png) 9-sliced for
-## every button; `tint` multiplies it so hover/pressed/accent states reuse
-## the one asset instead of needing separate art per state/color.
-static var _kenney_textures: Dictionary = {}
-func _paper_button_style(tint: Color = Color.WHITE, kind: String = "buttonLong_brown") -> StyleBoxTexture:
-	if not _kenney_textures.has(kind):
-		_kenney_textures[kind] = load("res://assets/approved/ui/kenney/%s.png" % kind)
-	var box := StyleBoxTexture.new()
-	box.texture = _kenney_textures[kind]
-	box.texture_margin_left = 13;box.texture_margin_right = 13
-	box.texture_margin_top = 13;box.texture_margin_bottom = 13
-	box.content_margin_left = 16;box.content_margin_right = 16
-	box.content_margin_top = 10;box.content_margin_bottom = 10
-	box.modulate_color = tint
+## Botões originais desenhados pela Godot; não dependem de texturas externas.
+## Margens constantes evitam deslocamento do conteúdo entre estados.
+func _medieval_button_style(state: String = "normal", accent: Color = Color("c5a475")) -> StyleBoxFlat:
+	var surface := accent
+	var rim := Color("82613b")
+	match state:
+		"hover":
+			surface = accent.lightened(0.18)
+			rim = Color("ad7636")
+		"pressed":
+			surface = accent.darkened(0.12)
+			rim = Color("60442b")
+		"disabled":
+			surface = Color("b5a48a")
+			rim = Color("93826b")
+	var box := _style(surface, rim, 3, 10)
+	box.content_margin_left = 16
+	box.content_margin_right = 16
+	box.set_border_width_all(2)
+	box.border_width_top = 4 if state == "pressed" else 2
+	box.border_width_bottom = 2 if state == "pressed" else 4
+	box.shadow_color = Color(0.16, 0.10, 0.05, 0.22 if state != "disabled" else 0.0)
+	box.shadow_size = 1 if state == "pressed" else 2
+	box.shadow_offset = Vector2(0, 0 if state == "pressed" else 1)
 	return box
 
-func _accent(button: Button, color: Color = Color("08664e")) -> void:
-	var tint := color.lightened(0.75)
-	var ink := color.darkened(0.35)
-	button.add_theme_stylebox_override("normal", _paper_button_style(tint))
-	button.add_theme_stylebox_override("hover", _paper_button_style(tint.lightened(0.08)))
-	button.add_theme_stylebox_override("pressed", _paper_button_style(tint,"buttonLong_brown_pressed"))
-	button.add_theme_color_override("font_color", ink)
-	button.add_theme_color_override("font_hover_color", ink)
-	button.add_theme_color_override("font_pressed_color", ink)
+func _accent(button: Button, color: Color = Color("665334")) -> void:
+	var surface := color.lightened(0.65)
+	var ink := color.darkened(0.5)
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		button.add_theme_stylebox_override(state, _medieval_button_style(state, surface))
+	for state in ["font_color", "font_hover_color", "font_pressed_color"]:
+		button.add_theme_color_override(state, ink)
 
 func _spacer(parent: Node) -> Control:
 	var spacer := Control.new()
@@ -434,7 +537,7 @@ func _make_top_bar() -> void:
 	_brand_box = _vbox(row,0)
 	_brand_box.custom_minimum_size.x = 182
 	_brand_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_brand = _label(_brand_box,"The Free Game",24)
+	_brand = _label(_brand_box,"The Free Game",24,WINE_DARK)
 	_credit_label = _label(_brand_box,"Lucas Marques, from Shiva",12,MUTED)
 	for item in ["wood","stone","food","gold","trunks","loaves","population"]:
 		var button := _button(row,"",_resource_info.bind(item),86)
@@ -449,11 +552,11 @@ func _make_top_bar() -> void:
 		content.offset_left = 10
 		content.offset_right = -10
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_resource_glyphs[item] = _glyph(content,item,27)
+		_resource_glyphs[item] = _glyph(content,item,34)
 		var values := _vbox(content,0)
 		values.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		_resource_values[item] = _label(values,"0",20)
-		_resource_captions[item] = _label(values,tr(ITEM_NAMES[item]),11,MUTED)
+		_resource_values[item] = _label(values,"0",20,INK)
+		_resource_captions[item] = _label(values,tr(ITEM_NAMES[item]),11,MUTED_LIGHT)
 		_resource_buttons[item] = button
 	_menu_button = _button(row,tr("Menu"),_toggle_menu,66)
 	_menu_button.tooltip_text = tr("Salvar, carregar, reiniciar e ajuda")
@@ -522,7 +625,7 @@ func _thumbnail(parent: Node, kind: String, height: float = 56.0) -> void:
 func _make_dock() -> void:
 	_dock = _panel(_root,true,8)
 	_dock.name = "CommandDock"
-	var row := _hbox(_dock,22)
+	var row := _hbox(_dock,10)
 	_tabs["build"] = _button(row,tr("Construir"),_toggle_drawer.bind("build"),178)
 	_tabs["road"] = _button(row,tr("Estradas"),_choose_road,140)
 	_tabs["road"].tooltip_text = tr("Traçar ou apagar estradas · R · 1 pedra por trecho novo")
@@ -600,7 +703,7 @@ func _populate_build() -> void:
 	_build_filter.add_theme_stylebox_override("normal",_style(Color("2c2013"),BRONZE.darkened(0.35),9,10))
 	_build_filter.add_theme_stylebox_override("focus",_style(Color("2c2013"),BRONZE,9,10))
 	_build_filter.add_theme_color_override("font_color",INK)
-	_build_filter.add_theme_color_override("font_placeholder_color",MUTED)
+	_build_filter.add_theme_color_override("font_placeholder_color",MUTED_LIGHT)
 	_build_filter.text_changed.connect(_filter_build_cards)
 	_drawer_content.add_child(_build_filter)
 	_build_grid = GridContainer.new()
@@ -613,7 +716,7 @@ func _populate_build() -> void:
 		var definition := _definition(kind)
 		var button := _button(_build_grid,"",_choose_build.bind(kind))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.custom_minimum_size.y = 168
+		button.custom_minimum_size.y = 128
 		button.tooltip_text = str(definition.get("description",tr(BUILD_HINTS[kind])))
 		var margin := MarginContainer.new()
 		margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -622,7 +725,7 @@ func _populate_build() -> void:
 			margin.add_theme_constant_override("margin_"+edge,10)
 		button.add_child(margin)
 		var card := _vbox(margin,4)
-		_thumbnail(card,kind,76)
+		_thumbnail(card,kind,48)
 		var title := _label(card,tr(SHORT_NAMES[kind]),16 if kind == "training" else 19,WINE_DARK if kind == "winery" else INK_DARK,true)
 		title.max_lines_visible = 2
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -652,7 +755,7 @@ func _populate_training() -> void:
 	_role_filter.add_theme_stylebox_override("normal",_style(Color("2c2013"),BRONZE.darkened(0.35),9,10))
 	_role_filter.add_theme_stylebox_override("focus",_style(Color("2c2013"),BRONZE,9,10))
 	_role_filter.add_theme_color_override("font_color",INK)
-	_role_filter.add_theme_color_override("font_placeholder_color",MUTED)
+	_role_filter.add_theme_color_override("font_placeholder_color",MUTED_LIGHT)
 	_role_filter.text_changed.connect(_filter_role_cards)
 	_drawer_content.add_child(_role_filter)
 	_training_context = _label(_drawer_content,"",15,MUTED,true)
@@ -1247,8 +1350,13 @@ func _cycle_speed() -> void:
 func _refresh_speed() -> void:
 	for value in _speed_buttons:
 		var button: Button = _speed_buttons[value]
-		button.add_theme_stylebox_override("normal",_style(Color("08664e") if value == _speed else Color("14383c"),Color("94713a"),8,8))
-		button.add_theme_color_override("font_color",PAPER if value == _speed else INK)
+		var selected: bool = value == _speed
+		var surface := WINE_DARK if selected else PANEL
+		button.add_theme_stylebox_override("normal",_style(surface,BRONZE,5,8))
+		button.add_theme_stylebox_override("hover",_style(surface.lightened(0.12),PAPER,5,8))
+		button.add_theme_stylebox_override("pressed",_style(surface.darkened(0.12),BRONZE,5,8))
+		for state in ["font_color", "font_hover_color", "font_pressed_color"]:
+			button.add_theme_color_override(state,PAPER if selected else INK)
 	_speed_cycle.text = "%d×" % _speed
 
 func _focus_village() -> void:
@@ -1548,7 +1656,7 @@ func _layout() -> void:
 	_top.position = Vector2(margin,margin)
 	_top.size = Vector2(width-margin*2,top_height)
 	_brand_box.custom_minimum_size.x = 145.0 if compact else 182.0
-	_brand_box.visible = width >= 900.0
+	_brand_box.visible = width >= 1100.0
 	_brand.add_theme_font_size_override("font_size",24 if compact else 28)
 	for item in _resource_buttons:
 		var button: Button = _resource_buttons[item]
@@ -1556,7 +1664,7 @@ func _layout() -> void:
 		var value: Label = _resource_values[item]
 		value.add_theme_font_size_override("font_size",17 if compact else 20)
 		_resource_captions[item].visible = not compact
-		_resource_glyphs[item].custom_minimum_size = Vector2(22,22) if compact else Vector2(27,27)
+		_resource_glyphs[item].custom_minimum_size = Vector2(24,24) if compact else Vector2(34,34)
 	_dock.position = Vector2(margin,height-margin-62)
 	_dock.size = Vector2(width-margin*2,62)
 	_tabs["build"].custom_minimum_size.x = 116.0 if compact else 160.0
@@ -1586,7 +1694,7 @@ func _layout() -> void:
 	_drawer.position = Vector2((width-drawer_width)*0.5,height-margin-74-drawer_height)
 	_drawer.size = Vector2(drawer_width,drawer_height)
 	if is_instance_valid(_build_grid):
-		_build_grid.columns = 4
+		_build_grid.columns = 4 if compact else 7
 	if is_instance_valid(_role_grid):
 		_role_grid.columns = 3 if compact else 4
 		# On short screens, the primary profession actions must be visible
