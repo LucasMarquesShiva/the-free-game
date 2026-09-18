@@ -6,6 +6,7 @@ const Hud = preload("res://ui/approved_hud.gd")
 const Clock = preload("res://core/simulation_clock.gd")
 const CIVIL_PACE := 0.4
 const SAVE_PATH := "user://vale-approved-save-v1.json"
+const SAVE_SLOTS := 3
 var sim: RefCounted
 var world: Node3D
 var hud: CanvasLayer
@@ -323,11 +324,22 @@ func _write_save(path: String) -> bool:
 			return false
 	return DirAccess.rename_absolute(temporary,path) == OK
 
-func _save() -> void:
-	hud.show_message(tr("Partida salva neste dispositivo.") if _write_save(SAVE_PATH) else tr("Não foi possível salvar. Verifique espaço e permissões locais."))
+## Slot 1 keeps the original single-save path so saves made before slots
+## existed keep loading; slots 2 and 3 are new, separate files.
+static func slot_path(slot: int) -> String:
+	return SAVE_PATH if slot <= 1 else "user://vale-approved-save-slot%d.json" % slot
 
-func _load_save() -> void:
-	_load_paths([SAVE_PATH,SAVE_PATH+".bak","user://vale-approved-autosave-v1.json"])
+static func slot_exists(slot: int) -> bool:
+	return FileAccess.file_exists(slot_path(slot))
+
+func _save(slot: int = 1) -> void:
+	hud.show_message(tr("Partida salva no slot {slot}.").format({"slot":slot}) if _write_save(slot_path(slot)) else tr("Não foi possível salvar. Verifique espaço e permissões locais."))
+
+func _load_save(slot: int = 1) -> void:
+	var paths := [slot_path(slot),slot_path(slot)+".bak"]
+	if slot == 1:
+		paths.append("user://vale-approved-autosave-v1.json")
+	_load_paths(paths)
 
 func _load_paths(paths: Array) -> bool:
 	for path in paths:

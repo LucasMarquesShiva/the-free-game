@@ -3,8 +3,8 @@ extends CanvasLayer
 
 signal build_selected(kind: String)
 signal command_requested(kind: String, payload: Dictionary)
-signal save_requested
-signal load_requested
+signal save_requested(slot: int)
+signal load_requested(slot: int)
 signal restart_requested
 signal speed_selected(multiplier: int)
 signal focus_requested(cell: Vector2i)
@@ -223,8 +223,12 @@ var _training_queue_title: Label
 var _inspect_close: Button
 var _inspect_map: Button
 var _menu_title: Label
-var _save_button: Button
-var _load_button: Button
+const SAVE_SLOTS := 3
+const SAVE_PATH := "user://vale-approved-save-v1.json"
+var _slots_header_label: Label
+var _slot_labels: Dictionary = {}
+var _slot_save_buttons: Dictionary = {}
+var _slot_load_buttons: Dictionary = {}
 var _lesson_button: Button
 var _menu_help_button: Button
 var _code_button: Button
@@ -847,9 +851,18 @@ func _make_menu() -> void:
 	for key in _graphics_buttons:
 		_graphics_buttons[key].size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_refresh_graphics_buttons()
-	_save_button = _button(content,tr("Salvar partida"),func(): save_requested.emit())
-	_accent(_save_button)
-	_load_button = _button(content,tr("Carregar partida"),func(): load_requested.emit())
+	_slots_header_label = _label(content,tr("Partidas salvas"),15,MUTED)
+	_slot_labels.clear();_slot_save_buttons.clear();_slot_load_buttons.clear()
+	for slot in range(1,SAVE_SLOTS+1):
+		var slot_row := _hbox(content,6)
+		var label := _label(slot_row,"",15,INK)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_slot_labels[slot] = label
+		var save_button := _button(slot_row,tr("Salvar"),save_requested.emit.bind(slot),86)
+		_accent(save_button)
+		_slot_save_buttons[slot] = save_button
+		_slot_load_buttons[slot] = _button(slot_row,tr("Carregar"),load_requested.emit.bind(slot),86)
+	_refresh_save_slots()
 	_lesson_button = _button(content,tr("Missão: primeira lição"),func():
 		close_panels()
 		command_requested.emit("load_mission", {"id": "tsk-01"})
@@ -882,6 +895,8 @@ func _toggle_menu() -> void:
 	var opening := not _menu.visible
 	close_panels()
 	_menu.visible = opening
+	if opening:
+		_refresh_save_slots()
 	_menu_scroll.scroll_vertical = 0
 	_layout()
 
@@ -948,6 +963,19 @@ func _choose_graphics(high_quality: bool) -> void:
 	_refresh_graphics_buttons()
 	show_message(tr("Gráficos em {mode}. Carregue a vila novamente para aplicar por completo.").format({"mode":tr("Qualidade") if high_quality else tr("Desempenho")}))
 
+static func _slot_path(slot: int) -> String:
+	return SAVE_PATH if slot <= 1 else "user://vale-approved-save-slot%d.json" % slot
+
+func _refresh_save_slots() -> void:
+	for slot in _slot_labels:
+		var label: Label = _slot_labels[slot]
+		var path := _slot_path(slot)
+		if FileAccess.file_exists(path):
+			var stamp := Time.get_datetime_string_from_unix_time(FileAccess.get_modified_time(path),true)
+			label.text = tr("Slot {slot} · salvo em {date}").format({"slot":slot,"date":stamp})
+		else:
+			label.text = tr("Slot {slot} · vazio").format({"slot":slot})
+
 func _refresh_graphics_buttons() -> void:
 	var selected := GraphicsSettings.high_quality()
 	for key in _graphics_buttons:
@@ -1012,8 +1040,11 @@ func _retranslate() -> void:
 	if is_instance_valid(_menu_title):
 		_menu_title.text = tr("Sua partida")
 		_language_label.text = tr("Idioma")
-		_save_button.text = tr("Salvar partida")
-		_load_button.text = tr("Carregar partida")
+		_slots_header_label.text = tr("Partidas salvas")
+		for slot in _slot_save_buttons:
+			_slot_save_buttons[slot].text = tr("Salvar")
+			_slot_load_buttons[slot].text = tr("Carregar")
+		_refresh_save_slots()
 		if is_instance_valid(_lesson_button):
 			_lesson_button.text = tr("Missão: primeira lição")
 		_menu_help_button.text = tr("Como jogar")
