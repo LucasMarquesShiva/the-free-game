@@ -518,7 +518,7 @@ func _thumbnail(parent: Node, kind: String, height: float = 56.0) -> void:
 func _make_dock() -> void:
 	_dock = _panel(_root,true,8)
 	_dock.name = "CommandDock"
-	var row := _hbox(_dock,7)
+	var row := _hbox(_dock,22)
 	_tabs["build"] = _button(row,tr("Construir"),_toggle_drawer.bind("build"),178)
 	_tabs["road"] = _button(row,tr("Estradas"),_choose_road,140)
 	_tabs["road"].tooltip_text = tr("Traçar ou apagar estradas · R · 1 pedra por trecho novo")
@@ -533,7 +533,7 @@ func _make_dock() -> void:
 	_village_focus = _button(row,tr("Vila"),_focus_village,70)
 	_village_focus.tooltip_text = tr("Voltar ao centro da vila")
 	_pause = _button(row,tr("Pausar"),func(): command_requested.emit("pause",{}),88)
-	_speed_group = _hbox(row,3)
+	_speed_group = _hbox(row,14)
 	for speed in [1,2,4]:
 		_speed_buttons[speed] = _button(_speed_group,"%d×" % speed,_choose_speed.bind(speed),44)
 	_speed_cycle = _button(row,"1×",_cycle_speed,48)
@@ -873,7 +873,7 @@ func _make_menu() -> void:
 	var content := _vbox(_menu_scroll,8)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_language_label = _label(content,tr("Idioma"),15,MUTED)
-	var languages := _hbox(content,6)
+	var languages := _hbox(content,16)
 	_language_buttons.clear()
 	for code in Locale.SUPPORTED:
 		var language_button := _button(languages,Locale.display_name(code),_choose_language.bind(code))
@@ -881,7 +881,7 @@ func _make_menu() -> void:
 		_language_buttons[code] = language_button
 	_refresh_language_buttons()
 	_graphics_label = _label(content,tr("Gráficos"),15,MUTED)
-	var graphics_row := _hbox(content,6)
+	var graphics_row := _hbox(content,16)
 	_graphics_buttons.clear()
 	_graphics_buttons[false] = _button(graphics_row,tr("Desempenho"),_choose_graphics.bind(false))
 	_graphics_buttons[true] = _button(graphics_row,tr("Qualidade"),_choose_graphics.bind(true))
