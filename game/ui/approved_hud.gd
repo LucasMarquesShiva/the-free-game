@@ -225,8 +225,10 @@ var _inspect_map: Button
 var _menu_title: Label
 const SAVE_SLOTS := 3
 const SAVE_PATH := "user://vale-approved-save-v1.json"
-var _slots_header_label: Label
-var _slot_labels: Dictionary = {}
+var _save_button: Button
+var _load_button: Button
+var _save_panel: VBoxContainer
+var _load_panel: VBoxContainer
 var _slot_save_buttons: Dictionary = {}
 var _slot_load_buttons: Dictionary = {}
 var _lesson_button: Button
@@ -851,17 +853,17 @@ func _make_menu() -> void:
 	for key in _graphics_buttons:
 		_graphics_buttons[key].size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_refresh_graphics_buttons()
-	_slots_header_label = _label(content,tr("Partidas salvas"),15,MUTED)
-	_slot_labels.clear();_slot_save_buttons.clear();_slot_load_buttons.clear()
+	_save_button = _button(content,tr("Salvar partida"),_toggle_save_panel)
+	_accent(_save_button)
+	_save_panel = _vbox(content,6)
+	_save_panel.visible = false
+	_load_button = _button(content,tr("Carregar partida"),_toggle_load_panel)
+	_load_panel = _vbox(content,6)
+	_load_panel.visible = false
+	_slot_save_buttons.clear();_slot_load_buttons.clear()
 	for slot in range(1,SAVE_SLOTS+1):
-		var slot_row := _hbox(content,6)
-		var label := _label(slot_row,"",15,INK)
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		_slot_labels[slot] = label
-		var save_button := _button(slot_row,tr("Salvar"),save_requested.emit.bind(slot),86)
-		_accent(save_button)
-		_slot_save_buttons[slot] = save_button
-		_slot_load_buttons[slot] = _button(slot_row,tr("Carregar"),load_requested.emit.bind(slot),86)
+		_slot_save_buttons[slot] = _button(_save_panel,"",_pick_save_slot.bind(slot))
+		_slot_load_buttons[slot] = _button(_load_panel,"",_pick_load_slot.bind(slot))
 	_refresh_save_slots()
 	_lesson_button = _button(content,tr("Missão: primeira lição"),func():
 		close_panels()
@@ -897,6 +899,8 @@ func _toggle_menu() -> void:
 	_menu.visible = opening
 	if opening:
 		_refresh_save_slots()
+		_save_panel.visible = false
+		_load_panel.visible = false
 	_menu_scroll.scroll_vertical = 0
 	_layout()
 
@@ -966,15 +970,40 @@ func _choose_graphics(high_quality: bool) -> void:
 static func _slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 1 else "user://vale-approved-save-slot%d.json" % slot
 
+func _slot_text(slot: int) -> String:
+	var path := _slot_path(slot)
+	if FileAccess.file_exists(path):
+		var stamp := Time.get_datetime_string_from_unix_time(FileAccess.get_modified_time(path),true)
+		return tr("Slot {slot} · salvo em {date}").format({"slot":slot,"date":stamp})
+	return tr("Slot {slot} · vazio").format({"slot":slot})
+
 func _refresh_save_slots() -> void:
-	for slot in _slot_labels:
-		var label: Label = _slot_labels[slot]
-		var path := _slot_path(slot)
-		if FileAccess.file_exists(path):
-			var stamp := Time.get_datetime_string_from_unix_time(FileAccess.get_modified_time(path),true)
-			label.text = tr("Slot {slot} · salvo em {date}").format({"slot":slot,"date":stamp})
-		else:
-			label.text = tr("Slot {slot} · vazio").format({"slot":slot})
+	for slot in _slot_save_buttons:
+		var text := _slot_text(slot)
+		_slot_save_buttons[slot].text = text
+		_slot_load_buttons[slot].text = text
+
+func _pick_save_slot(slot: int) -> void:
+	save_requested.emit(slot)
+	_save_panel.visible = false
+	_layout()
+
+func _pick_load_slot(slot: int) -> void:
+	load_requested.emit(slot)
+	_load_panel.visible = false
+	_layout()
+
+func _toggle_save_panel() -> void:
+	_refresh_save_slots()
+	_save_panel.visible = not _save_panel.visible
+	_load_panel.visible = false
+	_layout()
+
+func _toggle_load_panel() -> void:
+	_refresh_save_slots()
+	_load_panel.visible = not _load_panel.visible
+	_save_panel.visible = false
+	_layout()
 
 func _refresh_graphics_buttons() -> void:
 	var selected := GraphicsSettings.high_quality()
@@ -1040,10 +1069,8 @@ func _retranslate() -> void:
 	if is_instance_valid(_menu_title):
 		_menu_title.text = tr("Sua partida")
 		_language_label.text = tr("Idioma")
-		_slots_header_label.text = tr("Partidas salvas")
-		for slot in _slot_save_buttons:
-			_slot_save_buttons[slot].text = tr("Salvar")
-			_slot_load_buttons[slot].text = tr("Carregar")
+		_save_button.text = tr("Salvar partida")
+		_load_button.text = tr("Carregar partida")
 		_refresh_save_slots()
 		if is_instance_valid(_lesson_button):
 			_lesson_button.text = tr("Missão: primeira lição")
