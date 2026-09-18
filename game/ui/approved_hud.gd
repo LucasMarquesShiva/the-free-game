@@ -20,8 +20,13 @@ const INK_DARK := Color("3a2a18")
 const MUTED := Color("6b5f47")
 const BRONZE := Color("c59a50")
 const WINE := Color("e1bd71")
+## Same accent role as WINE but for headings on the light paper panels
+## (WINE itself stays light for the build/training cards' dark buttons).
+const WINE_DARK := Color("7a2418")
 const DANGER := Color("eeaa89")
 const SUCCESS := Color("b8d292")
+const DANGER_DARK := Color("8a2f1a")
+const SUCCESS_DARK := Color("2f5a1a")
 const BUILD_ORDER := ["lumber", "sawmill", "quarry", "farm", "mill", "bakery", "inn", "house", "vineyard", "winery", "store", "workshop", "barracks", "training"]
 const ROLE_NAMES := {"resident":"Morador", "builder":"Construtor", "servant":"Servente", "instructor":"Instrutor", "lumberjack":"Lenhador", "stonecutter":"Canteiro", "farmer":"Horticultor", "vintner":"Vinhateiro", "miller":"Moleiro", "baker":"Padeiro", "recruit":"Recruta"}
 const ROLE_DETAILS := {"builder":"Ergue as obras da vila", "servant":"Leva materiais e produção", "instructor":"Forma novos profissionais", "lumberjack":"Corta árvores e serra troncos", "stonecutter":"Extrai pedra", "farmer":"Cultiva alimentos e cereal", "vintner":"Cultiva uvas e produz vinho", "miller":"Moí cereal", "baker":"Asse pães", "recruit":"Caminha até o quartel"}
@@ -444,7 +449,7 @@ func _make_objectives() -> void:
 	for state in ["font_color","font_hover_color","font_pressed_color"]:
 		_objectives_toggle.add_theme_color_override(state,INK_DARK)
 	_objective_details = _vbox(box,9)
-	_outcome = _label(_objective_details,tr("Um vale para chamar de seu"),19,WINE,true)
+	_outcome = _label(_objective_details,tr("Um vale para chamar de seu"),19,WINE_DARK,true)
 	for i in range(3):
 		_objective_labels.append(_label(_objective_details,"",15,INK_DARK,true))
 	_notice_label = _label(_objective_details,"",14,MUTED,true)
@@ -455,7 +460,7 @@ func _make_tutorial() -> void:
 	_tutorial = _panel(_root,true,14)
 	_tutorial.name = "FirstDayHint"
 	var box := _vbox(_tutorial,8)
-	_tutorial_title = _label(box,tr("Primeiro, ligue a escola"),21,WINE)
+	_tutorial_title = _label(box,tr("Primeiro, ligue a escola"),21,WINE_DARK)
 	_tutorial_intro = _label(box,tr("Você começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas, parta de uma borda da praça até a entrada da escola: 1 pedra por trecho."),15,INK_DARK,true)
 	_tutorial_intro.max_lines_visible = 7
 	_tutorial_more = _label(box,tr("Depois, construa lenhador, pedreira e horta. Clique na escola concluída para formar os profissionais."),14,MUTED,true)
@@ -727,7 +732,7 @@ func _refresh_school_context() -> void:
 		else:
 			context += " "+(tr("Instrutor pronto para ensinar.") if ready else tr("Instrutor a caminho."))
 	_training_context.text = context+"\n"+tr("A fila é atendida pelas escolas disponíveis.")
-	_training_context.add_theme_color_override("font_color",SUCCESS if connected else DANGER)
+	_training_context.add_theme_color_override("font_color",SUCCESS_DARK if connected else DANGER_DARK)
 	if compact:
 		var state := tr("Escola conectada") if connected else tr("Falta estrada até o principal")
 		if connected and int(school.get("worker",-1)) < 0:
@@ -794,8 +799,8 @@ func _make_inspector() -> void:
 	var content := _vbox(_inspector_scroll,9)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_inspection_description = _label(content,"",15,MUTED,true)
-	_inspection_state = _label(content,"",17,WINE,true)
-	_inspection_connection = _label(content,"",15,SUCCESS,true)
+	_inspection_state = _label(content,"",17,WINE_DARK,true)
+	_inspection_connection = _label(content,"",15,SUCCESS_DARK,true)
 	_inspection_connection.max_lines_visible = 3
 	_inspection_progress = ProgressBar.new()
 	_inspection_progress.show_percentage = false
@@ -878,7 +883,7 @@ func _make_menu() -> void:
 	_restart_button = _button(content,tr("Reiniciar partida"),_toggle_restart_confirmation)
 	_restart_confirm = _vbox(content,7)
 	_restart_confirm.visible = false
-	_restart_prompt = _label(_restart_confirm,tr("Começar uma nova vila? O progresso atual que não foi salvo será perdido."),15,DANGER,true)
+	_restart_prompt = _label(_restart_confirm,tr("Começar uma nova vila? O progresso atual que não foi salvo será perdido."),15,DANGER_DARK,true)
 	var actions := _hbox(_restart_confirm)
 	_restart_yes = _button(actions,tr("Reiniciar"),func():
 		close_panels()
@@ -912,7 +917,7 @@ func _make_help() -> void:
 	_help.visible = false
 	var box := _vbox(_help,10)
 	var head := _hbox(box)
-	_help_title = _label(head,tr("Bem-vindo ao vale"),24,WINE)
+	_help_title = _label(head,tr("Bem-vindo ao vale"),24,WINE_DARK)
 	_spacer(head)
 	_help_close = _button(head,tr("Fechar"),close_panels,78)
 	var scroll := ScrollContainer.new()
@@ -1252,7 +1257,7 @@ func refresh() -> void:
 			var complete := bool(row.get("done",false))
 			done += 1 if complete else 0
 			label.text = ("[x]  " if complete else "[ ]  ")+str(row.get("text",""))
-			label.add_theme_color_override("font_color",SUCCESS if complete else INK)
+			label.add_theme_color_override("font_color",SUCCESS_DARK if complete else INK_DARK)
 	_objectives_toggle.text = tr("Objetivos  {done}/{total}  {mark}").format({"done":done,"total":rows.size(),"mark":"−" if _objectives_open else "+"})
 	_notice_label.text = _profession_text(str(_call_value("notice",tr("Os habitantes encontram trabalho sozinhos."))))
 	_outcome.text = tr("Sua vila prosperou!") if bool(_sim.get("won")) else (tr("A vila precisa recomeçar") if bool(_sim.get("lost")) else tr("Um vale para chamar de seu"))
@@ -1332,7 +1337,7 @@ func _refresh_inspection() -> void:
 	var connected := bool(_sim.call("is_building_connected",building)) if _sim.has_method("is_building_connected") else false
 	var main := str(building.get("kind","")) == "hall"
 	_inspection_connection.text = tr("Entrada marcada · origem da rede de estradas") if main else (tr("Entrada marcada · conectada ao principal") if connected else tr("Entrada marcada · falta estrada até o principal"))
-	_inspection_connection.add_theme_color_override("font_color",SUCCESS if connected else DANGER)
+	_inspection_connection.add_theme_color_override("font_color",SUCCESS_DARK if connected else DANGER_DARK)
 	var reason := str(building.get("reason",""))
 	var states := {"preparing":tr("Preparando o terreno"),"materials":tr("Recebendo materiais"),"building":tr("Em construção"),"complete":tr("Concluída")}
 	_inspection_state.text = _profession_text(reason if not reason.is_empty() else str(states.get(stage,stage)))
