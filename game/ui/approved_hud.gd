@@ -601,6 +601,15 @@ func _filter_role_cards(query: String) -> void:
 func _populate_training() -> void:
 	_drawer_title.text = tr("Mais mãos para a vila")
 	_drawer_subtitle.text = tr("Escolha profissão e quantidade. A escola conectada à estrada forma a equipe automaticamente.")
+	_role_filter = LineEdit.new()
+	_role_filter.placeholder_text = tr("Filtrar profissões…")
+	_role_filter.clear_button_enabled = true
+	_role_filter.add_theme_stylebox_override("normal",_style(PANEL.lightened(0.06),BRONZE.darkened(0.2),9,10))
+	_role_filter.add_theme_stylebox_override("focus",_style(PANEL.lightened(0.06),BRONZE,9,10))
+	_role_filter.add_theme_color_override("font_color",INK)
+	_role_filter.add_theme_color_override("font_placeholder_color",MUTED)
+	_role_filter.text_changed.connect(_filter_role_cards)
+	_drawer_content.add_child(_role_filter)
 	_training_context = _label(_drawer_content,"",15,MUTED,true)
 	_training_context.hide()
 	var settings := _hbox(_drawer_content)
@@ -613,15 +622,6 @@ func _populate_training() -> void:
 		if qty == _quantity:
 			_accent(btn)
 	_training_cost_label = _label(_drawer_content,tr("Cada pessoa: 1 ouro · 50 s de formação em 1×"),14,MUTED)
-	_role_filter = LineEdit.new()
-	_role_filter.placeholder_text = tr("Filtrar profissões…")
-	_role_filter.clear_button_enabled = true
-	_role_filter.add_theme_stylebox_override("normal",_style(PANEL.lightened(0.06),BRONZE.darkened(0.2),9,10))
-	_role_filter.add_theme_stylebox_override("focus",_style(PANEL.lightened(0.06),BRONZE,9,10))
-	_role_filter.add_theme_color_override("font_color",INK)
-	_role_filter.add_theme_color_override("font_placeholder_color",MUTED)
-	_role_filter.text_changed.connect(_filter_role_cards)
-	_drawer_content.add_child(_role_filter)
 	_role_grid = GridContainer.new()
 	_role_grid.columns = 4
 	_role_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
