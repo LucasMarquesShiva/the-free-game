@@ -288,11 +288,15 @@ func _make_theme() -> Theme:
 	theme.set_color("font_color", "Label", INK)
 	theme.set_constant("separation", "HBoxContainer", 8)
 	theme.set_constant("separation", "VBoxContainer", 8)
-	theme.set_stylebox("normal", "Button", _style(Color("14383c"), Color("94713a"), 9))
-	theme.set_stylebox("hover", "Button", _style(Color("205057"), BRONZE, 9))
-	theme.set_stylebox("pressed", "Button", _style(Color("155d55"), BRONZE, 9))
+	# Darkened to match the game's dark-panel palette so INK (light) text,
+	# used throughout for buttons with their own custom backgrounds, stays
+	# legible everywhere rather than only on the unmodulated tan button.
+	var button_tint := Color(0.34,0.42,0.42)
+	theme.set_stylebox("normal", "Button", _kenney_style("buttonLong_brown",button_tint))
+	theme.set_stylebox("hover", "Button", _kenney_style("buttonLong_brown",button_tint*Color(1.35,1.3,1.2)))
+	theme.set_stylebox("pressed", "Button", _kenney_style("buttonLong_brown_pressed",button_tint*0.8))
 	theme.set_stylebox("focus", "Button", _focus_style())
-	theme.set_stylebox("disabled", "Button", _style(Color("1a3336"), Color("47605c"), 9))
+	theme.set_stylebox("disabled", "Button", _kenney_style("buttonLong_brown",button_tint*0.6))
 	theme.set_color("font_color", "Button", INK)
 	theme.set_color("font_hover_color", "Button", INK)
 	theme.set_color("font_pressed_color", "Button", INK)
@@ -372,10 +376,28 @@ func _button(parent: Node, text: String, action: Callable, min_width: float = 0)
 	parent.add_child(button)
 	return button
 
+## Kenney's CC0 "UI pack: RPG extension" (assets/approved/ui/kenney, see
+## LICENSE-kenney.txt) 9-sliced as a button frame; `tint` recolors it via
+## modulate_color so accent buttons reuse the same art instead of needing
+## a separate asset per color.
+static var _kenney_textures: Dictionary = {}
+func _kenney_style(name: String, tint: Color = Color.WHITE, margin: int = 14) -> StyleBoxTexture:
+	if not _kenney_textures.has(name):
+		_kenney_textures[name] = load("res://assets/approved/ui/kenney/%s.png" % name)
+	var box := StyleBoxTexture.new()
+	box.texture = _kenney_textures[name]
+	box.texture_margin_left = margin;box.texture_margin_right = margin
+	box.texture_margin_top = margin;box.texture_margin_bottom = margin
+	box.content_margin_left = 12;box.content_margin_right = 12
+	box.content_margin_top = 6;box.content_margin_bottom = 6
+	box.modulate_color = tint
+	return box
+
 func _accent(button: Button, color: Color = Color("08664e")) -> void:
-	button.add_theme_stylebox_override("normal", _style(color, color.lightened(0.12), 9))
-	button.add_theme_stylebox_override("hover", _style(color.lightened(0.1), BRONZE, 9))
-	button.add_theme_stylebox_override("pressed", _style(color.darkened(0.1), BRONZE, 9))
+	var tint := Color(0.28,0.62,0.5)
+	button.add_theme_stylebox_override("normal", _kenney_style("buttonLong_brown",tint))
+	button.add_theme_stylebox_override("hover", _kenney_style("buttonLong_brown",tint*Color(1.3,1.25,1.15)))
+	button.add_theme_stylebox_override("pressed", _kenney_style("buttonLong_brown_pressed",tint*0.85))
 	button.add_theme_color_override("font_color", PAPER)
 	button.add_theme_color_override("font_hover_color", Color.WHITE)
 	button.add_theme_color_override("font_pressed_color", PAPER)
@@ -386,6 +408,27 @@ func _spacer(parent: Node) -> Control:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(spacer)
 	return spacer
+
+static var _medallion_texture: Texture2D
+func _medallion_glyph(parent: Node, kind: String, side: float = 34) -> Glyph:
+	if _medallion_texture == null:
+		_medallion_texture = load("res://assets/approved/ui/kenney/buttonRound_brown.png")
+	var wrap := Control.new()
+	wrap.custom_minimum_size = Vector2(side,side)
+	wrap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(wrap)
+	var badge := TextureRect.new()
+	badge.texture = _medallion_texture
+	badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	badge.stretch_mode = TextureRect.STRETCH_SCALE
+	badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	wrap.add_child(badge)
+	var glyph := _glyph(wrap,kind,side*0.6)
+	glyph.set_anchors_preset(Control.PRESET_CENTER)
+	glyph.position = Vector2(side,side)*0.2
+	return glyph
 
 func _glyph(parent: Node, kind: String, side: float = 34) -> Glyph:
 	var glyph := Glyph.new()
@@ -400,7 +443,7 @@ func _make_top_bar() -> void:
 	_top = _panel(_root, true, 10)
 	_top.name = "ResourcesBar"
 	var row := _hbox(_top, 9)
-	_glyph(row,"grapes",38)
+	_medallion_glyph(row,"grapes",42)
 	_brand_box = _vbox(row,0)
 	_brand_box.custom_minimum_size.x = 182
 	_brand_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -416,7 +459,7 @@ func _make_top_bar() -> void:
 		content.offset_left = 6
 		content.offset_right = -6
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_resource_glyphs[item] = _glyph(content,item,27)
+		_resource_glyphs[item] = _medallion_glyph(content,item,34)
 		var values := _vbox(content,0)
 		values.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		_resource_values[item] = _label(values,"0",20)
