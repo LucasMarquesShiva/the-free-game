@@ -1606,9 +1606,10 @@ func _layout() -> void:
 	_inspector.size = Vector2(308 if compact else 338,maxf(160.0,height-_inspector.position.y-margin-74.0) if compact else 0.0)
 	_inspection_description.visible = not compact
 	_refresh_inspection()
-	_menu.position = Vector2(width-margin-310,margin+top_height+12)
+	var menu_width := minf(380.0,width-margin*2)
+	_menu.position = Vector2(width-margin-menu_width,margin+top_height+12)
 	_menu_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if compact else ScrollContainer.SCROLL_MODE_DISABLED
-	_menu.size = Vector2(310,maxf(160.0,height-_menu.position.y-margin-74.0) if compact else 0.0)
+	_menu.size = Vector2(menu_width,maxf(160.0,height-_menu.position.y-margin-74.0) if compact else 0.0)
 	var help_width := minf(630.0,width-margin*2)
 	var help_height := minf(570.0,height-margin*2-10)
 	_help.position = Vector2((width-help_width)*0.5,(height-help_height)*0.5)
