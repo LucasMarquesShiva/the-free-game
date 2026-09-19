@@ -63,4 +63,3 @@ func _is_safe_unsigned_integer(value: Variant) -> bool:
 	if typeof(value) == TYPE_FLOAT:
 		return is_finite(value) and value >= 0.0 and value <= MAX_SAFE_INTEGER and value == floor(value)
 	return false
-

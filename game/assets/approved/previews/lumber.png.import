@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://f1kv6wf8gwt"
-path="res://.godot/imported/lumber.png-08592209ca67fcb42ee84ea32529309f.ctex"
+path.s3tc="res://.godot/imported/lumber.png-08592209ca67fcb42ee84ea32529309f.s3tc.ctex"
+path.etc2="res://.godot/imported/lumber.png-08592209ca67fcb42ee84ea32529309f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/approved/previews/lumber.png"
-dest_files=["res://.godot/imported/lumber.png-08592209ca67fcb42ee84ea32529309f.ctex"]
+dest_files=["res://.godot/imported/lumber.png-08592209ca67fcb42ee84ea32529309f.s3tc.ctex", "res://.godot/imported/lumber.png-08592209ca67fcb42ee84ea32529309f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

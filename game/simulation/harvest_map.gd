@@ -49,11 +49,17 @@ func is_harvested(cell: Vector2i) -> bool:
 	return _harvested.has(cell)
 
 
-func nearest_standing_tree(from: Vector2i) -> Vector2i:
+## `is_reachable`, when given, filters out standing trees the worker cannot
+## actually stand next to (e.g. every neighboring cell blocked by other trees
+## in a dense grove) so the search falls through to the next-nearest tree
+## instead of getting stuck retargeting the same unreachable one forever.
+func nearest_standing_tree(from: Vector2i, is_reachable: Callable = Callable()) -> Vector2i:
 	var best := Vector2i(-1, -1)
 	var best_d := 1 << 30
 	for cell: Vector2i in _cells:
 		if _harvested.has(cell):
+			continue
+		if is_reachable.is_valid() and not is_reachable.call(cell):
 			continue
 		var d: int = (cell.x - from.x) * (cell.x - from.x) + (cell.y - from.y) * (cell.y - from.y)
 		if d < best_d or (d == best_d and (best == Vector2i(-1, -1) or cell.x < best.x or (cell.x == best.x and cell.y < best.y))):

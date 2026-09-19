@@ -21,6 +21,7 @@ TEST_SCRIPTS = (
     "tests/test_approved.gd",
     "tests/test_approved_harvest_delivery.gd",
     "tests/test_parked_servants.gd",
+    "tests/test_idle_delivery_cost.gd",
     "tests/test_kam_gaps.gd",
     "tests/test_harvest_map.gd",
 )
@@ -125,7 +126,7 @@ def test_project(engine: Path, project: Path, env: dict[str, str]) -> int:
     if failed:
         print("Failed: " + ", ".join(failed), file=sys.stderr)
         return 1
-    print("All three simulation test scripts passed.")
+    print(f"All {len(TEST_SCRIPTS)} simulation test scripts passed.")
     return 0
 
 

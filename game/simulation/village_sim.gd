@@ -674,12 +674,19 @@ func _assign_export(w: Dictionary) -> bool:
 		ordered = ordered.slice(offset)+ordered.slice(0,offset)
 	if available("food") < 20:
 		ordered.sort_custom(func(a,b): return a.kind == "farm" and b.kind != "farm")
+	var targets := {"wood":100,"stone":60,"food":120,"grapes":24,"wine":32,"gold":40,"trunks":24,"corn":24,"flour":16,"loaves":24,"axe":8,"bow":8}
 	for b in ordered:
 		for item in ITEMS:
-			var target: int = {"wood":100,"stone":60,"food":120,"grapes":24,"wine":32,"gold":40,"trunks":24,"corn":24,"flour":16,"loaves":24,"axe":8,"bow":8}.get(item, 12)
+			# Reject empty outputs and satisfied stock before scanning all workers
+			# for in-flight deliveries. Idle couriers otherwise repeat these scans
+			# for every item in every building, on every simulation tick.
+			var output := int(b.output.get(item,0))
+			var target: int = targets.get(item, 12)
+			if output <= 0 or int(stock.get(item,0)) >= target:
+				continue
 			if int(stock.get(item,0))+_incoming(0,item) >= target:
 				continue
-			var free: int = int(b.output.get(item,0))-_outgoing(b.id,item)
+			var free: int = output-_outgoing(b.id,item)
 			if free > 0 and _transport(w,b.id,0,item,mini(2,free)):
 				return true
 	return false
@@ -913,17 +920,14 @@ func _produce(w: Dictionary, b: Dictionary) -> void:
 		w.state = tr("Aguardando equipamento no quartel")
 		return
 	if b.kind == "lumber" and harvest_map != null:
-		var tree: Vector2i = harvest_map.nearest_standing_tree(w.cell)
+		var tree: Vector2i = harvest_map.nearest_standing_tree(w.cell,func(cell:Vector2i)->bool:return _tree_stand_cell(cell).x>=0)
 		if tree == Vector2i(-1, -1):
-			w.state = tr("Sem árvores para cortar")
+			w.state = tr("Sem árvores acessíveis para cortar")
 			return
 		if int(b.output.get("trunks", 0)) >= 20:
 			w.state = tr("Aguardando retirada da produção")
 			return
 		var stand := _tree_stand_cell(tree)
-		if stand.x < 0:
-			w.state = tr("Sem acesso à árvore")
-			return
 		if w.cell != stand:
 			w.task = {"type": "harvest", "building": b.id, "tree": tree}
 			_go(w, stand)

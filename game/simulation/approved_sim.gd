@@ -440,7 +440,43 @@ func _transport(person: Dictionary, source: int, dest: int, item: String, amount
 	return true
 
 
+# A reservation snapshot lives for ONE idle courier's assignment attempt.
+# Success returns immediately; the next courier rebuilds after that reservation.
+# Calls outside this scope always read current worker tasks (including UI/tests).
+var _delivery_queries_active := false
+var _delivery_incoming: Dictionary = {}
+var _delivery_outgoing: Dictionary = {}
+
+func _incoming(id: int, item: String) -> int:
+	if _delivery_queries_active:
+		return int(_delivery_incoming.get(id, {}).get(item, 0))
+	return super._incoming(id, item)
+
+func _outgoing(id: int, item: String) -> int:
+	if _delivery_queries_active:
+		return int(_delivery_outgoing.get(id, {}).get(item, 0))
+	return super._outgoing(id, item)
+
 func _assign_delivery(person: Dictionary) -> void:
+	_delivery_incoming.clear()
+	_delivery_outgoing.clear()
+	for worker in workers:
+		var task: Dictionary = worker.task
+		if task.get("type", "") != "delivery": continue
+		var destination := int(task.get("building", -1))
+		var item := str(task.get("item", ""))
+		var amount := int(task.get("amount", 0))
+		if not _delivery_incoming.has(destination): _delivery_incoming[destination] = {}
+		_delivery_incoming[destination][item] = int(_delivery_incoming[destination].get(item, 0)) + amount
+		if task.get("phase", "") == "pickup":
+			var source := int(task.get("source", -1))
+			if not _delivery_outgoing.has(source): _delivery_outgoing[source] = {}
+			_delivery_outgoing[source][item] = int(_delivery_outgoing[source].get(item, 0)) + amount
+	_delivery_queries_active = true
+	_assign_delivery_from_snapshot(person)
+	_delivery_queries_active = false
+
+func _assign_delivery_from_snapshot(person: Dictionary) -> void:
 	if (int(person.get("jobs",0)) % 2 == 0 or not _road_node(person.cell)) and _assign_road_supply(person): return
 	if not _road_node(person.cell):
 		if _has_pending_road_delivery() and super._go(person,HUB):
@@ -484,6 +520,8 @@ func _has_pending_road_delivery() -> bool:
 		if building.kind == "workshop" and building.stage == "complete" and 6-int(building.input.get("wood",0))-_incoming(building.id,"wood") > 0 and available("wood") > 0:
 			return true
 		for item in ITEMS:
+			if int(building.output[item]) <= 0:
+				continue
 			if int(building.output[item])-_outgoing(building.id,item) <= 0:
 				continue
 			if building.stage == "cancelled" and _storage_used()+2 <= storage_capacity():
@@ -499,6 +537,8 @@ func _assign_export(person: Dictionary) -> bool:
 			if building.stage != "cancelled":
 				continue
 			for item in ITEMS:
+				if int(building.output[item]) <= 0:
+					continue
 				var remaining: int = int(building.output[item])-_outgoing(building.id,item)
 				if remaining > 0 and _transport(person,building.id,0,item,mini(2,remaining)):
 					return true
@@ -506,6 +546,8 @@ func _assign_export(person: Dictionary) -> bool:
 	# but let the first harvest actually leave the garden and reach the depot.
 	if int(stock.food)+_incoming(0,"food") < _food_stock_target() and _storage_used()+_incoming(0,"food")+2 <= storage_capacity():
 		for building in buildings:
+			if int(building.output.food) <= 0:
+				continue
 			var remaining: int = int(building.output.food)-_outgoing(building.id,"food")
 			if remaining > 0 and _transport(person,building.id,0,"food",mini(2,remaining)):
 				return true

@@ -18,6 +18,10 @@ Godot when redistributing engine binaries or exported builds.
 
 The game scripts, procedural model code, tools and documentation use the root
 MIT license. Original artwork uses CC BY 4.0 as described in LICENSE-ASSETS.md.
+The active HUD buttons are original procedural GDScript styles in
+`game/ui/approved_hud.gd`, covered by the root MIT license. They use no
+third-party button textures.
+
 No assets from the commercial games that inspired the genre are included as
 redistributable dependencies.
 

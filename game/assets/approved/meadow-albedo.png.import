@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bedrnkvynpnpw"
-path="res://.godot/imported/meadow-albedo.png-99218f5459f19b9730397557dd6fb87a.ctex"
+path.s3tc="res://.godot/imported/meadow-albedo.png-99218f5459f19b9730397557dd6fb87a.s3tc.ctex"
+path.etc2="res://.godot/imported/meadow-albedo.png-99218f5459f19b9730397557dd6fb87a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/approved/meadow-albedo.png"
-dest_files=["res://.godot/imported/meadow-albedo.png-99218f5459f19b9730397557dd6fb87a.ctex"]
+dest_files=["res://.godot/imported/meadow-albedo.png-99218f5459f19b9730397557dd6fb87a.s3tc.ctex", "res://.godot/imported/meadow-albedo.png-99218f5459f19b9730397557dd6fb87a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

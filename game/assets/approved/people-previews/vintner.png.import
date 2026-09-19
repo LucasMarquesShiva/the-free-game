@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwfi82jjj2o0b"
-path="res://.godot/imported/vintner.png-9fc026ccfbfbc0928e9cfc2551b4b48a.ctex"
+path.s3tc="res://.godot/imported/vintner.png-9fc026ccfbfbc0928e9cfc2551b4b48a.s3tc.ctex"
+path.etc2="res://.godot/imported/vintner.png-9fc026ccfbfbc0928e9cfc2551b4b48a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/approved/people-previews/vintner.png"
-dest_files=["res://.godot/imported/vintner.png-9fc026ccfbfbc0928e9cfc2551b4b48a.ctex"]
+dest_files=["res://.godot/imported/vintner.png-9fc026ccfbfbc0928e9cfc2551b4b48a.s3tc.ctex", "res://.godot/imported/vintner.png-9fc026ccfbfbc0928e9cfc2551b4b48a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

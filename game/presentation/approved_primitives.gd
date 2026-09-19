@@ -35,6 +35,11 @@ class Batch extends RefCounted:
 	var surfaces: Dictionary = {}
 	var tiles: Array[Transform3D] = []
 	var tile_colors: Array[Color] = []
+	## Instanced masonry blocks (see _stone_unit_mesh): one shared beveled-box
+	## mesh reused via MultiMesh instead of baking each stone's geometry into
+	## the merged Architecture surface, mirroring the roof tile system below.
+	var stones: Array[Transform3D] = []
+	var stone_colors: Array[Color] = []
 	var rng := RandomNumberGenerator.new()
 	var parts := 0
 
@@ -95,7 +100,7 @@ class Batch extends RefCounted:
 		triangle(a,c,d,key,color)
 		triangle(a,d,e,key,color)
 
-	func finish(shared_materials: Dictionary, roof_tile: Mesh) -> Dictionary:
+	func finish(shared_materials: Dictionary, roof_tile: Mesh, stone_unit: Mesh = null) -> Dictionary:
 		var mesh := ArrayMesh.new()
 		var vertex_count := 0
 		for key in MATERIAL_KEYS:
@@ -124,7 +129,17 @@ class Batch extends RefCounted:
 			for i in range(tiles.size()):
 				roof.set_instance_transform(i,tiles[i])
 				roof.set_instance_color(i,tile_colors[i])
-		return {"mesh":mesh,"tiles":roof,"vertices":vertex_count,"parts":parts,"tile_count":tiles.size(),"draw_calls":mesh.get_surface_count()+(1 if roof != null else 0)}
+		var stone_multimesh: MultiMesh
+		if not stones.is_empty():
+			stone_multimesh = MultiMesh.new()
+			stone_multimesh.transform_format = MultiMesh.TRANSFORM_3D
+			stone_multimesh.use_colors = true
+			stone_multimesh.mesh = stone_unit
+			stone_multimesh.instance_count = stones.size()
+			for i in range(stones.size()):
+				stone_multimesh.set_instance_transform(i,stones[i])
+				stone_multimesh.set_instance_color(i,stone_colors[i])
+		return {"mesh":mesh,"tiles":roof,"stones":stone_multimesh,"vertices":vertex_count,"parts":parts,"tile_count":tiles.size(),"draw_calls":mesh.get_surface_count()+(1 if roof != null else 0)+(1 if stone_multimesh != null else 0)}
 
 static func building(kind: String) -> Node3D:
 	return Legacy.building(kind)
@@ -159,6 +174,12 @@ static func _instantiate(asset: Dictionary, node_name: String) -> Node3D:
 		roof.multimesh = asset.tiles
 		roof.material_override = _material("roof")
 		root.add_child(roof)
+	if asset.get("stones") != null:
+		var stones := MultiMeshInstance3D.new()
+		stones.name = "InstancedStoneBlocks"
+		stones.multimesh = asset.stones
+		stones.material_override = _material("stone")
+		root.add_child(stones)
 	root.set_meta("draw_calls",asset.draw_calls)
 	root.set_meta("detail_parts",asset.parts)
 	root.set_meta("roof_tiles",asset.tile_count)
@@ -351,6 +372,16 @@ static func _mesh_from_data(data: SurfaceData) -> ArrayMesh:
 	arrays[Mesh.ARRAY_INDEX] = data.indices
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 	return mesh
+
+## Reference size close to a typical wall stone (see approved_buildings.gd
+## _stone_face); instances scale this non-uniformly, which only visibly
+## stretches the bevel on the rare edge-clipped block.
+const STONE_UNIT_SIZE := Vector3(0.42,0.31,0.16)
+static var _stone_mesh: ArrayMesh
+static func _stone_unit_mesh() -> ArrayMesh:
+	if _stone_mesh == null:
+		_stone_mesh = _rounded_box(STONE_UNIT_SIZE,0.035)
+	return _stone_mesh
 
 static func _roof_tile() -> ArrayMesh:
 	if _tile_mesh != null:
