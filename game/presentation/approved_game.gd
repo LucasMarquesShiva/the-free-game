@@ -4,6 +4,7 @@ const Village = preload("res://simulation/approved_sim.gd")
 const World = preload("res://presentation/approved_world.gd")
 const Hud = preload("res://ui/approved_hud.gd")
 const Clock = preload("res://core/simulation_clock.gd")
+const WorldMap = preload("res://core/world_map.gd")
 const CIVIL_PACE := 0.4
 const SAVE_PATH := "user://vale-approved-save-v1.json"
 const SAVE_SLOTS := 3
@@ -13,7 +14,7 @@ var hud: CanvasLayer
 var clock: RefCounted
 var speed := 1
 var build_kind := ""
-var hover_cell := Vector2i(-1,-1)
+var hover_cell := WorldMap.NO_CELL
 var selected_id := -1
 var drag_start := Vector2.ZERO
 var pointer_down := false
@@ -87,9 +88,9 @@ func _process(delta: float) -> void:
 		var hud_start := Time.get_ticks_usec()
 		hud.refresh()
 		frame_metrics.record("hud",hud_start)
-		if build_kind == "remove_road" and hover_cell.x >= 0:
+		if build_kind == "remove_road" and not WorldMap.is_no_cell(hover_cell):
 			world.set_road_removal_preview(hover_cell)
-		elif not build_kind.is_empty() and build_kind != "road" and hover_cell.x >= 0:
+		elif not build_kind.is_empty() and build_kind != "road" and not WorldMap.is_no_cell(hover_cell):
 			world.set_preview(build_kind,hover_cell,sim.can_place(build_kind,hover_cell).is_empty())
 	if since_autosave >= 60.0 and not application_paused:
 		since_autosave = 0.0
@@ -139,7 +140,7 @@ func _command(kind: String, payload: Dictionary) -> void:
 
 func _world_click(point: Vector2) -> void:
 	var cell: Vector2i = world.screen_to_cell(point)
-	if cell.x < 0:
+	if WorldMap.is_no_cell(cell):
 		return
 	if build_kind == "road":
 		_command("road",{"cell":cell})
@@ -173,7 +174,7 @@ func _reset_pointer() -> void:
 	dragging = false
 	pan_pointer_down = false
 	pan_pointer_ui = false
-	hover_cell = Vector2i(-1,-1)
+	hover_cell = WorldMap.NO_CELL
 	road_path.clear()
 	touch_points.clear()
 	pinch_distance = 0.0
@@ -187,7 +188,7 @@ func _cancel_stroke() -> void:
 		world.set_road_preview(road_path)
 		hud.set_mode(tr("Estradas · arraste ou clique · 1 pedra por trecho · Esc termina"))
 	elif build_kind == "remove_road":
-		hover_cell = Vector2i(-1,-1)
+		hover_cell = WorldMap.NO_CELL
 		world.set_road_removal_preview(hover_cell)
 		hud.set_mode(tr("Estradas · toque em um trecho para apagar · Esc termina"))
 
@@ -197,7 +198,7 @@ func _focus_map(cell: Vector2i) -> void:
 
 func _highlight_entrance(cell: Vector2i) -> void:
 	selected_id = -1
-	if cell.x >= 0:
+	if not WorldMap.is_no_cell(cell):
 		for building in sim.buildings:
 			if building.entrance == cell and building.stage != "cancelled":
 				selected_id = int(building.id)
@@ -255,7 +256,7 @@ func _input(event: InputEvent) -> void:
 			else:
 				if pointer_down and build_kind == "road":
 					var cell: Vector2i = world.screen_to_cell(event.position)
-					if not pointer_ui and not hud.blocks_pointer(event.position) and cell.x >= 0 and cell.y >= 0 and not road_path.is_empty():
+					if not pointer_ui and not hud.blocks_pointer(event.position) and not WorldMap.is_no_cell(cell) and not road_path.is_empty():
 						_extend_road(cell)
 						_command("road",{"cells":road_path.duplicate()})
 					_cancel_stroke()
@@ -285,7 +286,7 @@ func _input(event: InputEvent) -> void:
 			if dragging and not hud.blocks_pointer(event.position):
 				world.pan_by(event.relative)
 		if build_kind == "remove_road":
-			hover_cell = world.screen_to_cell(event.position) if not dragging and not hud.blocks_pointer(event.position) else Vector2i(-1,-1)
+			hover_cell = world.screen_to_cell(event.position) if not dragging and not hud.blocks_pointer(event.position) else WorldMap.NO_CELL
 			world.set_road_removal_preview(hover_cell)
 			return
 		if not build_kind.is_empty() and not hud.blocks_pointer(event.position):
@@ -432,7 +433,7 @@ func _chime() -> void:
 		audio_player.play()
 
 func _extend_road(cell:Vector2i) -> void:
-	if cell.x < 1 or cell.y < 1 or cell.x >= Village.WIDTH-1 or cell.y >= Village.HEIGHT-1: return
+	if not WorldMap.interior().has_point(cell): return
 	if road_path.is_empty():
 		road_path.append(cell)
 	else:

@@ -6,11 +6,14 @@ const RiverRocks=preload("res://presentation/approved_river_rocks.gd")
 const Architecture=preload("res://presentation/approved_primitives.gd")
 const HarvestMap=preload("res://simulation/harvest_map.gd")
 const Settings=preload("res://core/graphics_settings.gd")
+const WorldMap=preload("res://core/world_map.gd")
+const Gen=preload("res://presentation/terrain_gen.gd")
+const Chunks=preload("res://presentation/terrain_chunks.gd")
 const CELL:=2.5
-const GROUND_ORIGIN:=-27.0
-const GROUND_STRIDE:=1.2
-const GROUND_COLUMNS:=120
-const GROUND_ROWS:=107
+## Chunk ground meshes sit on a 1.25 m lattice anchored at the origin, so road
+## meshes can clip against exactly the same grid on any part of the map.
+const GROUND_ORIGIN:=0.0
+const GROUND_STRIDE:=1.25
 # A continuous walking envelope covers tiny gaps/bevels between physical planks.
 # Deck boxes are centered at y=.035 with height=.20; the walkable top is .135.
 const BRIDGE_TOP:=0.135
@@ -38,50 +41,37 @@ static func _road_material(connections:Vector4)->ShaderMaterial:
  mat.set_shader_parameter("stones",_road_stones_tex);mat.set_shader_parameter("earth_tex",_road_earth_tex);mat.set_shader_parameter("connections",connections)
  _road_materials[key]=mat
  return mat
-var _ground_heights:=PackedFloat32Array()
 var sim: RefCounted
+var chunks: Node3D
 var plaza: Node3D
 var roads: Node3D
-var details: Node3D
-const GRASS_CHUNK_SIZE:=12.0
-var grass_chunks:Array[MultiMeshInstance3D]=[]
-var grass_slots:Array[Vector2i]=[]
 var meadow_flowers:Node3D
 var road_nodes:={}
 var rng:=RandomNumberGenerator.new()
 var material_road:StandardMaterial3D
 var terrain_noise:=FastNoiseLite.new()
-var tufts: Array[Vector3]=[]
 var last_land_signature:=""
 var bank_cluster_sites:Array[Dictionary]=[]
 var bank_rock_bounds:Array[AABB]=[]
 var harvest_map:RefCounted
-var grove_nodes:={}
-var grove_forest:Node3D
-var last_harvest_revision:=-1
 
 func height_at(x:float,z:float)->float:
- var border:=maxf(maxf(-x,x-88.0),maxf(-z,z-68.0))
- var hills:=smoothstep(-2.0,15.0,border)*(1.5+terrain_noise.get_noise_2d(x*1.3,z*1.3)*4.5)
- var river_center:=57.5+sin(z*0.065)*0.3+sin(z*0.31)*0.13
- var half:=2.22+sin(z*0.17)*0.25+sin(z*0.47)*0.12
- var bank:=1.0-smoothstep(half,half+2.0,absf(x-river_center))
- return hills-bank*1.4
+ return Gen.height_at(x,z,terrain_noise)
 
 
 func ground_surface_height(x:float,z:float)->float:
- # Use the exact same samples and diagonal as the rendered ArrayMesh.
- if _ground_heights.is_empty():return height_at(x,z)
- var gx:float=(x-GROUND_ORIGIN)/GROUND_STRIDE
- var gz:float=(z-GROUND_ORIGIN)/GROUND_STRIDE
- if gx<0 or gx>GROUND_COLUMNS or gz<0 or gz>GROUND_ROWS:return height_at(x,z)
- var ix:int=mini(floori(gx),GROUND_COLUMNS-1)
- var iz:int=mini(floori(gz),GROUND_ROWS-1)
+ # Same lattice and diagonal as the chunk ground meshes (a-b-c / a-c-d), sampled
+ # analytically so it works for any point of the map, loaded or not.
+ if Gen.region_is_flat(x-2.5,z-2.5,x+2.5,z+2.5):return 0.0
+ var gx:float=x/GROUND_STRIDE
+ var gz:float=z/GROUND_STRIDE
+ var ix:int=floori(gx);var iz:int=floori(gz)
  var tx:float=gx-ix;var tz:float=gz-iz
- var a:float=_ground_heights[iz*(GROUND_COLUMNS+1)+ix]
- var b:float=_ground_heights[iz*(GROUND_COLUMNS+1)+ix+1]
- var c:float=_ground_heights[(iz+1)*(GROUND_COLUMNS+1)+ix+1]
- var d:float=_ground_heights[(iz+1)*(GROUND_COLUMNS+1)+ix]
+ var x0:float=ix*GROUND_STRIDE;var z0:float=iz*GROUND_STRIDE
+ var a:float=height_at(x0,z0)
+ var b:float=height_at(x0+GROUND_STRIDE,z0)
+ var c:float=height_at(x0+GROUND_STRIDE,z0+GROUND_STRIDE)
+ var d:float=height_at(x0,z0+GROUND_STRIDE)
  return a+(b-a)*tx+(c-b)*tz if tx>=tz else a+(c-d)*tx+(d-a)*tz
 
 func support_height(x:float,z:float)->float:
@@ -103,8 +93,15 @@ func support_height(x:float,z:float)->float:
 
 func setup(village:RefCounted)->void:
  sim=village;harvest_map=_bind_harvest();rng.seed=913760
- terrain_noise.seed=32;terrain_noise.frequency=0.032
- _ground();_water();_forest();_meadow();_bridge()
+ terrain_noise.seed=Gen.NOISE_SEED;terrain_noise.frequency=Gen.NOISE_FREQUENCY
+ WorldMap.ensure_built()
+ chunks=Chunks.new();add_child(chunks);chunks.setup(self)
+ # First frame must be complete: load the chunks around the opening camera now;
+ # from here on they stream in on worker threads.
+ chunks.load_around(Vector3(28,0,33),30.0)
+ _water();_bridge()
+ meadow_flowers=preload("res://presentation/approved_meadow_flowers.gd").new()
+ add_child(meadow_flowers);meadow_flowers.setup(self)
  add_child(preload("res://presentation/approved_bank_ambience.gd").create(self))
  plaza=preload("res://presentation/approved_plaza.gd").create(self,sim);add_child(plaza)
  roads=Node3D.new();add_child(roads)
@@ -113,25 +110,12 @@ func setup(village:RefCounted)->void:
  material_road.uv1_scale=Vector3(0.48,0.48,0.48)
  sync()
 
-func _ground()->void:
- var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
- _ground_heights.resize((GROUND_COLUMNS+1)*(GROUND_ROWS+1))
- for zi in range(GROUND_ROWS+1):
-  for xi in range(GROUND_COLUMNS+1):
-   _ground_heights[zi*(GROUND_COLUMNS+1)+xi]=height_at(GROUND_ORIGIN+xi*GROUND_STRIDE,GROUND_ORIGIN+zi*GROUND_STRIDE)
- for zi in range(GROUND_ROWS):
-  for xi in range(GROUND_COLUMNS):
-   var x:float=GROUND_ORIGIN+xi*GROUND_STRIDE;var z:float=GROUND_ORIGIN+zi*GROUND_STRIDE
-   var index:int=zi*(GROUND_COLUMNS+1)+xi
-   var pts:=[Vector3(x,_ground_heights[index],z),Vector3(x+GROUND_STRIDE,_ground_heights[index+1],z),Vector3(x+GROUND_STRIDE,_ground_heights[index+GROUND_COLUMNS+2],z+GROUND_STRIDE),Vector3(x,_ground_heights[index+GROUND_COLUMNS+1],z+GROUND_STRIDE)]
-   for id in [0,1,2,0,2,3]:
-    st.set_uv(Vector2(pts[id].x,pts[id].z)*0.1);st.add_vertex(pts[id])
- st.generate_normals();st.generate_tangents()
- var m:=MeshInstance3D.new();m.mesh=st.commit()
- var mat:=ShaderMaterial.new();mat.shader=load("res://assets/approved/terrain.gdshader");mat.set_shader_parameter("meadow_tex",load("res://assets/approved/meadow-albedo.png"));mat.set_shader_parameter("earth_tex",load("res://assets/approved/earth-albedo.png"));m.material_override=mat;add_child(m)
+## Called every frame by the world: keeps the chunks around the camera loaded.
+func stream(focus:Vector3,view_size:float,delta:float)->void:
+ if chunks!=null:chunks.stream(focus,view_size,delta)
 
 func _water()->void:
- var m:=MeshInstance3D.new();var plane:=PlaneMesh.new();plane.size=Vector2(9.2,155);plane.subdivide_depth=70;plane.subdivide_width=5;m.mesh=plane;m.position=Vector3(57.5,-0.85,38)
+ var m:=MeshInstance3D.new();var plane:=PlaneMesh.new();var span:float=float(WorldMap.MAP.size.y)*CELL+60.0;plane.size=Vector2(9.2,span);plane.subdivide_depth=int(span/2.2);plane.subdivide_width=5;m.mesh=plane;m.position=Vector3(57.5,-0.85,(float(WorldMap.MAP.position.y)+float(WorldMap.MAP.size.y)*0.5)*CELL)
  var mat:=ShaderMaterial.new();mat.shader=load("res://assets/approved/water.gdshader");mat.set_shader_parameter("water_tex",load("res://assets/approved/water-albedo.png"));m.material_override=mat;add_child(m)
  var banks:=Node3D.new();add_child(banks)
  for i in range(100):
@@ -214,98 +198,6 @@ func _bind_harvest()->RefCounted:
  var map:=HarvestMap.new()
  if sim!=null:map.setup_from_natural_cells(sim.natural_cells)
  return map
-
-func _grove_visual(cell:Vector2i)->Node3D:
- var seed:=cell.x*71+cell.y*97
- if harvest_map!=null and harvest_map.is_harvested(cell):return Models.stump(seed)
- return Broadleaf.tree(seed)
-
-func _sync_grove_harvest()->void:
- if grove_forest==null:return
- var existing:Variant=sim.get("harvest_map") if sim!=null else null
- if existing!=null and existing!=harvest_map:
-  harvest_map=existing;last_harvest_revision=-1
- if harvest_map==null:return
- if harvest_map.revision==last_harvest_revision:return
- last_harvest_revision=harvest_map.revision
- for cell:Vector2i in grove_nodes:
-  var node:Node3D=grove_nodes[cell]
-  var harvested:bool=harvest_map.is_harvested(cell)
-  if harvested==(node.get_meta("environment_kind","")=="stump"):continue
-  var replacement:Node3D=_grove_visual(cell)
-  replacement.position=node.position;replacement.rotation=node.rotation;replacement.scale=node.scale
-  grove_forest.add_child(replacement);node.free();grove_nodes[cell]=replacement
-
-func _forest()->void:
- var forest:=Node3D.new();forest.name="OakAndPineForest";add_child(forest)
- grove_forest=forest;grove_nodes.clear();last_harvest_revision=-1
- for i in range(175):
-  var x:=rng.randf_range(-19,107);var z:=rng.randf_range(-18,88)
-  var outside:bool=x<1 or x>88 or z<0 or z>68
-  if not outside:continue
-  if absf(x-57.5)<5.1:continue
-  var tree:Node3D=Broadleaf.tree(i);forest.add_child(tree);tree.position=Vector3(x,height_at(x,z),z);tree.rotation.y=rng.randf()*TAU;tree.scale=Vector3.ONE*rng.randf_range(0.8,1.4)
- for cell:Vector2i in sim.natural_cells:
-  var tree:Node3D=_grove_visual(cell)
-  forest.add_child(tree)
-  tree.position=Vector3(cell.x*CELL+rng.randf_range(-0.24,0.24),height_at(cell.x*CELL,cell.y*CELL),cell.y*CELL+rng.randf_range(-0.24,0.24))
-  tree.rotation.y=rng.randf()*TAU;tree.scale=Vector3.ONE*rng.randf_range(0.78,1.12)
-  grove_nodes[cell]=tree
- last_harvest_revision=harvest_map.revision if harvest_map!=null else 0
- for i in range(36):
-  var x:=rng.randf_range(-10,96);var z:=rng.randf_range(-9,80)
-  if x>1 and x<88 and z>1 and z<68:continue
-  if absf(x-57.5)<5:continue
-  var rock:Node3D=Models.rock(i+500);add_child(rock);rock.position=Vector3(x,height_at(x,z),z);rock.scale=Vector3.ONE*rng.randf_range(0.3,0.9)
-
-func _meadow()->void:
- var mesh:=ArrayMesh.new();var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
- for blade in range(6):
-  var angle:=blade*2.39996
-  var right:=Vector3(cos(angle),0,sin(angle))*0.017
-  var base:=Vector3(sin(angle*3.0),0,cos(angle*3.0))*0.025
-  var middle:=base+Vector3(sin(angle)*0.024,0.085+float(blade%3)*0.008,cos(angle)*0.024)
-  var tip:=base+Vector3(sin(angle)*0.07,0.14+float(blade%3)*0.021,cos(angle)*0.07)
-  var points:=[base-right,base+right,middle+right*0.52,base-right,middle+right*0.52,middle-right*0.52,middle-right*0.52,middle+right*0.52,tip]
-  for point:Vector3 in points:
-   st.set_color(Color(0.86,0.91,0.75).lerp(Color(1.04,1.02,0.95),point.y/0.19));st.set_normal(Vector3.UP);st.add_vertex(point)
- mesh=st.commit()
- var gl_compatibility:=not Settings.high_quality()
- var mat:=StandardMaterial3D.new();mat.albedo_color=Color("749048");mat.vertex_color_use_as_albedo=true;mat.cull_mode=BaseMaterial3D.CULL_DISABLED;mat.roughness=1.0
- var shader:=Shader.new();shader.code="shader_type spatial; render_mode cull_disabled; varying vec4 tint; void vertex(){tint=COLOR; vec3 w=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; VERTEX.x+=sin(TIME*1.5+w.x*0.9+w.z*0.7)*VERTEX.y*0.12;} void fragment(){vec3 c=tint.rgb*vec3(0.31,0.43,0.18); ALBEDO=OUTPUT_IS_SRGB ? c : pow(c,vec3(2.2));ROUGHNESS=1.0;}"
- var grass_mat:=ShaderMaterial.new();grass_mat.shader=shader
- # Small spatial batches can be culled independently. Positions, scale,
- # color, animation and random-number order match the original 24k meadow.
- # gl_compatibility targets weak/integrated GPUs: the per-vertex wind sway
- # (sin(TIME...) every vertex, every frame, regardless of camera motion) is
- # dropped in favor of the plain static material, and the tuft count is cut
- # to a third to keep vertex throughput manageable.
- var meadow_material:Material=mat if gl_compatibility else grass_mat
- var tuft_count:=8000 if gl_compatibility else 24000
- details=Node3D.new();details.name="MeadowChunks";add_child(details)
- var buckets:Dictionary={};grass_slots.resize(tuft_count)
- for i in range(tuft_count):
-  var p:=Vector3(rng.randf_range(-9,98),0,rng.randf_range(-8,78));p.y=height_at(p.x,p.z)+0.005;tufts.append(p)
-  var s:=rng.randf_range(0.65,1.5)
-  var t:=Transform3D(Basis(Vector3.UP,rng.randf()*TAU).scaled(Vector3.ONE*s),p)
-  var key:=Vector2i(floori(p.x/GRASS_CHUNK_SIZE),floori(p.z/GRASS_CHUNK_SIZE))
-  if not buckets.has(key):buckets[key]=[]
-  buckets[key].append({"index":i,"transform":t,"color":Color(0.85+s*0.1,0.86+s*0.08,0.9,1)})
- for key:Vector2i in buckets:
-  var records:Array=buckets[key]
-  var multi:=MultiMesh.new();multi.transform_format=MultiMesh.TRANSFORM_3D;multi.use_colors=true;multi.mesh=mesh;multi.instance_count=records.size()
-  var chunk:=MultiMeshInstance3D.new();chunk.name="Grass_%d_%d" % [key.x,key.y];chunk.multimesh=multi;chunk.material_override=meadow_material;chunk.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;details.add_child(chunk)
-  # A fixed tight AABB excludes the buried hidden instances without making
-  # the renderer recompute bounds after every road-construction update.
-  var bounds:=AABB(Vector3(key.x*GRASS_CHUNK_SIZE,-3,key.y*GRASS_CHUNK_SIZE),Vector3(GRASS_CHUNK_SIZE,12,GRASS_CHUNK_SIZE)).grow(0.25)
-  multi.custom_aabb=bounds
-  var chunk_index:int=grass_chunks.size();grass_chunks.append(chunk)
-  for local_index in range(records.size()):
-   var record:Dictionary=records[local_index]
-   multi.set_instance_transform(local_index,record.transform);multi.set_instance_color(local_index,record.color)
-   grass_slots[record.index]=Vector2i(chunk_index,local_index)
- meadow_flowers=preload("res://presentation/approved_meadow_flowers.gd").new()
- add_child(meadow_flowers);meadow_flowers.setup(self)
 
 func _bridge()->void:
  var b:=Architecture.Batch.new(8271)
@@ -439,7 +331,7 @@ func _build_road_visual(node:Node3D,road:Dictionary,neighbors:Vector4)->void:
   Basic.bake(markers)
 
 func sync()->void:
- _sync_grove_harvest()
+ chunks.sync_harvest()
  var sig:=str(sim.buildings.size())+str(sim.roads.size())
  for building:Dictionary in sim.buildings:sig+=str(building.stage=="cancelled")
  var alive:={}
@@ -474,10 +366,4 @@ func sync()->void:
   for r:Dictionary in sim.roads:
    if r.stage!="cancelled":occupied[r.cell]=true
   meadow_flowers.sync_occupancy(occupied)
-  for i in range(tufts.size()):
-   var p:Vector3=tufts[i];var cell:=Vector2i(roundi(p.x/CELL),roundi(p.z/CELL));var hidden:bool=occupied.has(cell) or (cell.x>=22 and cell.x<=24)
-   var slot:Vector2i=grass_slots[i]
-   var multi:MultiMesh=grass_chunks[slot.x].multimesh
-   var t:Transform3D=multi.get_instance_transform(slot.y)
-   t.origin.y=-10 if hidden else p.y
-   multi.set_instance_transform(slot.y,t)
+  chunks.sync_occupancy(occupied)

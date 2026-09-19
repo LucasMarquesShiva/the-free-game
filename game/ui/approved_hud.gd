@@ -11,6 +11,7 @@ signal focus_requested(cell: Vector2i)
 signal entrance_highlighted(cell: Vector2i)
 signal language_changed
 
+const WorldMap := preload("res://core/world_map.gd")
 const PAPER := Color("f5e4bd")
 const PANEL := Color("2c2013")
 const INK := Color("f1dfb4")
@@ -828,7 +829,7 @@ func open_training(building: Dictionary) -> void:
 	_drawer.hide()
 	_toggle_drawer("training")
 	_training_school_id = int(building.get("id",-1))
-	entrance_highlighted.emit(building.get("entrance",Vector2i(-1,-1)))
+	entrance_highlighted.emit(building.get("entrance",WorldMap.NO_CELL))
 	_refresh_school_context()
 	_layout()
 
@@ -958,7 +959,7 @@ func inspect(building: Dictionary) -> void:
 	_inspector.visible = _inspected_id >= 0
 	_inspector_scroll.scroll_vertical = 0
 	if _inspector.visible:
-		entrance_highlighted.emit(building.get("entrance",Vector2i(-1,-1)))
+		entrance_highlighted.emit(building.get("entrance",WorldMap.NO_CELL))
 	_refresh_inspection()
 	_layout()
 
@@ -1318,7 +1319,7 @@ func show_message(text: String) -> void:
 	_layout()
 
 func close_panels() -> void:
-	entrance_highlighted.emit(Vector2i(-1,-1))
+	entrance_highlighted.emit(WorldMap.NO_CELL)
 	for panel in [_drawer,_menu,_help,_inspector]:
 		if is_instance_valid(panel):
 			panel.hide()

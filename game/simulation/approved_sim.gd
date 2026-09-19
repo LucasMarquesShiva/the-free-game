@@ -487,7 +487,29 @@ func _outgoing(id: int, item: String) -> int:
 		return int(_delivery_outgoing.get(id, {}).get(item, 0))
 	return super._outgoing(id, item)
 
+## Incoming/outgoing tallies only change when a delivery task starts, ends or
+## progresses, so idle servants asking in the same tick share one snapshot.
+var _delivery_snapshot_tick := -1
+
+## Idle couriers look for work only on their own slot of every IDLE_SLOTS ticks
+## (staggered by id) instead of rescanning all buildings and roads each tick.
+## Stateless on purpose, so restored games stay identical to uninterrupted ones.
+const IDLE_SLOTS := 4
+
 func _assign_delivery(person: Dictionary) -> void:
+	var person_id := int(person.id)
+	if (tick+person_id) % IDLE_SLOTS != 0:
+		return
+	if _delivery_snapshot_tick != tick:
+		_delivery_snapshot_tick = tick
+		_rebuild_delivery_tallies()
+	_delivery_queries_active = true
+	_assign_delivery_from_snapshot(person)
+	_delivery_queries_active = false
+	if not person.task.is_empty():
+		_delivery_snapshot_tick = -1
+
+func _rebuild_delivery_tallies() -> void:
 	_delivery_incoming.clear()
 	_delivery_outgoing.clear()
 	for worker in workers:
@@ -502,9 +524,6 @@ func _assign_delivery(person: Dictionary) -> void:
 			var source := int(task.get("source", -1))
 			if not _delivery_outgoing.has(source): _delivery_outgoing[source] = {}
 			_delivery_outgoing[source][item] = int(_delivery_outgoing[source].get(item, 0)) + amount
-	_delivery_queries_active = true
-	_assign_delivery_from_snapshot(person)
-	_delivery_queries_active = false
 
 func _assign_delivery_from_snapshot(person: Dictionary) -> void:
 	if (int(person.get("jobs",0)) % 2 == 0 or not _road_node(person.cell)) and _assign_road_supply(person): return

@@ -20,6 +20,8 @@ const RIVER_X1 := 24
 const BRIDGE_Y0 := 13
 const BRIDGE_Y1 := 15
 const CHUNK_CELLS := 16
+## "No cell" sentinel for pointer/highlight state. (-1,-1) is a real cell on this map.
+const NO_CELL := Vector2i(-99999, -99999)
 const FOREST_SEED := 917
 ## Bits of the terrain mask.
 const TREE := 1
@@ -37,6 +39,10 @@ static func interior() -> Rect2i:
 
 static func chunk_of(cell: Vector2i) -> Vector2i:
 	return Vector2i(floori(float(cell.x) / CHUNK_CELLS), floori(float(cell.y) / CHUNK_CELLS))
+
+
+static func is_no_cell(cell: Vector2i) -> bool:
+	return cell.x < -90000
 
 
 static func in_map(cell: Vector2i) -> bool:
