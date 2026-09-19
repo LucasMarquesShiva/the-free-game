@@ -4,9 +4,15 @@ extends "res://simulation/village_sim.gd"
 const HUB := Vector2i(8,13)
 const MOVEMENT_STEP_TICKS := 5
 const ROAD_DIRECTIONS := [Vector2i.RIGHT,Vector2i.DOWN,Vector2i.LEFT,Vector2i.UP]
-const NATURAL_AREAS := [Rect2i(1,2,3,7),Rect2i(1,18,2,8),Rect2i(14,1,7,3),Rect2i(27,2,7,5),Rect2i(2,9,2,3),Rect2i(19,9,2,3),Rect2i(14,23,3,3)]
-# Presentation reads this deterministic map; natural obstacles cannot be cleared in 0.4.
-var natural_cells: Array[Vector2i] = _create_natural_cells()
+const WorldMap := preload("res://core/world_map.gd")
+# Presentation and simulation share the deterministic large map (core/world_map.gd):
+# hand-authored groves in the original valley plus procedural forests elsewhere.
+# Natural obstacles cannot be cleared in 0.4; treat this shared list as read-only.
+var natural_cells: Array[Vector2i] = WorldMap.natural_cells()
+var _nav_initialized := false
+var _nav_building_cells: Array[Vector2i] = []
+var _road_nav_initialized := false
+var _road_supply_nav_initialized := false
 var roads: Array[Dictionary] = []
 var road_navigation := AStarGrid2D.new()
 var _road_moved: Dictionary = {}
@@ -17,6 +23,11 @@ var _road_supply_nodes: Dictionary = {}
 var _road_supply_connected: Dictionary = {}
 var _road_supply_dirty := true
 var _plaza: Array[Vector2i] = []
+
+
+func _init() -> void:
+	WorldMap.ensure_built()
+	map_rect = WorldMap.MAP
 
 
 func setup(_peaceful_mode: bool = true) -> void:
@@ -90,28 +101,47 @@ func storage_capacity() -> int:
 	return 800+200*_completed("store")
 
 
-static func _create_natural_cells() -> Array[Vector2i]:
-	var cells: Array[Vector2i] = []
-	for area: Rect2i in NATURAL_AREAS:
-		for y in range(area.position.y,area.end.y):
-			for x in range(area.position.x,area.end.x):
-				cells.append(Vector2i(x,y))
-	return cells
-
-
 func is_terrain_natural(cell: Vector2i) -> bool:
-	for area: Rect2i in NATURAL_AREAS:
-		if area.has_point(cell):
-			return true
-	return false
+	return WorldMap.is_natural(cell)
+
+
+## Buildable rectangle: two cells clear of the map border, and room below for the entrance.
+func _build_bounds_ok(cell: Vector2i, size: Vector2i) -> bool:
+	return cell.x >= map_rect.position.x + 2 and cell.x <= map_rect.end.x - 1 - size.x and cell.y >= map_rect.position.y + 2 and cell.y <= map_rect.end.y - 5
 
 
 func _terrain_walkable(cell: Vector2i) -> bool:
-	if cell.x < 1 or cell.y < 1 or cell.x >= WIDTH-1 or cell.y >= HEIGHT-1:
-		return false
-	if is_terrain_natural(cell):
-		return false
-	return not (cell.x >= 22 and cell.x <= 24 and (cell.y < 13 or cell.y > 15))
+	return not WorldMap.terrain_blocked(cell)
+
+
+## The navigation grid is built once; afterwards only building footprints change,
+## so a build/cancel/restore costs a handful of cells instead of the whole map.
+func _rebuild_navigation() -> void:
+	if not _nav_initialized:
+		_nav_initialized = true
+		navigation.region = map_rect
+		navigation.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+		navigation.default_compute_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
+		navigation.default_estimate_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
+		navigation.update()
+		navigation.fill_solid_region(map_rect, false)
+		navigation.fill_solid_region(Rect2i(map_rect.position, Vector2i(map_rect.size.x, 1)), true)
+		navigation.fill_solid_region(Rect2i(Vector2i(map_rect.position.x, map_rect.end.y - 1), Vector2i(map_rect.size.x, 1)), true)
+		navigation.fill_solid_region(Rect2i(map_rect.position, Vector2i(1, map_rect.size.y)), true)
+		navigation.fill_solid_region(Rect2i(Vector2i(map_rect.end.x - 1, map_rect.position.y), Vector2i(1, map_rect.size.y)), true)
+		for cell in WorldMap.blocked_cells():
+			navigation.set_point_solid(cell, true)
+	else:
+		for cell in _nav_building_cells:
+			if not WorldMap.terrain_blocked(cell):
+				navigation.set_point_solid(cell, false)
+	_nav_building_cells.clear()
+	for building in buildings:
+		if building.stage == "cancelled":
+			continue
+		for cell in building_footprint(building):
+			navigation.set_point_solid(cell, true)
+			_nav_building_cells.append(cell)
 
 
 func command(kind: String, payload: Dictionary = {}) -> Dictionary:
@@ -219,12 +249,12 @@ func _rebuild_roads() -> void:
 	_rebuild_plaza()
 	_complete_roads.clear()
 	_connected_roads.clear()
-	road_navigation.region = Rect2i(0,0,WIDTH,HEIGHT)
-	road_navigation.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
-	road_navigation.update()
-	for y in range(HEIGHT):
-		for x in range(WIDTH):
-			road_navigation.set_point_solid(Vector2i(x,y),true)
+	if not _road_nav_initialized:
+		_road_nav_initialized = true
+		road_navigation.region = map_rect
+		road_navigation.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+		road_navigation.update()
+	road_navigation.fill_solid_region(map_rect, true)
 	road_navigation.set_point_solid(HUB,false)
 	for cell in _plaza:
 		road_navigation.set_point_solid(cell,false)
@@ -325,7 +355,7 @@ func can_place(kind: String, cell: Vector2i) -> String:
 	if kind == "quarry" and not _quarry_has_deposit(cell):
 		return tr("A pedreira precisa ficar junto a uma jazida de pedra.")
 	var size := footprint_size(kind)
-	if cell.x < 2 or cell.x > WIDTH-1-size.x or cell.y < 2 or cell.y > 23:
+	if not _build_bounds_ok(cell,size):
 		return tr("Deixe espaço para toda a construção e sua entrada dentro do vale.")
 	var area := Rect2i(cell,size)
 	for y in range(size.y):
@@ -457,7 +487,29 @@ func _outgoing(id: int, item: String) -> int:
 		return int(_delivery_outgoing.get(id, {}).get(item, 0))
 	return super._outgoing(id, item)
 
+## Incoming/outgoing tallies only change when a delivery task starts, ends or
+## progresses, so idle servants asking in the same tick share one snapshot.
+var _delivery_snapshot_tick := -1
+
+## Idle couriers look for work only on their own slot of every IDLE_SLOTS ticks
+## (staggered by id) instead of rescanning all buildings and roads each tick.
+## Stateless on purpose, so restored games stay identical to uninterrupted ones.
+const IDLE_SLOTS := 4
+
 func _assign_delivery(person: Dictionary) -> void:
+	var person_id := int(person.id)
+	if (tick+person_id) % IDLE_SLOTS != 0:
+		return
+	if _delivery_snapshot_tick != tick:
+		_delivery_snapshot_tick = tick
+		_rebuild_delivery_tallies()
+	_delivery_queries_active = true
+	_assign_delivery_from_snapshot(person)
+	_delivery_queries_active = false
+	if not person.task.is_empty():
+		_delivery_snapshot_tick = -1
+
+func _rebuild_delivery_tallies() -> void:
 	_delivery_incoming.clear()
 	_delivery_outgoing.clear()
 	for worker in workers:
@@ -472,9 +524,6 @@ func _assign_delivery(person: Dictionary) -> void:
 			var source := int(task.get("source", -1))
 			if not _delivery_outgoing.has(source): _delivery_outgoing[source] = {}
 			_delivery_outgoing[source][item] = int(_delivery_outgoing[source].get(item, 0)) + amount
-	_delivery_queries_active = true
-	_assign_delivery_from_snapshot(person)
-	_delivery_queries_active = false
 
 func _assign_delivery_from_snapshot(person: Dictionary) -> void:
 	if (int(person.get("jobs",0)) % 2 == 0 or not _road_node(person.cell)) and _assign_road_supply(person): return
@@ -952,7 +1001,7 @@ func _valid_task(task: Dictionary) -> bool:
 
 
 func _valid_save(state: Dictionary) -> bool:
-	if state.get("mode") != "approved" or not state.get("roads") is Array or state.roads.size() > WIDTH*HEIGHT:
+	if state.get("mode") != "approved" or not state.get("roads") is Array or state.roads.size() > map_rect.size.x*map_rect.size.y:
 		return false
 	var parent_state := state.duplicate(true)
 	parent_state.mode = "peaceful"
@@ -979,7 +1028,7 @@ func _valid_save(state: Dictionary) -> bool:
 		if _decode(building.entrance) != origin+_entrance_offset(building.kind):
 			return false
 		var size := footprint_size(building.kind)
-		if origin.x < 2 or origin.x > WIDTH-1-size.x or origin.y < 2 or origin.y > 23:
+		if not _build_bounds_ok(origin,size):
 			return false
 		for y in range(size.y):
 			for x in range(size.x):
@@ -1113,13 +1162,14 @@ func _road_supply_prepare() -> void:
 	_road_supply_nodes[HUB] = true
 	for road in roads:
 		if road.stage in ["planned","building"]: _road_supply_nodes[road.cell] = true
-	_road_supply_navigation.region = Rect2i(0,0,WIDTH,HEIGHT)
-	_road_supply_navigation.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
-	_road_supply_navigation.update()
-	for y in range(HEIGHT):
-		for x in range(WIDTH):
-			var cell := Vector2i(x,y)
-			_road_supply_navigation.set_point_solid(cell,not _road_supply_nodes.has(cell))
+	if not _road_supply_nav_initialized:
+		_road_supply_nav_initialized = true
+		_road_supply_navigation.region = map_rect
+		_road_supply_navigation.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+		_road_supply_navigation.update()
+	_road_supply_navigation.fill_solid_region(map_rect, true)
+	for node_cell in _road_supply_nodes:
+		_road_supply_navigation.set_point_solid(node_cell, false)
 	_road_supply_connected.clear()
 	var pending: Array[Vector2i] = [HUB]
 	_road_supply_connected[HUB] = true

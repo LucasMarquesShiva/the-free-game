@@ -7,6 +7,7 @@ const Basic = preload("res://presentation/model_factory.gd")
 const Materials=preload("res://presentation/approved_materials.gd")
 const CropGrowth=preload("res://presentation/approved_crop_growth.gd")
 const Settings=preload("res://core/graphics_settings.gd")
+const WorldMap=preload("res://core/world_map.gd")
 const CELL := 2.5
 var sim: RefCounted
 var camera: Camera3D
@@ -81,7 +82,7 @@ func pan_by(pixels: Vector2) -> void:
  var right := camera.global_basis.x;right.y = 0;right = right.normalized()
  var forward := Vector3(-sin(yaw),0,-cos(yaw))
  target_focus += (-right*pixels.x+forward*pixels.y*1.38)*scale_factor
- target_focus.x = clampf(target_focus.x,0,88);target_focus.z = clampf(target_focus.z,0,68)
+ var reach:=WorldMap.interior();target_focus.x = clampf(target_focus.x,reach.position.x*CELL,(reach.end.x-1)*CELL);target_focus.z = clampf(target_focus.z,reach.position.y*CELL,(reach.end.y-1)*CELL)
 func zoom_by(amount: float) -> void:
  target_size = clampf(target_size+amount,16,66)
 func orbit(amount: float) -> void:
@@ -92,9 +93,9 @@ func cell_to_screen(cell: Vector2i) -> Vector2:
  return world_to_screen(Vector3(cell.x*CELL,0,cell.y*CELL))
 func screen_to_cell(point: Vector2) -> Vector2i:
  var hit: Variant = Plane(Vector3.UP,0).intersects_ray(camera.project_ray_origin(point),camera.project_ray_normal(point))
- if hit == null:return Vector2i(-1,-1)
+ if hit == null:return WorldMap.NO_CELL
  var c := Vector2i(roundi(hit.x/CELL),roundi(hit.z/CELL))
- return c if c.x>0 and c.x<35 and c.y>0 and c.y<27 else Vector2i(-1,-1)
+ return c if WorldMap.interior().has_point(c) else WorldMap.NO_CELL
 func building_at_screen(point: Vector2) -> Dictionary:
  var origin := camera.project_ray_origin(point)
  var query := PhysicsRayQueryParameters3D.create(origin,origin+camera.project_ray_normal(point)*300,2)
@@ -108,6 +109,8 @@ func building_at_screen(point: Vector2) -> Dictionary:
 func sync(delta: float) -> void:
  if camera==null:return
  _camera_update(delta)
+ terrain.stream(focus,view_size,delta)
+ _debug_visibility() # TEMP-DEBUG
  elapsed += delta*visual_speed if not sim.paused else 0.0
  terrain_elapsed += delta
  if terrain_elapsed>=0.2:
@@ -341,7 +344,7 @@ func set_preview(kind:String,cell:Vector2i,valid:bool) -> void:
  var key:=kind+str(cell)+str(valid)
  if key==preview_key:return
  preview_key=key;_clear(preview)
- if cell.x<0:return
+ if WorldMap.is_no_cell(cell):return
  var color:=Color("c9edb0") if valid else Color("ee947f")
  var node:Node3D=Models.building(kind);node.position=_building_center(cell,kind);preview.add_child(node)
  _ghost(node,color)
@@ -355,7 +358,7 @@ func set_road_preview(cells:Array) -> void:
  if road_key==key:return
  road_key=key;_clear(road_preview)
  for cell in cells:
-  if cell.x<0:continue
+  if WorldMap.is_no_cell(cell):continue
   var valid:bool=sim.can_place_road(cell).is_empty() or sim.has_road(cell) or cell==Vector2i(8,13)
   _outline(road_preview,Vector3(cell.x*CELL,0.10,cell.y*CELL),1.16,Color("e0d7a0") if valid else Color("eb927b"))
  # Every entrance stays legible while the player plans the road network.
@@ -375,3 +378,16 @@ func set_road_removal_preview(cell:Vector2i) -> void:
 func _building_center(cell:Vector2i,kind:String)->Vector3:
  var footprint:Vector2i=sim.footprint_size(kind)
  return Vector3((cell.x+(footprint.x-1)*0.5)*CELL,0,(cell.y+(footprint.y-1)*0.5)*CELL)
+
+# TEMP-DEBUG: FG_HIDE=trees,grass,people,buildings,ground hides categories to attribute cost.
+func _debug_visibility()->void:
+ var hide:=OS.get_environment("FG_HIDE")
+ if hide.is_empty():return
+ for b in buildings.values():b.visible=not hide.contains("buildings")
+ for p in people.values():p.visible=not hide.contains("people")
+ for chunk in terrain.chunks.chunks.values():
+  for child in chunk.node.get_children():
+   var n:String=child.name
+   if n.begins_with("Trees") or n.begins_with("Rocks"):child.visible=not hide.contains("trees")
+   elif n.begins_with("Grass"):child.visible=not hide.contains("grass") and terrain.chunks._grass_fraction>0.0
+   elif n=="Ground":child.visible=not hide.contains("ground")

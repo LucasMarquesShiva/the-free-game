@@ -3,6 +3,9 @@ extends RefCounted
 const Battle = preload("res://simulation/battle_sim.gd")
 const WIDTH := 36
 const HEIGHT := 28
+## Playable cell rectangle. Other modes keep the original valley; the approved
+## simulation replaces it with the large streamed map.
+var map_rect := Rect2i(0, 0, WIDTH, HEIGHT)
 const SAVE_VERSION := 1
 const ITEMS := ["wood", "stone", "food", "grapes", "wine", "gold", "trunks", "corn", "flour", "loaves", "axe", "bow"]
 const ROLES := ["resident", "builder", "servant", "instructor", "lumberjack", "stonecutter", "farmer", "vintner", "miller", "baker", "recruit"]
@@ -124,7 +127,7 @@ func definition(kind: String) -> Dictionary:
 	return result
 
 func _terrain_walkable(cell: Vector2i) -> bool:
-	if cell.x < 1 or cell.y < 1 or cell.x >= WIDTH-1 or cell.y >= HEIGHT-1:
+	if cell.x < map_rect.position.x+1 or cell.y < map_rect.position.y+1 or cell.x >= map_rect.end.x-1 or cell.y >= map_rect.end.y-1:
 		return false
 	if Rect2i(32,20,2,2).has_point(cell) or Rect2i(28,20,2,2).has_point(cell):
 		return false
@@ -160,13 +163,13 @@ func _worker(id: int) -> Dictionary:
 	return {}
 
 func _rebuild_navigation() -> void:
-	navigation.region = Rect2i(0,0,WIDTH,HEIGHT)
+	navigation.region = map_rect
 	navigation.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
 	navigation.default_compute_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
 	navigation.default_estimate_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
 	navigation.update()
-	for y in range(HEIGHT):
-		for x in range(WIDTH):
+	for y in range(map_rect.position.y,map_rect.end.y):
+		for x in range(map_rect.position.x,map_rect.end.x):
 			navigation.set_point_solid(Vector2i(x,y),not is_walkable(Vector2i(x,y)))
 
 func find_path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
@@ -1191,8 +1194,15 @@ func _apply(s: Dictionary) -> void:
 func _safe_int(value: Variant) -> bool:
 	return (typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT) and is_finite(float(value)) and float(value) == floor(float(value)) and value >= 0 and value <= 100000000
 
+func _safe_coord(value: Variant) -> bool:
+	return (typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT) and is_finite(float(value)) and float(value) == floor(float(value)) and absf(float(value)) <= 100000
+
 func _valid_cell(value: Variant) -> bool:
-	return value is Dictionary and value.has("__cell") and value.__cell is Array and value.__cell.size() == 2 and _safe_int(value.__cell[0]) and _safe_int(value.__cell[1]) and value.__cell[0] < WIDTH and value.__cell[1] < HEIGHT
+	if not (value is Dictionary and value.has("__cell") and value.__cell is Array and value.__cell.size() == 2):
+		return false
+	if not _safe_coord(value.__cell[0]) or not _safe_coord(value.__cell[1]):
+		return false
+	return map_rect.has_point(Vector2i(int(value.__cell[0]), int(value.__cell[1])))
 
 func _valid_save(s: Dictionary) -> bool:
 	if s.get("version") != SAVE_VERSION:
@@ -1253,7 +1263,7 @@ func _valid_save(s: Dictionary) -> bool:
 		for key in ["cell","previous","goal"]:
 			if not _valid_cell(w.get(key)):
 				return false
-		if not w.get("route") is Array or w.route.size() > WIDTH*HEIGHT:
+		if not w.get("route") is Array or w.route.size() > map_rect.size.x*map_rect.size.y:
 			return false
 		for cell in w.route:
 			if not _valid_cell(cell):
@@ -1280,7 +1290,7 @@ func _valid_save(s: Dictionary) -> bool:
 			if typeof(t.get(key)) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(t[key])):
 				return false
 	if s.has("harvested_cells"):
-		if not s.harvested_cells is Array or s.harvested_cells.size() > WIDTH * HEIGHT:
+		if not s.harvested_cells is Array or s.harvested_cells.size() > map_rect.size.x*map_rect.size.y:
 			return false
 		for cell in s.harvested_cells:
 			if not _valid_cell(cell):
